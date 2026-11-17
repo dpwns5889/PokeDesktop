@@ -15,8 +15,9 @@ func test_auto_scale_by_screen_height() -> void:
 func test_clamp_scale_respects_range_and_screen() -> void:
 	assert_int(WindowLayout.clamp_scale(0, FHD_USABLE)).is_equal(1)
 	assert_int(WindowLayout.clamp_scale(9, FHD_USABLE)).is_equal(4)
-	# 800×450 화면에는 2배(640×400)까지만 들어간다
-	assert_int(WindowLayout.clamp_scale(4, Rect2i(0, 0, 800, 450))).is_equal(2)
+	# 1000×450 화면에는 2배(896×400)까지만 들어간다 (v0.46: 기준 448×200)
+	assert_int(WindowLayout.clamp_scale(4, Rect2i(0, 0, 1000, 450))).is_equal(2)
+	assert_int(WindowLayout.clamp_scale(4, Rect2i(0, 0, 800, 450))).is_equal(1)
 
 
 func test_bottom_left_above_bottom_taskbar() -> void:

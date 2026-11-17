@@ -2,7 +2,8 @@ class_name WindowLayout
 extends RefCounted
 ## 창 배치 계산 (순수 함수). WindowManager가 사용한다. (기획서 2.2, 3장)
 
-const BASE_SIZE := Vector2i(320, 200)
+## 448×200 (v0.46): 왼쪽 320 = 기존 UI, 오른쪽 128 = 전투 칸
+const BASE_SIZE := Vector2i(448, 200)
 const MIN_SCALE := 1
 const MAX_SCALE := 4
 ## 기본 위치(우하단) 근처 이 거리 안에 놓으면 기본 위치에 붙인다(도킹).

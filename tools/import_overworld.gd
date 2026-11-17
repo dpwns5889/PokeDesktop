@@ -14,6 +14,9 @@ extends SceneTree
 ##
 ## 결과
 ## - res://Assets/Generated/overworld/gen<N>/<dex 4자리>.png  64×32 (앞1 | 앞2), 암컷 모습이 있으면 64×64 (2행 = 암컷)
+## - res://Assets/Generated/overworld/gen<N>/walk/<dex 4자리>.png  64×128 걷기 시트 (v0.45, M12 걸어다니는 엔트리)
+##   행: 0 아래(앞) / 1 위(뒤) / 2 왼쪽 / 3 오른쪽, 열: 걷기 2프레임. 암컷 모습은 <dex>_f.png
+##   원본 블록: 왼쪽 열 0·1행 = 위, 2·3행 = 아래 / 오른쪽 열 0·1행 = 왼쪽, 2·3행 = 오른쪽
 ## - res://Assets/Generated/preview_overworld_gen<N>.png       (검토용: 도감 순서)
 
 const SHEETS := {
@@ -30,6 +33,9 @@ const CELL := 32
 const BLOCK_H := 128
 const BLOCKS_PER_ROW := 15
 const FRONT_ROWS := [2, 3]
+## 걷기 시트 행 순서(아래·위·왼쪽·오른쪽) → 원본 블록의 [열, 행 2개]
+const WALK_SRC := [[0, [2, 3]], [0, [0, 1]], [1, [0, 1]], [1, [2, 3]]]
+const WALK_DIR := "/walk"
 
 
 func _init() -> void:
@@ -67,6 +73,8 @@ func _run(gen: int) -> int:
 	var count: int = SPECIES_COUNT[gen]
 	var males := {}     # dex -> Image(64×32)
 	var females := {}
+	var walk_m := {}    # dex -> Image(64×128) 걷기 시트
+	var walk_f := {}
 	var dex := 0
 	for b in blocks:
 		var female := _has_color(sheet, b, FEMALE_DOT)
@@ -75,10 +83,13 @@ func _run(gen: int) -> int:
 		if dex > count:
 			break
 		var strip := _cut_front(sheet, b)
+		var walk := _cut_walk(sheet, b)
 		if female:
 			females[dex] = strip
+			walk_f[dex] = walk
 		else:
 			males[dex] = strip
+			walk_m[dex] = walk
 	if males.size() != count:
 		push_error("종 %d개를 찾았습니다(예상 %d). 시트 구조를 확인하세요." % [males.size(), count])
 		return 1
@@ -93,6 +104,12 @@ func _run(gen: int) -> int:
 			both.blit_rect(females[d], Rect2i(0, 0, CELL * 2, CELL), Vector2i(0, CELL))
 			img = both
 		img.save_png(ProjectSettings.globalize_path(out_dir + "/%04d.png" % d))
+
+	DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path(out_dir + WALK_DIR))
+	for d in walk_m:
+		walk_m[d].save_png(ProjectSettings.globalize_path(out_dir + WALK_DIR + "/%04d.png" % d))
+	for d in walk_f:
+		walk_f[d].save_png(ProjectSettings.globalize_path(out_dir + WALK_DIR + "/%04d_f.png" % d))
 
 	_save_preview(gen, males, females)
 	print("오버월드 %d종 저장 (암컷 모습 %d종: %s) → %s" % [males.size(), females.size(), females.keys(), out_dir])
@@ -180,6 +197,47 @@ func _cut_front(sheet: Image, b: Vector2i) -> Image:
 		_drop_right_edge_slivers(cut)
 		strip.blit_rect(cut, Rect2i(0, 0, CELL, CELL), Vector2i(CELL * i, 0))
 	return strip
+
+
+## 걷기 시트 64×128 (행: 아래·위·왼쪽·오른쪽, 열: 2프레임, 배경 투명)
+func _cut_walk(sheet: Image, b: Vector2i) -> Image:
+	var out := Image.create(CELL * 2, CELL * 4, false, Image.FORMAT_RGBA8)
+	out.fill(Color(0, 0, 0, 0))
+	for row in WALK_SRC.size():
+		var col: int = WALK_SRC[row][0]
+		var src_rows: Array = WALK_SRC[row][1]
+		for i in 2:
+			out.blit_rect(_cut_cell(sheet, b, col, src_rows[i]), Rect2i(0, 0, CELL, CELL), Vector2i(CELL * i, CELL * row))
+	return out
+
+
+## 블록의 한 칸(32×32)을 잘라 배경을 투명하게. 옆 칸에서 비어져 들어온 조각과 구분선은 지운다.
+func _cut_cell(sheet: Image, b: Vector2i, col: int, row: int) -> Image:
+	var bg := _bg(sheet, b)
+	var r := _frame_rect(sheet, b, row)
+	r.position.x += CELL * col
+	r.size.x = mini(CELL, sheet.get_width() - r.position.x)
+	var cut := Image.create(CELL, CELL, false, Image.FORMAT_RGBA8)
+	cut.fill(bg)
+	cut.blit_rect(sheet, r, Vector2i.ZERO)
+	for y in CELL:
+		for x in CELL:
+			var c := cut.get_pixel(x, y)
+			if c.is_equal_approx(MALE_DOT) or c.is_equal_approx(FEMALE_DOT) or c.is_equal_approx(LINE):   # 블록 폭이 좁은 줄은 구분선이 칸 안에 들어온다
+				cut.set_pixel(x, y, bg)
+	_clear_background(cut, bg)
+	if col == 0:
+		_drop_right_edge_slivers(cut)
+	else:
+		_drop_left_edge_slivers(cut)
+	return cut
+
+
+## 왼쪽 가장자리에 닿은 폭 2px 이하 조각 = 왼쪽 열 스프라이트가 비어져 들어온 것 → 지운다 (오른쪽 열 칸용)
+func _drop_left_edge_slivers(img: Image) -> void:
+	img.flip_x()
+	_drop_right_edge_slivers(img)
+	img.flip_x()
 
 
 ## 가장자리에서 이어진 배경색 픽셀만 투명으로 (스프라이트 안쪽의 같은 색은 남긴다)

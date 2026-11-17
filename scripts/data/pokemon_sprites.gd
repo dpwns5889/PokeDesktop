@@ -80,6 +80,19 @@ static func overworld_frames(species: PokemonSpecies, female: bool = false) -> A
 	return out
 
 
+## 오버월드 걷기 시트 64×128 (v0.45, M12): 행 0 아래 / 1 위 / 2 왼쪽 / 3 오른쪽, 열 = 걷기 2프레임.
+## 암컷 모습이 있는 종은 <dex>_f.png. 파일이 없으면 null.
+static func overworld_walk_sheet(species: PokemonSpecies, female: bool = false) -> Texture2D:
+	if species == null:
+		return null
+	var base := (OW_DIR % species.generation) + "/walk/%04d" % species.dex_id
+	if female and ResourceLoader.exists(base + "_f.png"):
+		return load(base + "_f.png")
+	if ResourceLoader.exists(base + ".png"):
+		return load(base + ".png")
+	return null
+
+
 static func _get_placeholder() -> Texture2D:
 	if _placeholder == null:
 		var img := Image.create(CELL, CELL, false, Image.FORMAT_RGBA8)

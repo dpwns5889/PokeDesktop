@@ -4,11 +4,12 @@ extends Control
 
 signal finished(success: bool)
 
-## 기준 해상도 320×200: 위 버튼 줄(0~18), 아래 HUD(184~200) 사이
+## v0.46: 메인 창 오른쪽 전투 칸(128×200)에 놓인다. 좌표는 이 노드 기준(전투 칸 왼쪽 위 = 0,0).
 ## 세로 배치 (메인 창 companion 과 맞춤):
-##   v0.39: 21~37 이름·성별·레벨(왼쪽) + "과녁을 클릭해서 잡자!"(오른쪽) / 40~47 포획 게이지 / 52~179 과녁 / 181~200 HUD
-const GAUGE_RECT := Rect2(60, 41, 200, 7)
-const PLAYFIELD := Rect2(4, 52, 312, 127)     # 이름·게이지 줄과 HUD를 피한 영역
+##   3~19 이름·성별·레벨(companion 의 BattleInfo) / 22~28 포획 게이지 + 남은 초 / 32~198 과녁
+## 칸이 좁아 과녁은 야생 포켓몬 위에도 나타난다(포켓몬을 피하지 않음).
+const GAUGE_RECT := Rect2(4, 22, 96, 6)
+const PLAYFIELD := Rect2(2, 32, 124, 166)
 const POP_SEC := 0.45
 
 const COL_TARGET := Color(1.0, 0.95, 0.85, 0.9)
@@ -45,8 +46,7 @@ func start(params: Dictionary, rng: RandomNumberGenerator, pokemon_rect: Rect2 =
 
 
 func _ready() -> void:
-	mouse_filter = Control.MOUSE_FILTER_PASS
-	set_anchors_preset(Control.PRESET_FULL_RECT)
+	mouse_filter = Control.MOUSE_FILTER_PASS   # 위치·크기는 companion 이 전투 칸에 맞춘다 (v0.46)
 	set_process(false)
 
 
@@ -106,9 +106,8 @@ func _draw() -> void:
 	fill.size.x *= _game.gauge
 	draw_rect(fill, COL_GAUGE if _game.gauge >= 0.5 else COL_GAUGE_LOW)
 	var font := get_theme_default_font()
-	draw_string(font, Vector2(GAUGE_RECT.end.x + 6, GAUGE_RECT.end.y + 2), "%ds" % ceili(_game.time_left),
+	draw_string(font, Vector2(GAUGE_RECT.end.x + 4, GAUGE_RECT.end.y + 3), "%ds" % ceili(_game.time_left),
 		HORIZONTAL_ALIGNMENT_LEFT, -1, 16, COL_TEXT)
-	draw_string(font, Vector2(8, GAUGE_RECT.end.y + 2), "포획", HORIZONTAL_ALIGNMENT_LEFT, -1, 16, COL_TEXT)
 
 	for p in _pops:
 		var a: float = 1.0 - p.t / POP_SEC

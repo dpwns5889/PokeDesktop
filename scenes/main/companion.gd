@@ -1,6 +1,7 @@
 extends Control
-## 메인 컴패니언 창 (320×200). (기획서 6.1)
-## 레이아웃: 위 버튼 줄(18px) / 장면 / 아래 HUD(19px)
+## 메인 컴패니언 창 (448×200, v0.46). (기획서 6.1)
+## 가로: 왼쪽 0~320 = 기존 UI(버튼 줄·장면·HUD·패널·확인 창), 오른쪽 320~448 = 전투 칸(발판·야생 포켓몬·말풍선·이름·게이지·과녁)
+## 왼쪽 세로: 위 버튼 줄(18px) / 장면 / 아래 HUD(19px). 패널·확인 창은 왼쪽만 덮어 전투 칸을 가리지 않는다.
 ## - 위 버튼 줄 왼쪽: 도감·보관함·지역·원정·가방·상점 → 장면을 덮는 패널(OverlayPanel). 별도 OS 창은 쓰지 않는다.
 ## - 위 버튼 줄 오른쪽: 설정(톱니바퀴, 창·소리·개발용) / 종료(X)
 ## - 배경 드래그 이동, Ctrl+휠 배율 (M1)
@@ -9,6 +10,7 @@ extends Control
 ## - 풀숲 위 말풍선(v0.33): 대기 중 ". .. ..." 반복, 인카운터가 나면 "!" 가 2배로 확 커지며 나타남,
 ##   타이머가 멈추면(선택한 볼이 없음) "?" (v0.34)
 ## - 장면 왼쪽 아래: 엔트리 포켓몬 오버월드 앞모습(걷기 애니메이션, 누르면 파티 패널) / 오른쪽 위: 엔트리로 받는 버프 (v0.27, 기획서 6.1)
+## - 엔트리 포켓몬이 장면 안을 걸어다닌다 (M12, v0.45, OverworldWalker). 인카운터·전투 중에는 멈춰서 발판을 바라본다.
 ## 상태는 EncounterManager가 갖고, 이 화면은 EventBus 시그널을 받아 표시만 바꾼다.
 
 const BATTLE_SCENE := preload("res://scenes/battle/battle.tscn")
@@ -26,9 +28,16 @@ const PANELS := [
 	[&"bag", "가방", preload("res://scenes/ui/bag_panel.gd")],
 	[&"shop", "상점", preload("res://scenes/ui/shop_panel.gd")],
 ]
+## 왼쪽 UI 폭 (버튼 줄·HUD·패널). 오른쪽 BATTLE_COLUMN 은 전투 칸 (v0.46)
 const WIDTH := 320.0
+const BATTLE_COLUMN := Rect2(320, 0, 128, 200)
+## 전투 칸 테두리 두께 (v0.47, 버튼 줄 색)
+const BATTLE_FRAME_PX := 2
+## 엔트리 상자 접기/펴기 화살표 탭 (v0.47): 상자 오른쪽에 붙은 작은 탭. 접으면 상자가 왼쪽 밖으로 들어간다.
+const ENTRY_TAB_SIZE := Vector2(9, 34)
+const ENTRY_SLIDE_SEC := 0.18
 ## 지역 바닥 발판(예전 풀숲 자리, v0.37): 타원 중심 위치(기준 해상도). 포켓몬은 이 위에 나타난다.
-const BATTLE_GROUND_POS := Vector2(240, 159)   # v0.38: 6px 위로
+const BATTLE_GROUND_POS := Vector2(384, 159)   # v0.38: 6px 위로, v0.46: 오른쪽 전투 칸 가운데
 ## 포켓몬 발(그림의 실제 아래 끝)이 오는 높이 = 발판 타원 중심보다 조금 아래 (v0.38)
 const POKEMON_FEET_Y := BATTLE_GROUND_POS.y + 3.0
 ## 포켓몬 전투 스프라이트 칸 크기 (PokemonSprites.CELL)
@@ -41,13 +50,18 @@ const FLOAT_BOB_SEC := 0.9
 ## 스프라이트가 떠 있는 종: 버터플·독침붕·피죤투·깨비드릴조·주뱃·골뱃·도나리·코일·레어코일·고오스·고우스트·
 ## 또가스·또도가스·프테라·프리져·썬더·파이어·뮤. (구구·피죤·깨비참·리자몽·망나뇽 등은 서 있는 모습이라 안 띄움)
 const FLOATING_SPECIES := [12, 15, 18, 22, 41, 42, 49, 81, 82, 92, 93, 109, 110, 142, 144, 145, 146, 151]
-## 말풍선 꼬리 끝 위치 (발판 위쪽, 화면 세로 가운데쯤, 기준 해상도) (v0.39)
-const EMOTE_POS := Vector2(240, 105)
-## 엔트리 아이콘 줄 영역 (기준 해상도, 장면 왼쪽 아래). 과녁이 이 영역을 피한다.
+## 말풍선 꼬리 끝 위치 (발판 위쪽, 화면 세로 가운데쯤, 기준 해상도) (v0.39, v0.46 전투 칸)
+const EMOTE_POS := Vector2(384, 105)
+## 색이 다른 포켓몬 이름 색 (전투 칸 이름 줄, v0.46)
+const SHINY_NAME_COLOR := "#b07800"
+## 엔트리 아이콘 줄 영역 (기준 해상도, 장면 왼쪽 아래)
 const ENTRY_STRIP_RECT := Rect2(3, 145, 104, 34)
 ## 엔트리는 오버월드 앞모습(32×32, 걷기 2프레임)으로 표시 (v0.28). 없으면 메뉴 아이콘.
 const ENTRY_ICON := 32
 const ENTRY_ANIM_SEC := 0.45
+## 걸어다니는 엔트리의 발 위치 영역 (기준 해상도, M12 v0.45). 위 버튼 줄(18px)과 아래 HUD(19px) 사이의 장면 전체.
+## 그림 높이(최대 32px)만큼 위를 띄워 머리가 버튼 줄에 가리지 않게 한다.
+const WALK_AREA := Rect2(14, 18 + 30, 320 - 28, 200 - 19 - 1 - 48)
 ## 버프 상자 오른쪽 끝·위 (장면 오른쪽 위)
 const BUFF_RIGHT := 317.0
 const BUFF_TOP := 20.0
@@ -71,20 +85,33 @@ var _ball_label: Label
 var _exp_fill: ColorRect
 var _battle: Control
 var _emote: EmoteBubble
-## 전투 중 이름·레벨 줄 오른쪽 끝의 "과녁을 클릭해서 잡자!" (v0.38)
-var _battle_prompt: Label
 ## 지금 포켓몬 그림이 실제로 그려진 영역 (두 프레임 합침, 기준 해상도)
 var _pokemon_used := Rect2()
 ## 나는 포켓몬의 그림자와 흔들림
 var _shadow: Polygon2D
 var _bob: Tween
 var _ground_plate: BattleGround
+## 포획 연출 (v0.50): 볼 던지기 → 빨려 들어감 → 3번 흔들림 → 포획
+var _capture: CaptureAnim
+## 이번 전투에 쓴 볼 (battle_started)
+var _battle_ball: StringName = &"poke_ball"
 ## 장면 왼쪽 아래 엔트리 아이콘 줄, 오른쪽 위 버프 상자 (v0.27)
 var _entry_strip: PanelContainer
 var _entry_icons: HBoxContainer
 var _buff_box: PanelContainer
 var _buff_list: VBoxContainer
 var _entry_anim_frame := 0
+## 엔트리 상자 접기/펴기 탭과 상태 (v0.47)
+var _entry_tab: EntryTab
+var _entry_open := true
+var _entry_slide: Tween
+## 전투 칸 테두리 (v0.47) / 왼쪽 장면을 땅 색으로 덮는 면 (v0.47: 하늘 없음)
+var _battle_frame: Control
+var _field: ColorRect
+## 왼쪽 들판 타일맵 (v0.48). 그림이 없으면 _field 땅 색만 보인다.
+var _field_map: FieldMap
+## 걸어다니는 엔트리 (OverworldWalker, 발 높이 순으로 겹침 정렬)
+var _walkers: Node2D
 ## 버프 목록 내용 (바뀔 때만 다시 그림)
 var _buff_key := ""
 ## 개발용 자동 플레이 (실행 인자 `-- --autoplay`): 등장하면 자동으로 전투를 시작하고 과녁을 누른다.
@@ -107,10 +134,14 @@ func _ready() -> void:
 	_hitbox.gui_input.connect(_on_hitbox_gui_input)
 	_build_panels()
 	_build_hud_widgets()
+	_build_walkers()
 	_build_entry_widgets()
 	_build_ground_plate()
 	_build_shadow()
-	_build_battle_prompt()
+	_build_battle_frame()
+	_capture = CaptureAnim.new()
+	add_child(_capture)
+	move_child(_capture, _pokemon.get_index() + 1)   # 포켓몬 위, 과녁·테두리 아래
 	_emote = EmoteBubble.new()
 	_emote.position = EMOTE_POS
 	add_child(_emote)
@@ -122,10 +153,13 @@ func _ready() -> void:
 	EventBus.encounter_started.connect(_on_encounter_started)
 	EventBus.encounter_appeared.connect(_on_encounter_appeared)
 	EventBus.battle_started.connect(func(_e: Dictionary, _b: StringName) -> void: _close_panels())
+	EventBus.battle_started.connect(func(_e: Dictionary, b: StringName) -> void: _battle_ball = b)
 	EventBus.battle_finished.connect(_on_battle_finished)
 	EventBus.encounter_fled.connect(_on_encounter_fled)
 	EventBus.pokemon_caught.connect(_on_pokemon_caught)
 	EventBus.encounter_ended.connect(_show_idle)
+	EventBus.encounter_started.connect(func(_e: Dictionary) -> void: _set_walkers_watching(true))
+	EventBus.encounter_ended.connect(func() -> void: _set_walkers_watching(false))
 	EventBus.encounter_ended.connect(_show_unlock_notice)
 	EventBus.game_reset.connect(_on_game_reset)
 	EventBus.player_leveled_up.connect(_on_player_leveled_up)
@@ -312,12 +346,14 @@ func _on_game_reset() -> void:
 		_battle.queue_free()
 		_battle = null
 	_battle_info.hide()
-	_battle_prompt.hide()
 	_title.text = "저장을 초기화했다"
+	_set_walkers_watching(false)
 	_update_hud()
 
 
 func _show_idle() -> void:
+	if _capture:
+		_capture.clear()
 	_pokemon.hide()
 	_pokemon.stop()
 	_stop_bob()
@@ -335,6 +371,8 @@ func _apply_region_look() -> void:
 	if region:
 		$Background.color = region.sky_color
 		$Ground.color = region.ground_color
+		_field.color = region.ground_color   # v0.47: 걸어다니는 왼쪽 장면은 하늘 없이 땅 색
+	_set_field_region()
 	_ground_plate.shaking = false
 	_ground_plate.set_region(region)   # 지역마다 다른 바닥 (v0.37)
 
@@ -426,17 +464,25 @@ func _stop_bob() -> void:
 
 
 ## 이름·레벨 줄(BattleInfo)과 같은 높이, 오른쪽 정렬 (v0.38)
-func _build_battle_prompt() -> void:
-	_battle_prompt = Label.new()
-	_battle_prompt.text = "과녁을 클릭해서 잡자!"
-	_battle_prompt.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
-	_battle_prompt.position = _battle_info.position
-	_battle_prompt.size = _battle_info.size
-	_battle_prompt.add_theme_color_override(&"font_color", Color(0.125, 0.125, 0.125))
-	_battle_prompt.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	_battle_prompt.visible = false
-	add_child(_battle_prompt)
-	move_child(_battle_prompt, _battle_info.get_index() + 1)
+## 오른쪽 전투 칸 테두리 (v0.47, 2px, 버튼 줄 색): 칸이 창 끝에 붕 떠 보이지 않게 액자처럼 두른다.
+## 과녁·포켓몬 위, 패널 아래에 그린다 (v0.46 의 1px 구분선을 대신함).
+func _build_battle_frame() -> void:
+	_battle_frame = Control.new()
+	_battle_frame.name = "BattleFrame"
+	_battle_frame.position = BATTLE_COLUMN.position
+	_battle_frame.size = BATTLE_COLUMN.size
+	_battle_frame.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var w := BATTLE_FRAME_PX
+	var sz := BATTLE_COLUMN.size
+	for r in [Rect2(0, 0, sz.x, w), Rect2(0, sz.y - w, sz.x, w), Rect2(0, 0, w, sz.y), Rect2(sz.x - w, 0, w, sz.y)]:
+		var edge := ColorRect.new()
+		edge.color = $ButtonBar.color
+		edge.position = r.position
+		edge.size = r.size
+		edge.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		_battle_frame.add_child(edge)
+	add_child(_battle_frame)
+	move_child(_battle_frame, _panel_layer.get_index())
 
 
 ## 포켓몬 그림이 실제로 그려진 영역(투명 여백 제외, 모든 프레임 합침)을 재서,
@@ -473,6 +519,8 @@ func _place_pokemon(floating: bool = false) -> void:
 
 
 func _on_encounter_appeared(enc: Dictionary) -> void:
+	_capture.clear()
+	_pokemon.scale = Vector2.ONE
 	_ground_plate.shaking = false   # 포켓몬이 발판 위에 나타난다
 	_emote.hide_bubble()   # 포켓몬이 나오면 말풍선은 숨김
 	var species := GameData.get_species(enc[&"dex_id"])
@@ -507,38 +555,51 @@ func _start_battle() -> void:
 	_battle.autoplay = _autoplay
 	add_child(_battle)
 	move_child(_battle, _panel_layer.get_index())   # 패널·버튼 줄·HUD 아래, 포켓몬 위
-	_battle.finished.connect(EncounterManager.finish_battle)
-	var avoid: Array[Rect2] = []
-	if _entry_strip.visible:
-		avoid.append(ENTRY_STRIP_RECT.grow(2))   # 왼쪽 아래 엔트리 아이콘은 과녁이 피한다
-	_battle.start(params, EncounterManager.rng, _pokemon_rect(), avoid)
-	# 전투 중: 맨 윗줄에 이름·성별·레벨(왼쪽) + "과녁을 클릭해서 잡자!"(오른쪽) → 그 아래 포획 게이지(battle.gd) (v0.39)
-	_title.text = ""
+	_battle.finished.connect(_on_capture_game_finished)
+	# 전투 칸(오른쪽 128px)만 차지한다 → 왼쪽 UI 클릭을 막지 않는다 (v0.46)
+	_battle.position = BATTLE_COLUMN.position
+	_battle.size = BATTLE_COLUMN.size
+	move_child(_battle_frame, _panel_layer.get_index())   # 테두리는 과녁 위
+	_battle.start(params, EncounterManager.rng)
+	# 전투 중: 전투 칸 맨 윗줄에 이름·성별·레벨 → 그 아래 포획 게이지(battle.gd). 안내는 왼쪽 안내 문구로 (v0.46)
+	_title.text = "과녁을 클릭해서 잡자!"
 	_show_battle_info(EncounterManager.current)
-	_battle_prompt.show()
 	_update_hud()
 
 
 func _show_battle_info(enc: Dictionary) -> void:
 	var species := GameData.get_species(enc[&"dex_id"])
 	var g := UiUtil.gender_bbcode(String(enc[&"gender"]), false)
-	_battle_info.text = "%s%s%s%s Lv%d" % ["색이 다른 " if enc.get(&"shiny", false) else "",
-		"전설 " if enc.get(&"legendary", false) else "", species.name_ko,
-		(" " + g) if g != "" else "", enc[&"level"]]
+	# 전투 칸이 좁아(128px) "색이 다른"·"전설" 글자 대신 색이 다른 개체는 이름을 금색으로 (v0.46)
+	var name_text := species.name_ko
+	if enc.get(&"shiny", false):
+		name_text = "[color=%s]%s[/color]" % [SHINY_NAME_COLOR, name_text]
+	_battle_info.text = "%s%s Lv%d" % [name_text, (" " + g) if g != "" else "", enc[&"level"]]
 	_battle_info.show()
-
-
-## 포켓몬이 실제로 그려진 영역 (투명 여백 제외, 기준 해상도).
-func _pokemon_rect() -> Rect2:
-	return _pokemon_used.grow(2)
 
 
 func _on_battle_finished(_success: bool) -> void:
 	_battle_info.hide()
-	_battle_prompt.hide()
 	if _battle != null:
 		_battle.queue_free()
 		_battle = null
+
+
+## 과녁 게임이 끝났을 때 (v0.50): 실패면 바로 결과, 성공이면 포획 연출을 보여 준 뒤 결과(포획 정보 창)
+## 게이지를 다 채우면 언제나 잡힌다(흔들리다 빠져나오는 일은 없음).
+func _on_capture_game_finished(success: bool) -> void:
+	if not success:
+		EncounterManager.finish_battle(false)
+		return
+	if _battle != null:
+		_battle.hide()   # 과녁·게이지를 치우고 연출만
+	_stop_bob()
+	var item := GameData.get_item(_battle_ball)
+	_title.text = "가랏! %s!" % (item.name_ko if item else "몬스터볼")
+	var from := BATTLE_COLUMN.position + Vector2(12, BATTLE_COLUMN.size.y - 6)
+	var to := Vector2(BATTLE_GROUND_POS.x, _pokemon_used.position.y + _pokemon_used.size.y * 0.45) if _pokemon_used.has_area() 		else _pokemon.position
+	_capture.finished.connect(func() -> void: EncounterManager.finish_battle(true), CONNECT_ONE_SHOT)
+	_capture.play(_battle_ball, from, to, POKEMON_FEET_Y, _pokemon)
 
 
 func _on_pokemon_caught(inst: Dictionary) -> void:
@@ -615,6 +676,14 @@ func _build_entry_widgets() -> void:
 	_entry_icons.add_theme_constant_override(&"separation", 2)
 	_entry_icons.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_entry_strip.add_child(_entry_icons)
+	# 접기/펴기 화살표 탭 (v0.47). 상태는 설정에 저장
+	_entry_open = bool(Settings.get_value(&"entry_strip_open"))
+	_entry_tab = EntryTab.new()
+	_entry_tab.size = ENTRY_TAB_SIZE
+	_entry_tab.style = _overlay_style()
+	_entry_tab.pressed.connect(_toggle_entry_strip)
+	add_child(_entry_tab)
+	move_child(_entry_tab, _panel_layer.get_index())
 
 	_buff_box = PanelContainer.new()
 	_buff_box.add_theme_stylebox_override(&"panel", _overlay_style())
@@ -626,6 +695,110 @@ func _build_entry_widgets() -> void:
 	_buff_list.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_buff_box.add_child(_buff_list)
 	_refresh_entry_widgets()
+
+
+# ---------------------------------------------------------------- 걸어다니는 엔트리 (M12, v0.45)
+
+## 배경·땅 바로 위, 안내 문구·발판·포켓몬·말풍선보다 아래에 그린다.
+## 그 아래에 왼쪽 장면 전체를 땅 색으로 덮는 면(_field)을 깐다 (v0.47: 하늘은 오른쪽 전투 칸에만).
+func _build_walkers() -> void:
+	_field = ColorRect.new()
+	_field.name = "Field"
+	_field.position = Vector2(0, 18)
+	_field.size = Vector2(WIDTH, 200 - 18 - 19)
+	_field.mouse_filter = Control.MOUSE_FILTER_IGNORE   # 배경 드래그는 그대로
+	var region := GameData.get_region(PlayerState.current_region)
+	_field.color = region.ground_color if region else $Ground.color
+	add_child(_field)
+	move_child(_field, _title.get_index())
+	# 들판 타일맵 (v0.48): 장면 위쪽(버튼 줄 아래)부터. 마지막 줄은 HUD 에 가려진다.
+	_field_map = FieldMap.new()
+	_field_map.name = "FieldMap"
+	_field_map.position = _field.position
+	add_child(_field_map)
+	move_child(_field_map, _title.get_index())
+	_field_map.set_region(PlayerState.current_region)
+	# 안내 문구가 타일 위에서도 읽히게: 흰 글자 + 어두운 외곽선 (v0.48)
+	_title.add_theme_color_override(&"default_color", Color(1, 1, 1))
+	_title.add_theme_constant_override(&"outline_size", 4)
+	_title.add_theme_color_override(&"font_outline_color", Color(0.1, 0.13, 0.2))
+	_walkers = Node2D.new()
+	_walkers.name = "Walkers"
+	_walkers.y_sort_enabled = true
+	add_child(_walkers)
+	move_child(_walkers, _title.get_index())
+
+
+## 엔트리가 바뀌면: 빠진 포켓몬은 지우고, 새 포켓몬은 무작위 위치에서 시작, 진화 등으로 모습이 바뀌면 그림만 교체.
+func _refresh_walkers(entries: Array[Dictionary]) -> void:
+	if _walkers == null:
+		return
+	var keep := {}
+	for p in entries:
+		keep[String(p.uid)] = p
+	for w: OverworldWalker in _walkers.get_children():
+		if not keep.has(w.uid):
+			_walkers.remove_child(w)
+			w.queue_free()
+	var watching := _walkers_should_watch()
+	for uid: String in keep:
+		var p: Dictionary = keep[uid]
+		var s := GameData.get_species(p.dex_id)
+		var female := String(p.get("gender", "")) == "female"
+		var key := "%d:%s" % [int(p.dex_id), female]
+		var sheet := PokemonSprites.overworld_walk_sheet(s, female)
+		var icon: Texture2D = UiUtil.pokemon_icon(s) if s else null
+		var w := _find_walker(uid)
+		if w == null:
+			w = OverworldWalker.new()
+			w.uid = uid
+			w.look_key = key
+			w.rng.randomize()
+			w.blocked = _field_blocked
+			var start := Vector2(w.rng.randf_range(WALK_AREA.position.x, WALK_AREA.end.x),
+				w.rng.randf_range(WALK_AREA.position.y, WALK_AREA.end.y))
+			w.setup(sheet, icon, WALK_AREA, start)
+			w.relocate_if_blocked()   # 나무·물 위에서 시작하지 않게
+			_walkers.add_child(w)
+			if watching:
+				w.set_watching(true, BATTLE_GROUND_POS)
+		elif w.look_key != key:
+			w.look_key = key
+			w.set_look(sheet, icon)
+
+
+## 들판 타일맵에서 못 지나가는 곳인가 (발 위치, 메인 창 좌표)
+func _field_blocked(p: Vector2) -> bool:
+	return _field_map != null and _field_map.is_blocked(p - _field_map.position)
+
+
+## 지역이 바뀌면 들판을 다시 깔고, 나무·물 위에 서게 된 엔트리는 빈 곳으로 옮긴다
+func _set_field_region() -> void:
+	if _field_map == null or _field_map.region_id == PlayerState.current_region:
+		return
+	_field_map.set_region(PlayerState.current_region)
+	if _walkers:
+		for w: OverworldWalker in _walkers.get_children():
+			w.relocate_if_blocked()
+
+
+func _find_walker(uid: String) -> OverworldWalker:
+	for w: OverworldWalker in _walkers.get_children():
+		if w.uid == uid:
+			return w
+	return null
+
+
+## 인카운터가 시작돼 끝날 때까지(포켓몬 등장·전투·결과) 지켜본다
+func _walkers_should_watch() -> bool:
+	return EncounterManager.state not in [EncounterManager.State.WAITING, EncounterManager.State.PAUSED]
+
+
+func _set_walkers_watching(on: bool) -> void:
+	if _walkers == null:
+		return
+	for w: OverworldWalker in _walkers.get_children():
+		w.set_watching(on, BATTLE_GROUND_POS)
 
 
 ## 엔트리 아이콘(왼쪽 아래)과 버프(오른쪽 위)를 다시 그린다. 버프는 전투 중에는 숨긴다(게이지와 겹치지 않게).
@@ -652,8 +825,39 @@ func _refresh_entry_widgets() -> void:
 		_entry_icons.add_child(icon)
 	_entry_strip.visible = not entries.is_empty()
 	_entry_strip.reset_size()
+	_entry_tab.visible = _entry_strip.visible
+	_layout_entry_strip(false)
+	_refresh_walkers(entries)
 
 	_refresh_buffs(true)
+
+
+## 엔트리 상자 접기/펴기 (v0.47): 화살표 탭을 누르면 상자가 왼쪽 밖으로 미끄러져 들어가거나 나온다.
+func _toggle_entry_strip() -> void:
+	_entry_open = not _entry_open
+	Settings.set_value(&"entry_strip_open", _entry_open)
+	AudioManager.play(&"button_click")
+	_layout_entry_strip(true)
+
+
+## 펼침: 상자는 제자리, 탭은 상자 오른쪽에 붙어 "◀". 접힘: 상자는 창 왼쪽 밖, 탭만 왼쪽 끝에 "▶".
+func _layout_entry_strip(animate: bool) -> void:
+	var w := _entry_strip.size.x
+	var strip_x := ENTRY_STRIP_RECT.position.x if _entry_open else -w - 1.0
+	var tab_x := strip_x + w + 1.0 if _entry_open else 0.0
+	var y := ENTRY_STRIP_RECT.position.y
+	_entry_tab.position.y = y + (_entry_strip.size.y - ENTRY_TAB_SIZE.y) / 2.0
+	_entry_tab.pointing_left = _entry_open
+	_entry_tab.tooltip_text = "엔트리 접기" if _entry_open else "엔트리 펴기"
+	if _entry_slide:
+		_entry_slide.kill()
+	if not animate:
+		_entry_strip.position = Vector2(strip_x, y)
+		_entry_tab.position.x = tab_x
+		return
+	_entry_slide = create_tween().set_parallel().set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+	_entry_slide.tween_property(_entry_strip, ^"position:x", strip_x, ENTRY_SLIDE_SEC)
+	_entry_slide.tween_property(_entry_tab, ^"position:x", tab_x, ENTRY_SLIDE_SEC)
 
 
 ## 버프 목록(오른쪽 위). 향로 남은 시간이 바뀌므로 HUD 갱신 때마다 부르고, 내용이 같으면 그대로 둔다.
@@ -661,7 +865,7 @@ func _refresh_buffs(force: bool = false) -> void:
 	if _buff_list == null:
 		return
 	var buffs := EncounterManager.entry_buffs()
-	var key := "\n".join(PackedStringArray(buffs.map(func(b) -> String: return b.text))) + str(EncounterManager.state == EncounterManager.State.BATTLE)
+	var key := "\n".join(PackedStringArray(buffs.map(func(b) -> String: return b.text)))
 	if not force and key == _buff_key:
 		return
 	_buff_key = key
@@ -673,7 +877,7 @@ func _refresh_buffs(force: bool = false) -> void:
 		l.add_theme_color_override(&"font_color", BUFF_GOOD if b.good else BUFF_BAD)
 		l.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		_buff_list.add_child(l)
-	var show_buffs := not buffs.is_empty() and EncounterManager.state != EncounterManager.State.BATTLE
+	var show_buffs := not buffs.is_empty()   # v0.46: 게이지가 전투 칸으로 옮겨져 전투 중에도 보인다
 	_buff_box.visible = show_buffs
 	_buff_box.reset_size()
 	_place_buff_box.call_deferred()

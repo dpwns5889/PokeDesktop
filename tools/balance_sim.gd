@@ -169,7 +169,7 @@ func _choose_ball(difficulty: float) -> StringName:
 
 ## 과녁 전투를 가상 플레이어로 진행 (실제 CaptureGame)
 func _play_capture(params: Dictionary) -> bool:
-	var game := CaptureGame.new(params, Rect2(4, 68, 312, 111), rng, [Rect2(200, 95, 80, 80)] as Array[Rect2])
+	var game := CaptureGame.new(params, Rect2(2, 32, 124, 166), rng)   # v0.46 전투 칸
 	var dt := 0.05
 	var cooldown := 0.0
 	var reaction := rng.randf_range(0.3, 0.5)

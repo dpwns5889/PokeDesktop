@@ -6,10 +6,11 @@ const SECTION := "settings"
 
 const DEFAULTS := {
 	&"always_on_top": true,
-	&"window_scale": 1,           # 1× = 320×200. 0 = 자동 (기획서 2.2)
+	&"window_scale": 1,           # 1× = 448×200. 0 = 자동 (기획서 2.2)
 	&"encounter_sound": true,
 	&"sfx_volume": 0.7,
 	&"bgm_volume": 0.5,           # M11: BGM(플레이리스트) 크기 (0 = 끔)
+	&"entry_strip_open": true,    # v0.47: 메인 화면 왼쪽 아래 엔트리 상자 펼침/접힘
 }
 
 var _cfg := ConfigFile.new()

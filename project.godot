@@ -35,7 +35,7 @@ WindowManager="*res://scripts/autoload/window_manager.gd"
 
 [display]
 
-window/size/viewport_width=320
+window/size/viewport_width=448
 window/size/viewport_height=200
 window/size/resizable=false
 window/size/borderless=true
