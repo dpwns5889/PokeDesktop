@@ -116,8 +116,33 @@ func test_ball_fetch_and_honey_after_failed_battle() -> void:
 	assert_dict(m.begin_battle()).is_not_empty()
 	assert_int(PlayerState.item_count(&"great_ball")).is_equal(0)
 	m.finish_battle(false)
-	assert_int(PlayerState.item_count(&"great_ball")).is_equal(1)          # 볼줍기: 실패하면 돌려받음
 	assert_int(PlayerState.currency).is_equal(money + int(m.current[&"level"]) * 2)   # 꿀모으기
+
+
+## 볼줍기 (v0.56): 성공·실패 상관없이 30% 확률로 쓴 볼을 돌려받는다. 몬스터볼은 돌려받지 않는다.
+func test_ball_fetch_refunds_about_30_percent_on_any_result() -> void:
+	PlayerState.add_entry(_add(16, 10, ["ball_fetch"]).uid)
+	var fx := BattleTraits.collect(PlayerState.entry_pokemon())
+	assert_bool(fx.refund_ball).is_true()
+	assert_float(fx.refund_chance).is_equal_approx(0.3, 0.0001)
+	var m := _manager()
+	m.rng.seed = 11
+	m.current = {&"level": 5}
+	var refunds := {true: 0, false: 0}
+	for success in [true, false]:
+		for i in 300:
+			var before := PlayerState.item_count(&"great_ball")
+			m._battle_ball = &"great_ball"
+			m._apply_after_battle(success)
+			refunds[success] += PlayerState.item_count(&"great_ball") - before
+	assert_int(refunds[true]).is_between(60, 120)    # 300 × 30% ≈ 90
+	assert_int(refunds[false]).is_between(60, 120)
+	# 몬스터볼은 돌려받지 않는다
+	var pb := PlayerState.item_count(PlayerState.INFINITE_BALL)
+	for i in 50:
+		m._battle_ball = PlayerState.INFINITE_BALL
+		m._apply_after_battle(false)
+	assert_int(PlayerState.item_count(PlayerState.INFINITE_BALL)).is_equal(pb)
 
 
 func test_unnerve_lowers_fill_and_stench_slows_encounters() -> void:

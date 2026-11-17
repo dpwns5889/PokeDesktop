@@ -98,7 +98,7 @@ sky_color = Color(0.49411765, 0.41568628, 0.61960787, 1)
 ground_color = Color(0.29411766, 0.2509804, 0.3764706, 1)
 encounters = Array[ExtResource("1_uc7ok")]([SubResource("Resource_f8k6l"), SubResource("Resource_o5ssj"), SubResource("Resource_8mu1g"), SubResource("Resource_bd3qd"), SubResource("Resource_4yajc"), SubResource("Resource_2ydvb"), SubResource("Resource_8gdjx"), SubResource("Resource_ei5ro"), SubResource("Resource_181vi"), SubResource("Resource_tfqlb"), SubResource("Resource_ll20s"), SubResource("Resource_nmy0y")])
 level_cap = 38
-encounter_interval = Vector2(180, 420)
+encounter_interval = Vector2(280, 460)
 battle_ground = 8
 unlock_conditions = Array[Dictionary]([{
 "type": "player_level",

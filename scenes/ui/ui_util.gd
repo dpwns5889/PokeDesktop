@@ -58,12 +58,47 @@ const MALE_ON_LIGHT := Color("2a5fd0")
 const FEMALE_ON_LIGHT := Color("d6337f")
 
 
-## 종별 시트의 첫 프레임(일반 앞모습)을 아이콘으로.
-static func pokemon_icon(s: PokemonSpecies) -> Texture2D:
+## UI 아이콘 크기 (v0.55): 오버월드 앞모습(32×32 칸)에서 그림 부분을 24×24 로 잘라 1:1 로 보인다.
+const ICON_SIZE := 24
+static var _icon_cache := {}
+
+
+## 포켓몬 아이콘 (목록·도감 등). v0.55: 오버월드 앞모습 첫 프레임을 그림 아래 가운데 기준 24×24 로 자른 것.
+## 오버월드 그림이 없으면 전투 스프라이트 첫 프레임.
+static func pokemon_icon(s: PokemonSpecies, female: bool = false) -> Texture2D:
+	if s == null:
+		return null
+	var key := "%d:%s" % [s.dex_id, female]
+	if _icon_cache.has(key):
+		return _icon_cache[key]
+	var frames := PokemonSprites.overworld_frames(s, female)
 	var at := AtlasTexture.new()
-	at.atlas = PokemonSprites.load_sheet(s)
-	at.region = Rect2(0, 0, PokemonSprites.CELL, PokemonSprites.CELL)
+	if frames.is_empty():
+		at.atlas = PokemonSprites.load_sheet(s)
+		at.region = Rect2(0, 0, PokemonSprites.CELL, PokemonSprites.CELL)
+	else:
+		var f: AtlasTexture = frames[0]
+		at.atlas = f.atlas
+		at.region = icon_region(f)
+	_icon_cache[key] = at
 	return at
+
+
+## 오버월드 칸(32×32) 안에서 그림 아래 가운데를 기준으로 24×24 영역
+static func icon_region(frame: AtlasTexture) -> Rect2:
+	var cell := frame.region
+	var used := Rect2i(0, 0, int(cell.size.x), int(cell.size.y))
+	var img := frame.atlas.get_image()
+	if img:
+		if img.is_compressed():
+			img.decompress()
+		var r := img.get_region(Rect2i(cell)).get_used_rect()
+		if r.size != Vector2i.ZERO:
+			used = r
+	var n := float(ICON_SIZE)
+	var x := clampf(roundf(used.position.x + used.size.x / 2.0 - n / 2.0), 0.0, cell.size.x - n)
+	var y := clampf(float(used.end.y) - n, 0.0, cell.size.y - n)
+	return Rect2(cell.position + Vector2(x, y), Vector2(n, n))
 
 
 ## 유닉스 시각 → "11/16 14:05" (시스템 시간대)

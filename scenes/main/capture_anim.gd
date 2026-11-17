@@ -29,6 +29,8 @@ const SHAKE_WAIT_SEC := 0.45
 const SHAKE_DEG := 22.0
 const SHAKE_SEC := 0.12
 const CLICK_WAIT_SEC := 0.35
+## 흔들림 소리 피치 범위 (매번 무작위, v0.54)
+const WOBBLE_PITCH := Vector2(0.9, 1.1)
 ## 볼 그림 높이 (칸 아래 16px)
 const BALL_PX := 16.0
 
@@ -85,6 +87,7 @@ func play(ball_id: StringName, from: Vector2, to: Vector2, rest_y: float, pokemo
 	_ball.visible = true
 
 	# 1) 던지기: 돌면서 포물선
+	AudioManager.play(&"ball_throw")
 	_spinning = true
 	var throw := create_tween()
 	_from = from
@@ -118,6 +121,7 @@ func play(ball_id: StringName, from: Vector2, to: Vector2, rest_y: float, pokemo
 	# 4) 3번 흔들림 (볼 아래를 축으로 좌우)
 	for i in SHAKES:
 		await get_tree().create_timer(SHAKE_WAIT_SEC).timeout
+		AudioManager.play(&"ball_wobble", randf_range(WOBBLE_PITCH.x, WOBBLE_PITCH.y))
 		var shake := create_tween()
 		var deg := deg_to_rad(SHAKE_DEG)
 		shake.tween_property(_ball, ^"rotation", -deg, SHAKE_SEC).set_trans(Tween.TRANS_SINE)
@@ -126,7 +130,8 @@ func play(ball_id: StringName, from: Vector2, to: Vector2, rest_y: float, pokemo
 		await shake.finished
 	await get_tree().create_timer(CLICK_WAIT_SEC).timeout
 
-	# 잡았다: 볼 위로 별 3개
+	# 잡았다: "착" + 볼에서 별 3개
+	AudioManager.play(&"ball_catch")
 	_stars = CatchStars.new()
 	_stars.position = _ball.position + Vector2(0, -BALL_PX)
 	add_child(_stars)
@@ -161,16 +166,21 @@ class CatchStars:
 	const VELOCITIES := [Vector2(-34, -52), Vector2(0, -66), Vector2(34, -52)]
 	const COL_FILL := Color(1.0, 0.98, 0.8)
 
-	## 7×7 다섯 꼭지 별
+	## 11×11 다섯 꼭지 별 (v0.53: 7×7 의 1.5배)
 	const SHAPE := [
-		"...X...",
-		"..XXX..",
-		"XXXXXXX",
-		".XXXXX.",
-		"..XXX..",
-		".XX.XX.",
-		".X...X.",
+		".....X.....",
+		"....XXX....",
+		"....XXX....",
+		"...XXXXX...",
+		"XXXXXXXXXXX",
+		".XXXXXXXXX.",
+		"..XXXXXXX..",
+		"..XXXXXXX..",
+		".XXXX.XXXX.",
+		".XXX...XXX.",
+		"XX.......XX",
 	]
+	const HALF := 5
 
 	var _t := 0.0
 
@@ -196,4 +206,4 @@ class CatchStars:
 				var row: String = SHAPE[y]
 				for x in row.length():
 					if row[x] == "X":
-						draw_rect(Rect2(c + Vector2(x - 3, y - 3), Vector2.ONE), col)
+						draw_rect(Rect2(c + Vector2(x - HALF, y - HALF), Vector2.ONE), col)

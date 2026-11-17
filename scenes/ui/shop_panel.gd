@@ -6,7 +6,9 @@ const STORAGE_ROW := &"__storage__"
 const LIST_WIDTH := 150
 
 var _money: Label
-var _mode: OptionButton
+## 구매/판매 전환 버튼 (v0.53: 드롭다운 대신 토글 버튼 두 개)
+var _buy_tab: Button
+var _sell_tab: Button
 var _list: ItemList
 var _ids: Array[StringName] = []
 # 오른쪽
@@ -48,14 +50,10 @@ func _build_content(box: VBoxContainer) -> void:
 	_money = Label.new()
 	_money.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	top.add_child(_money)
-	_mode = OptionButton.new()
-	_mode.focus_mode = Control.FOCUS_NONE
-	_mode.add_item("구매")
-	_mode.add_item("판매")
-	_mode.item_selected.connect(func(_i: int) -> void:
-		_message.text = ""
-		refresh())
-	top.add_child(_mode)
+	var group := ButtonGroup.new()
+	_buy_tab = _mode_button("구매", group, top)
+	_sell_tab = _mode_button("판매", group, top)
+	_buy_tab.set_pressed_no_signal(true)
 	_list = ItemList.new()
 	_list.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	_list.fixed_icon_size = Vector2i(20, 20)
@@ -103,8 +101,22 @@ func _build_content(box: VBoxContainer) -> void:
 	right.add_child(_button)
 
 
+func _mode_button(text: String, group: ButtonGroup, parent: Control) -> Button:
+	var b := Button.new()
+	b.text = text
+	b.toggle_mode = true
+	b.button_group = group
+	b.focus_mode = Control.FOCUS_NONE
+	b.toggled.connect(func(on: bool) -> void:
+		if on:
+			_message.text = ""
+			refresh())
+	parent.add_child(b)
+	return b
+
+
 func _selling() -> bool:
-	return _mode.selected == 1
+	return _sell_tab.button_pressed
 
 
 func refresh() -> void:

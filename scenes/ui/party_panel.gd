@@ -40,11 +40,12 @@ func _build_content(box: VBoxContainer) -> void:
 	# 왼쪽: 엔트리
 	var left := VBoxContainer.new()
 	left.custom_minimum_size.x = LIST_WIDTH
-	left.add_theme_constant_override(&"separation", 2)
+	left.add_theme_constant_override(&"separation", 0)   # v0.55: 오버월드 아이콘(24px)로 높이가 늘어 간격을 줄임
 	row.add_child(left)
 	_entry_list = ItemList.new()
-	_entry_list.fixed_icon_size = Vector2i(16, 16)   # 3칸 + 빼기 + 보너스 두 줄이 패널 높이에 들어가게
+	_entry_list.fixed_icon_size = Vector2i(UiUtil.ICON_SIZE, UiUtil.ICON_SIZE)   # 3칸 + 빼기 + 보너스 두 줄이 패널 높이에 들어가게 (v0.55 오버월드 24px)
 	_entry_list.auto_height = true
+	_entry_list.add_theme_constant_override(&"v_separation", 0)   # v0.55: 아이콘 24px 로 커져 줄 간격을 줄여 패널 높이에 맞춘다
 	_entry_list.item_selected.connect(func(_i: int) -> void: _update_buttons())
 	_entry_list.item_activated.connect(func(_i: int) -> void: _on_remove())
 	left.add_child(_entry_list)
@@ -52,6 +53,7 @@ func _build_content(box: VBoxContainer) -> void:
 	left.add_child(_remove)
 	_bonus = Label.new()
 	_bonus.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	_bonus.add_theme_constant_override(&"line_spacing", -4)
 	_bonus.add_theme_color_override(&"font_color", Color(0.75, 0.8, 0.9))
 	_bonus.mouse_filter = Control.MOUSE_FILTER_PASS
 	_bonus.tooltip_text = "엔트리의 능력치로 받는 전투 보너스 (최대 25%: 종족값 80인 Lv80 포켓몬 3마리 기준)\n게이지: 공격+특공 / 과녁: 스피드 / 감점: 방어+특방 / 시간: HP"
@@ -64,7 +66,7 @@ func _build_content(box: VBoxContainer) -> void:
 	row.add_child(right)
 	_pick_list = ItemList.new()
 	_pick_list.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	_pick_list.fixed_icon_size = Vector2i(20, 20)
+	_pick_list.fixed_icon_size = Vector2i(UiUtil.ICON_SIZE, UiUtil.ICON_SIZE)   # v0.55 오버월드 아이콘 1:1
 	_pick_list.item_selected.connect(func(_i: int) -> void: _update_buttons())
 	_pick_list.item_activated.connect(func(_i: int) -> void: _on_add())
 	right.add_child(_pick_list)

@@ -108,3 +108,14 @@ func test_volume_setting_applies_to_sounds() -> void:
 	AudioManager.play(&"button_click")
 	assert_float(AudioManager._players[&"button_click"].volume_db).is_equal_approx(linear_to_db(0.3), 0.01)
 	Settings.set_value(&"sfx_volume", before, false)
+
+
+func test_capture_sounds_loaded_and_pitch() -> void:
+	for id in [&"ball_throw", &"ball_wobble", &"ball_catch"]:
+		assert_bool(AudioManager.has_sound(id)).override_failure_message("효과음 없음: %s" % id).is_true()
+		assert_bool(AudioManager.NO_BGM_PAUSE.has(id)).is_true()   # 연출 중 BGM 이 끊기지 않게
+	AudioManager.play(&"ball_wobble", 0.93)
+	assert_float(AudioManager._players[&"ball_wobble"].pitch_scale).is_equal_approx(0.93, 0.0001)
+	AudioManager.play(&"ball_wobble")
+	assert_float(AudioManager._players[&"ball_wobble"].pitch_scale).is_equal(1.0)
+	AudioManager._players[&"ball_wobble"].stop()

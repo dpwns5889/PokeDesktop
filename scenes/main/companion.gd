@@ -110,6 +110,8 @@ var _battle_frame: Control
 var _field: ColorRect
 ## 왼쪽 들판 타일맵 (v0.48). 그림이 없으면 _field 땅 색만 보인다.
 var _field_map: FieldMap
+## 전투 칸 배경 (v0.53): 지역의 하늘색(위) → 땅색(아래) 세로 그라데이션
+var _battle_bg: TextureRect
 ## 걸어다니는 엔트리 (OverworldWalker, 발 높이 순으로 겹침 정렬)
 var _walkers: Node2D
 ## 버프 목록 내용 (바뀔 때만 다시 그림)
@@ -262,7 +264,7 @@ func _style_bar_button(b: Button, normal: StyleBox, hover: StyleBox, pressed: St
 
 ## X 버튼: 화면 안 확인 창을 먼저 띄우고, 확인하면 종료 (M11)
 func _ask_quit() -> void:
-	_confirm.ask("종료", "게임을 종료할까요?\n(진행 상황은 저장된다)", "종료", quit_game)
+	_confirm.ask("종료", "게임을 종료할까요?\n(진행 상황은 저장된다)", "종료", quit_game, true)   # v0.57 가운데 정렬
 
 
 ## 색이 다른 포켓몬 등장 연출: 포켓몬 주변에 별 모양 반짝임이 퍼졌다 사라진다 (M11)
@@ -372,6 +374,7 @@ func _apply_region_look() -> void:
 		$Background.color = region.sky_color
 		$Ground.color = region.ground_color
 		_field.color = region.ground_color   # v0.47: 걸어다니는 왼쪽 장면은 하늘 없이 땅 색
+		_set_battle_bg(region.sky_color, region.ground_color)
 	_set_field_region()
 	_ground_plate.shaking = false
 	_ground_plate.set_region(region)   # 지역마다 다른 바닥 (v0.37)
@@ -464,6 +467,30 @@ func _stop_bob() -> void:
 
 
 ## 이름·레벨 줄(BattleInfo)과 같은 높이, 오른쪽 정렬 (v0.38)
+## 전투 칸 배경: 하늘색(위) → 땅색(아래) 두 색 그라데이션 (v0.53). 배경·땅 바로 위, 발판·포켓몬 아래.
+func _set_battle_bg(top: Color, bottom: Color) -> void:
+	if _battle_bg == null:
+		_battle_bg = TextureRect.new()
+		_battle_bg.name = "BattleBackground"
+		_battle_bg.position = BATTLE_COLUMN.position
+		_battle_bg.size = BATTLE_COLUMN.size
+		_battle_bg.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		_battle_bg.stretch_mode = TextureRect.STRETCH_SCALE
+		_battle_bg.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+		var tex := GradientTexture2D.new()
+		tex.width = 1
+		tex.height = int(BATTLE_COLUMN.size.y)
+		tex.fill_from = Vector2(0, 0)
+		tex.fill_to = Vector2(0, 1)
+		tex.gradient = Gradient.new()
+		_battle_bg.texture = tex
+		add_child(_battle_bg)
+		move_child(_battle_bg, $Ground.get_index() + 1)
+	var g: Gradient = (_battle_bg.texture as GradientTexture2D).gradient
+	g.set_color(0, top)
+	g.set_color(1, bottom)
+
+
 ## 오른쪽 전투 칸 테두리 (v0.47, 2px, 버튼 줄 색): 칸이 창 끝에 붕 떠 보이지 않게 액자처럼 두른다.
 ## 과녁·포켓몬 위, 패널 아래에 그린다 (v0.46 의 1px 구분선을 대신함).
 func _build_battle_frame() -> void:

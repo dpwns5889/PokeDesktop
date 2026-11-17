@@ -60,6 +60,7 @@ func test_shiny_catch_gets_fixed_trait_and_keeps_it() -> void:
 	var plain := PlayerState.add_caught({&"dex_id": 25, &"level": 5, &"gender": &"male", &"shiny": false, &"region": &"grassland"})
 	assert_bool(plain.traits.has("shiny")).is_false()
 	var shiny := PlayerState.add_caught({&"dex_id": 25, &"level": 5, &"gender": &"male", &"shiny": true, &"region": &"grassland"})
+	shiny.ivs = plain.ivs.duplicate()   # 개체치(v0.55)는 같게
 	assert_bool(shiny.shiny).is_true()
 	assert_str(String(shiny.traits[0])).is_equal("shiny")
 	# 원정 전투력 ×1.2 (자신)

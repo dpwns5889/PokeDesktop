@@ -172,6 +172,7 @@ func add_caught(encounter: Dictionary) -> Dictionary:
 		"gender": String(encounter[&"gender"]),
 		"shiny": bool(encounter.get(&"shiny", false)),
 		"traits": _roll_traits(dex_id, bool(encounter.get(&"shiny", false))),   # 고정 특성(전설·색이다른) + 무작위 특성 (기획서 4.6)
+		"ivs": Formulas.roll_ivs(rng),   # 개체치 (v0.55)
 		"evolution_cancelled": false,
 		"locked": false,
 		"caught_at": now,
@@ -204,7 +205,7 @@ func stats_of(inst: Dictionary) -> Dictionary:
 	var species := GameData.get_species(inst.dex_id)
 	if species == null:
 		return {}
-	return Formulas.calc_stats(species.base_stats, inst.level)
+	return Formulas.calc_stats(species.base_stats, inst.level, {}, inst.get("ivs", {}))
 
 
 ## 원정 중인 개체인가 (원정 중에는 다른 원정·박사 보내기·진화·레벨업 불가)
@@ -478,6 +479,7 @@ func load_save_dict(d: Dictionary) -> void:
 		if not GameData.has_species(inst.dex_id):
 			push_warning("세이브: 알 수 없는 종 %d (활성 세대 밖?) — 보관은 유지" % inst.dex_id)
 		inst["traits"] = _known_traits(inst.get("traits", []))
+		inst["ivs"] = _valid_ivs(inst.get("ivs"))
 		pokemon.append(inst)
 
 	for k in d.get("inventory", {}):
@@ -528,6 +530,16 @@ func load_save_dict(d: Dictionary) -> void:
 
 ## 지금 데이터에 있는 특성만 남긴다. v0.28 특성 개편 전 세이브의 옛 특성(튼튼함·길잡이 등)은 사라진다.
 ## 고정 특성(전설)은 id 가 같아서 그대로 남는다.
+## 세이브의 개체치. 없으면(v0.55 이전 세이브) 새로 뽑는다. 값은 0~31 로 자른다.
+func _valid_ivs(raw) -> Dictionary:
+	if not raw is Dictionary:
+		return Formulas.roll_ivs(rng)
+	var out := {}
+	for k in Formulas.STAT_KEYS:
+		out[String(k)] = clampi(int(raw.get(String(k), rng.randi_range(0, Formulas.IV_MAX))), 0, Formulas.IV_MAX)
+	return out
+
+
 func _known_traits(raw) -> Array:
 	var out: Array = []
 	if not raw is Array:

@@ -2,7 +2,7 @@ extends OverlayPanel
 ## 도감 패널. 151종 격자: 미발견 ?, 발견만 실루엣, 포획은 원래 모습. (기획서 4.7, 6.2)
 
 const CELL := 34
-const ICON := 30
+const ICON := 24   # v0.55: 오버월드 아이콘 1:1
 const COLUMNS := 8
 
 var _header: Label

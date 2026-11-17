@@ -1,7 +1,7 @@
 {
 	"_comment": "특성 (기획서 4.6, v0.28 개편). tools/json_to_traits_expeditions.gd 가 data/traits/*.tres 로 변환한다. trigger: expedition = 원정 파티에 있을 때 / battle = 엔트리일 때 / both = 둘 다(고정 특성). effects[].scope: self = 그 포켓몬만, party = 원정 전체(같은 특성은 파티에 여러 마리여도 1번만). when 조건: expeditions(원정지 id), self_types(자신의 타입), max_duration_min(원정 시간 이하). 수치를 바꾸면 기획서 4.6 표도 고친다.",
 	"roll": {
-		"count_weights": [50, 35, 12, 3],
+		"count_weights": [60, 25, 12, 3],
 		"tier_weights": {"normal": 70, "rare": 15, "negative": 15}
 	},
 	"traits": [
@@ -22,8 +22,8 @@
 		 "description": "[전투] 야생 포켓몬의 레벨이 2 높아진다(지역 최고 레벨까지).",
 		 "effects": [{"kind": "wild_level_add", "value": 2}]},
 		{"id": "ball_fetch", "name_ko": "볼줍기", "tier": "normal", "weight": 10, "trigger": "battle",
-		 "description": "[전투] 포획에 실패하면 쓴 볼을 돌려받는다(몬스터볼 제외).",
-		 "effects": [{"kind": "refund_ball_on_fail"}]},
+		 "description": "[전투] 전투가 끝나면 30% 확률로 쓴 볼을 돌려받는다(몬스터볼 제외).",
+		 "effects": [{"kind": "refund_ball", "chance": 0.3}]},
 		{"id": "flash_fire", "name_ko": "타오르는불꽃", "tier": "normal", "weight": 10, "trigger": "battle",
 		 "description": "[전투] 불꽃 타입 포켓몬이 더 잘 나온다.", "effects": [{"kind": "encounter_type_weight", "types": ["fire"], "value": 1.5}]},
 		{"id": "storm_drain", "name_ko": "마중물", "tier": "normal", "weight": 10, "trigger": "battle",

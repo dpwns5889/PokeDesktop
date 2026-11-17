@@ -10,11 +10,11 @@ const MAX_INTERVAL_MULT := 1.5
 
 ## 엔트리 개체들 → 합친 전투 효과
 ## {type_weights: {type: mult}, interval_mult, wild_level_add, fill_mult,
-##  after_items: [{chance, table}], per_level_currency, refund_ball, traits: [TraitData]}
+##  after_items: [{chance, table}], per_level_currency, refund_ball, refund_chance, traits: [TraitData]}
 static func collect(entries: Array) -> Dictionary:
 	var out := {
 		"type_weights": {}, "interval_mult": 1.0, "wild_level_add": 0, "fill_mult": 1.0,
-		"after_items": [], "per_level_currency": 0, "refund_ball": false, "traits": [],
+		"after_items": [], "per_level_currency": 0, "refund_ball": false, "refund_chance": 0.0, "traits": [],
 	}
 	var seen := {}
 	for inst in entries:
@@ -39,8 +39,9 @@ static func collect(entries: Array) -> Dictionary:
 						out.after_items.append({"chance": float(e.chance), "table": e.table})
 					"after_battle_currency":
 						out.per_level_currency += int(e.per_level)
-					"refund_ball_on_fail":
+					"refund_ball":   # 볼줍기 (v0.56: 포획 실패 때만 → 성공·실패 상관없이 확률로)
 						out.refund_ball = true
+						out.refund_chance = maxf(float(out.refund_chance), float(e.get("chance", 0.3)))
 	return out
 
 

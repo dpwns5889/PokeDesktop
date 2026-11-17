@@ -4,7 +4,7 @@
 
 [resource]
 script = ExtResource("1_6je7s")
-count_weights = Array[int]([50, 35, 12, 3])
+count_weights = Array[int]([60, 25, 12, 3])
 tier_weights = {
 &"negative": 15,
 &"normal": 70,

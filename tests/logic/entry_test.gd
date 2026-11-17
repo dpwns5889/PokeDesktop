@@ -78,7 +78,8 @@ func test_entries_survive_save_and_drop_invalid() -> void:
 
 
 func _stats_all(base: int, level: int) -> Dictionary:
-	return Formulas.calc_stats({"hp": base, "atk": base, "def": base, "spa": base, "spd": base, "spe": base}, level)
+	# v0.55: 기준은 개체치 최대 (최대 보너스엔 개체치도 필요)
+	return Formulas.calc_stats({"hp": base, "atk": base, "def": base, "spa": base, "spd": base, "spe": base}, level, {}, Formulas.max_ivs())
 
 
 func test_battle_bonus_rules() -> void:

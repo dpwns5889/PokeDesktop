@@ -35,10 +35,44 @@ static func transfer_candies(level: int) -> Dictionary:
 	return {&"exp_candy_m": m, &"exp_candy_s": s}
 
 
-## 능력치 계산. 개체값·노력치 없음. (기획서 4.7.1)
-static func calc_stat(base: int, level: int, is_hp: bool) -> int:
-	var v := (2 * base * level) / 100
+## 능력치 계산 (기획서 4.7.1). v0.55: 개체치(IV, 0~31) 추가 — 원작과 같은 꼴 ((2×종족값 + 개체치) × 레벨 / 100). 노력치 없음.
+static func calc_stat(base: int, level: int, is_hp: bool, iv: int = 0) -> int:
+	var v := ((2 * base + iv) * level) / 100
 	return v + level + 10 if is_hp else v + 5
+
+
+# ---------------------------------------------------------------- 개체치 (기획서 4.7.1, v0.55)
+
+const IV_MAX := 31
+## 보관함 표시: 31 = ★★, IV_HIGH 이상 = ★, IV_LOW 이하 = 하늘색 값
+const IV_HIGH := 25
+const IV_LOW := 9
+
+
+## 능력치 6종의 개체치 (0~31 고르게). 키는 세이브와 같은 문자열 ("hp", "atk", ...)
+static func roll_ivs(rng: RandomNumberGenerator) -> Dictionary:
+	var out := {}
+	for k in STAT_KEYS:
+		out[String(k)] = rng.randi_range(0, IV_MAX)
+	return out
+
+
+static func max_ivs() -> Dictionary:
+	var out := {}
+	for k in STAT_KEYS:
+		out[String(k)] = IV_MAX
+	return out
+
+
+## 개체치 등급: 2 = 최대(★★), 1 = 높음(★), 0 = 보통, -1 = 낮음(하늘색)
+static func iv_grade(iv: int) -> int:
+	if iv >= IV_MAX:
+		return 2
+	if iv >= IV_HIGH:
+		return 1
+	if iv <= IV_LOW:
+		return -1
+	return 0
 
 
 # ---------------------------------------------------------------- 인카운터 (기획서 4.2)
@@ -84,7 +118,7 @@ static func roll_wild_level(entry: EncounterEntry, level_scale: float, level_cap
 
 # ---------------------------------------------------------------- 인카운터 전투 (기획서 4.3)
 
-const CAPTURE_TIME_LIMIT_SEC := 20.0
+const CAPTURE_TIME_LIMIT_SEC := 12.0      # v0.55: 20초 → 12초
 const CAPTURE_BASE_FILL := 0.12
 const CAPTURE_INNER_RATIO := 0.45        # 과녁 반지름 대비 '중심' 영역
 const CAPTURE_INNER_BONUS := 1.5         # 중심 명중 시 게이지 배율
@@ -163,7 +197,7 @@ static func entry_reference_stats() -> Dictionary:
 	var base := {}
 	for k in STAT_KEYS:
 		base[String(k)] = ENTRY_REF_BASE
-	return calc_stats(base, ENTRY_REF_LEVEL)
+	return calc_stats(base, ENTRY_REF_LEVEL, {}, max_ivs())   # v0.55: 개체치 최대 기준 → 최대 보너스엔 개체치도 필요
 
 
 # ---------------------------------------------------------------- 플레이어 레벨 (기획서 4.1) — 수치는 M10에서 조정
@@ -192,10 +226,11 @@ static func capture_player_exp(wild_level: int, new_dex: bool) -> int:
 const STAT_KEYS: Array[StringName] = [&"hp", &"atk", &"def", &"spa", &"spd", &"spe"]
 
 
-## 종족값과 레벨로 계산한 능력치 6종. stat_mults = {atk: 1.2, ...} (특성 등, M7)
-static func calc_stats(base_stats: Dictionary, level: int, stat_mults: Dictionary = {}) -> Dictionary:
+## 종족값·레벨·개체치로 계산한 능력치 6종. stat_mults = {atk: 1.2, ...} (특성 등, M7), ivs = {"hp": 0~31, ...} (v0.55)
+static func calc_stats(base_stats: Dictionary, level: int, stat_mults: Dictionary = {}, ivs: Dictionary = {}) -> Dictionary:
 	var out := {}
 	for k in STAT_KEYS:
-		var v := calc_stat(int(base_stats.get(String(k), base_stats.get(k, 0))), level, k == &"hp")
+		var iv := int(ivs.get(String(k), ivs.get(k, 0)))
+		var v := calc_stat(int(base_stats.get(String(k), base_stats.get(k, 0))), level, k == &"hp", iv)
 		out[k] = int(floor(v * float(stat_mults.get(k, 1.0))))
 	return out

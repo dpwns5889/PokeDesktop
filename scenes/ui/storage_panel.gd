@@ -1,7 +1,8 @@
 extends OverlayPanel
 ## 보관함 패널. (기획서 4.7, 6.2)
 ## 왼쪽: 보유 포켓몬 목록(정렬, 아래까지 스크롤) / 오른쪽: 고른 포켓몬의 정보
-##   (이름·레벨·상태, 경험치, 능력치, 특성 상자 — 좋은 특성은 파란 ^, 나쁜 특성은 빨간 v)
+## 오른쪽 — 위: 전투 모습(64×64) + 옆에 이름·성별 / 레벨 / 타입 (v0.55)
+##   아래: 상태(원정 중·색이 다른·엔트리), 경험치, 능력치(개체치 표시: 최대 ★★, 높음 ★, 낮음 = 하늘색 값, v0.55), 특성 상자
 ## 오른쪽 아래 버튼(M8): 경험사탕 S·M(왼쪽 클릭 1개, 오른쪽 클릭 = 다음 레벨까지), 박사에게 보내기, 잠금
 ## 제목 줄 "중복 보내기": 종마다 가장 좋은 1마리를 남기고 나머지를 박사에게 (잠금·원정 중·특성 있는 개체 제외)
 ## 목록 색: 원정 중 = 하늘색, 엔트리 = 연두색, 잠금 = 금색. 필터는 이후 추가.
@@ -10,6 +11,11 @@ const SORTS := ["도감번호", "레벨", "포획일"]
 const LIST_WIDTH := 150
 const ENTRY_COLOR := Color(0.6, 0.95, 0.55)
 const SHINY_COLOR := Color(1.0, 0.85, 0.35)
+## 전투 모습 칸 (v0.55)
+const SPRITE_BOX := 64
+## 개체치 표시 색 (v0.55)
+const IV_STAR_COLOR := "#ffd34a"
+const IV_LOW_COLOR := "#8fd3ff"
 
 var _count: Label
 var _sort: OptionButton
@@ -23,10 +29,13 @@ var _info_scroll: ScrollContainer
 var _hint: Label
 var _info: VBoxContainer
 var _name: RichTextLabel
-var _status: HBoxContainer
+var _sprite: TextureRect
+var _level: Label
+var _types: HBoxContainer
+var _status: HFlowContainer
 var _exp_bar: ProgressBar
 var _exp_label: Label
-var _stat_labels: Dictionary = {}   # stat key -> Label
+var _stat_labels: Dictionary = {}   # stat key -> RichTextLabel
 var _traits_box: VBoxContainer
 var _evo_box: HFlowContainer
 # 오른쪽 아래 버튼
@@ -74,7 +83,7 @@ func _build_content(box: VBoxContainer) -> void:
 	top.add_child(_sort)
 	_list = ItemList.new()
 	_list.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	_list.fixed_icon_size = Vector2i(20, 20)
+	_list.fixed_icon_size = Vector2i(UiUtil.ICON_SIZE, UiUtil.ICON_SIZE)   # v0.55 오버월드 아이콘 1:1
 	_list.item_selected.connect(_on_selected)
 	left.add_child(_list)
 
@@ -116,10 +125,30 @@ func _build_content(box: VBoxContainer) -> void:
 	_info.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_info.add_theme_constant_override(&"separation", 3)
 	right.add_child(_info)
+	# 위: 전투 모습 + 이름·성별 / 레벨 / 타입 (v0.55)
+	var head := HBoxContainer.new()
+	head.add_theme_constant_override(&"separation", 4)
+	_info.add_child(head)
+	_sprite = TextureRect.new()
+	_sprite.custom_minimum_size = Vector2(SPRITE_BOX, SPRITE_BOX)
+	_sprite.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	_sprite.stretch_mode = TextureRect.STRETCH_KEEP_CENTERED
+	head.add_child(_sprite)
+	var side := VBoxContainer.new()
+	side.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	side.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	side.add_theme_constant_override(&"separation", 1)
+	head.add_child(side)
 	_name = UiUtil.rich_label()
-	_info.add_child(_name)
-	_status = HBoxContainer.new()
-	_status.add_theme_constant_override(&"separation", 3)
+	_name.autowrap_mode = TextServer.AUTOWRAP_OFF
+	side.add_child(_name)
+	_level = Label.new()
+	side.add_child(_level)
+	_types = HBoxContainer.new()
+	_types.add_theme_constant_override(&"separation", 3)
+	side.add_child(_types)
+	_status = HFlowContainer.new()
+	_status.add_theme_constant_override(&"h_separation", 6)
 	_info.add_child(_status)
 	# 진화 버튼 (M9): 레벨 진화 "진화하기", 가진 진화의 돌마다 돌 이름 버튼
 	_evo_box = HFlowContainer.new()
@@ -149,8 +178,8 @@ func _build_content(box: VBoxContainer) -> void:
 	stats.add_theme_constant_override(&"v_separation", 0)
 	_info.add_child(stats)
 	for k in Formulas.STAT_KEYS:
-		var l := Label.new()
-		l.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		var l := UiUtil.rich_label()
+		l.autowrap_mode = TextServer.AUTOWRAP_OFF
 		stats.add_child(l)
 		_stat_labels[k] = l
 
@@ -211,11 +240,17 @@ func _show_info(p: Dictionary) -> void:
 	var s := GameData.get_species(p.dex_id)
 	# 성별: 수컷 파랑, 암컷 분홍, 무성은 표시하지 않음
 	var g := UiUtil.gender_bbcode(p.gender)
-	_name.text = "%s%s Lv%d" % [s.name_ko if s else "?", (" " + g) if g != "" else "", p.level]
-	for c in _status.get_children():
+	_name.text = "%s%s" % [s.name_ko if s else "?", (" " + g) if g != "" else ""]
+	_level.text = "Lv%d" % p.level
+	_sprite.texture = battle_portrait(s, p.gender == "female", p.get("shiny", false))
+	for c in _types.get_children():
+		_types.remove_child(c)
 		c.queue_free()
 	if s:
-		UiUtil.add_type_badges(_status, s.types)
+		UiUtil.add_type_badges(_types, s.types)
+	for c in _status.get_children():
+		_status.remove_child(c)
+		c.queue_free()
 	if PlayerState.is_busy(p.uid):
 		var busy := Label.new()
 		busy.text = "원정 중"
@@ -243,8 +278,9 @@ func _show_info(p: Dictionary) -> void:
 		_exp_label.text = "%d/%d" % [p.get("exp", 0), need]
 
 	var st := PlayerState.stats_of(p)
+	var ivs: Dictionary = p.get("ivs", {})
 	for k in Formulas.STAT_KEYS:
-		_stat_labels[k].text = "%s %d" % [UiUtil.STAT_NAMES[k], st.get(k, 0)]
+		_stat_labels[k].text = stat_bbcode(k, int(st.get(k, 0)), int(ivs.get(String(k), -1)))
 
 	for c in _traits_box.get_children():
 		c.queue_free()
@@ -263,6 +299,55 @@ func _show_info(p: Dictionary) -> void:
 		_traits_box.add_child(badge)
 	_info_scroll.scroll_vertical = 0
 
+
+
+## 능력치 한 칸 (v0.55): "공격 23★★" — 개체치 최대 ★★, 높음 ★, 낮음이면 값이 하늘색. iv < 0 = 모름(표시 없음)
+static func stat_bbcode(key: StringName, value: int, iv: int) -> String:
+	var v := str(value)
+	var mark := ""
+	if iv >= 0:
+		match Formulas.iv_grade(iv):
+			2:
+				mark = "[color=%s]★★[/color]" % IV_STAR_COLOR
+			1:
+				mark = "[color=%s]★[/color]" % IV_STAR_COLOR
+			-1:
+				v = "[color=%s]%s[/color]" % [IV_LOW_COLOR, v]
+	return "%s %s%s" % [UiUtil.STAT_NAMES[key], v, mark]
+
+
+## 전투 모습 첫 프레임을 그림 부분 기준으로 잘라 SPRITE_BOX 칸에 1:1 로 (그림이 칸보다 크면 줄여서 맞춘다)
+func battle_portrait(s: PokemonSpecies, female: bool, shiny: bool) -> Texture2D:
+	if s == null:
+		return null
+	var frames := PokemonSprites.make_frames(s, female, shiny)
+	var tex := frames.get_frame_texture(&"idle", 0)
+	var at := tex as AtlasTexture
+	if at == null:
+		return tex
+	var cell := at.region
+	var used := Rect2(Vector2.ZERO, cell.size)
+	var img := at.atlas.get_image()
+	if img:
+		if img.is_compressed():
+			img.decompress()
+		var r := img.get_region(Rect2i(cell)).get_used_rect()
+		if r.size != Vector2i.ZERO:
+			used = Rect2(r)
+	var n := float(SPRITE_BOX)
+	var region: Rect2
+	if used.size.x <= n and used.size.y <= n:
+		var x := clampf(roundf(used.get_center().x - n / 2.0), 0.0, cell.size.x - n)
+		var y := clampf(roundf(used.get_center().y - n / 2.0), 0.0, cell.size.y - n)
+		region = Rect2(Vector2(x, y), Vector2(n, n))
+		_sprite.stretch_mode = TextureRect.STRETCH_KEEP_CENTERED
+	else:
+		region = used
+		_sprite.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	var out := AtlasTexture.new()
+	out.atlas = at.atlas
+	out.region = Rect2(cell.position + region.position, region.size)
+	return out
 
 
 # ---------------------------------------------------------------- 버튼 (M8)

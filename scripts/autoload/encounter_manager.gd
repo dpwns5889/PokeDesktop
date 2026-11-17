@@ -258,8 +258,8 @@ func _finish(now: float, success: bool) -> void:
 		_apply_after_battle(success)
 
 
-## 전투가 끝난 뒤 엔트리의 전투 특성: 픽업·꿀모으기(성공·실패 모두), 볼줍기(실패) (기획서 4.6)
-func _apply_after_battle(success: bool) -> void:
+## 전투가 끝난 뒤 엔트리의 전투 특성: 픽업·꿀모으기·볼줍기(30% 확률, v0.56) — 성공·실패 모두 (기획서 4.6)
+func _apply_after_battle(_success: bool) -> void:
 	var fx := entry_traits()
 	var lines := PackedStringArray()
 	var r := BattleTraits.roll_after_battle(fx, int(current.get(&"level", 1)), rng)
@@ -272,7 +272,7 @@ func _apply_after_battle(success: bool) -> void:
 	if r.currency > 0:
 		PlayerState.add_currency(r.currency)
 		lines.append("꿀모으기 +%d원" % r.currency)
-	if not success and fx.refund_ball and _battle_ball != &"" and _battle_ball != PlayerState.INFINITE_BALL:
+	if fx.refund_ball and _battle_ball != &"" and _battle_ball != PlayerState.INFINITE_BALL 			and rng.randf() < float(fx.refund_chance):
 		PlayerState.add_item(_battle_ball, 1)
 		var ball := GameData.get_item(_battle_ball)
 		lines.append("볼줍기: %s 회수" % (ball.name_ko if ball else String(_battle_ball)))

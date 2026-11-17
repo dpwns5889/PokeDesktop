@@ -24,7 +24,7 @@
 		},
 		{
 			"id": "waterside", "name_ko": "물가", "order": 3, "main_types": ["water"], "level_cap": 18, "sky": "#7fb6e6", "ground": "#d9c98f",
-			"interval": [60, 180], "battle_ground": 1,
+			"interval": [100, 200], "battle_ground": 1,
 			"unlock": [{"type": "player_level", "value": 6}, {"type": "dex_caught_count", "value": 10}],
 			"encounters": [
 				[129, 20, 8, 14], [60, 12, 8, 14], [54, 12, 9, 15], [118, 10, 9, 15], [72, 10, 9, 15],
@@ -35,7 +35,7 @@
 		},
 		{
 			"id": "cave", "name_ko": "동굴", "order": 4, "main_types": ["rock", "ground"], "level_cap": 24, "sky": "#6b6f80", "ground": "#8a7458",
-			"interval": [90, 240], "battle_ground": 6,
+			"interval": [150, 270], "battle_ground": 6,
 			"unlock": [{"type": "player_level", "value": 10}],
 			"encounters": [
 				[41, 20, 12, 18], [74, 16, 12, 18], [27, 10, 12, 18], [50, 10, 12, 18], [35, 6, 13, 19],
@@ -46,7 +46,7 @@
 		},
 		{
 			"id": "power_plant", "name_ko": "발전소", "order": 5, "main_types": ["electric"], "level_cap": 30, "sky": "#c9c58a", "ground": "#7a7a7a",
-			"interval": [120, 300], "battle_ground": 5,
+			"interval": [200, 340], "battle_ground": 5,
 			"unlock": [{"type": "player_level", "value": 14}, {"type": "type_caught_count", "type_id": "electric", "value": 2}],
 			"encounters": [
 				[81, 18, 18, 24], [100, 18, 18, 24], [25, 10, 18, 24], [88, 12, 18, 24], [109, 12, 18, 24],
@@ -56,7 +56,7 @@
 		},
 		{
 			"id": "volcano", "name_ko": "화산", "order": 6, "main_types": ["fire"], "level_cap": 35, "sky": "#e0a07a", "ground": "#6b3b2e",
-			"interval": [150, 360], "battle_ground": 2,
+			"interval": [240, 400], "battle_ground": 2,
 			"unlock": [{"type": "player_level", "value": 18}, {"type": "dex_caught_count", "value": 50}],
 			"encounters": [
 				[58, 16, 22, 28], [37, 16, 22, 28], [77, 16, 22, 28], [126, 6, 24, 30], [74, 10, 22, 28],
@@ -66,7 +66,7 @@
 		},
 		{
 			"id": "ghost_tower", "name_ko": "유령탑", "order": 7, "main_types": ["ghost", "psychic"], "level_cap": 38, "sky": "#7e6a9e", "ground": "#4b4060",
-			"interval": [180, 420], "battle_ground": 8,
+			"interval": [280, 460], "battle_ground": 8,
 			"unlock": [{"type": "player_level", "value": 22}],
 			"encounters": [
 				[92, 22, 25, 31], [63, 14, 25, 31], [96, 14, 25, 31], [79, 8, 25, 31], [122, 7, 26, 32],
@@ -76,7 +76,7 @@
 		},
 		{
 			"id": "snow_mountain", "name_ko": "설산", "order": 8, "main_types": ["ice"], "level_cap": 45, "sky": "#cfe3f2", "ground": "#f2f6fa",
-			"interval": [210, 480], "battle_ground": 7,
+			"interval": [320, 520], "battle_ground": 7,
 			"unlock": [{"type": "player_level", "value": 27}, {"type": "type_caught_count", "type_id": "water", "value": 10}],
 			"encounters": [
 				[86, 16, 30, 37], [124, 12, 30, 37], [90, 14, 30, 37], [87, 6, 36, 42], [91, 7, 36, 42],
@@ -86,7 +86,7 @@
 		},
 		{
 			"id": "deep_cave", "name_ko": "깊은 동굴", "order": 9, "main_types": ["dragon", "rock"], "level_cap": 60, "sky": "#3b3f55", "ground": "#57505a",
-			"interval": [240, 540], "battle_ground": 4,
+			"interval": [360, 580], "battle_ground": 4,
 			"unlock": [{"type": "player_level", "value": 32}, {"type": "dex_caught_count", "value": 100}],
 			"encounters": [
 				[147, 14, 40, 48], [42, 12, 40, 48], [75, 12, 40, 48], [95, 10, 40, 48], [112, 6, 42, 50],

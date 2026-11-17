@@ -13,6 +13,9 @@ extends Node
 ##   pokemon_catch    PokemonCatch.mp3        포획 성공 (M11)
 ##   pokemon_run      PokemonRun.mp3          야생 포켓몬이 도망침 (포획 실패, 90초 무반응) (M11)
 ##   shiny            ShinyPokemon.mp3        색이 다른 포켓몬 등장 (M11)
+##   ball_throw       PokemonBallThrow.wav    포획 연출: 볼을 던질 때 (v0.54)
+##   ball_wobble      PokemonBallWobble.wav   포획 연출: 볼이 흔들릴 때마다 (피치 0.9~1.1 무작위, v0.54)
+##   ball_catch       PokemonBallCatch.wav    포획 연출: 잡힌 순간 "착" (tools/make_catch_click.py 로 합성, v0.54)
 ## 인카운터 파일이 없으면 코드로 합성한 2음 차임을 대신 쓴다.
 ##
 ## 소리마다 플레이어가 따로 있어서 서로 다른 소리는 겹쳐 나고, 같은 소리는 처음부터 다시 난다.
@@ -37,13 +40,18 @@ const SOUNDS := {
 	&"pokemon_catch": "PokemonCatch.mp3",
 	&"pokemon_run": "PokemonRun.mp3",
 	&"shiny": "ShinyPokemon.mp3",
+	&"ball_throw": "PokemonBallThrow.wav",
+	&"ball_wobble": "PokemonBallWobble.wav",
+	&"ball_catch": "PokemonBallCatch.wav",
 }
 
 const BGM_DIR := "res://Assets/Audio/BGM/"
 const BGM_EXTS := ["ogg", "mp3", "wav"]
 const BGM_FADE_SEC := 3.0
 ## BGM 을 멈추지 않는 효과음
-const NO_BGM_PAUSE := [&"button_click", &"attack"]   # 버튼 클릭, 전투 중 과녁 명중음 (v0.32)
+## 포획 연출의 짧은 소리(던지기·흔들림·착)도 멈추지 않는다 — 4초 남짓한 연출 동안 BGM 이 뚝뚝 끊기지 않게 (v0.54).
+## 연출 끝의 포획 효과음(pokemon_catch)은 그대로 BGM 을 멈춘다.
+const NO_BGM_PAUSE := [&"button_click", &"attack", &"ball_throw", &"ball_wobble", &"ball_catch"]
 const SFX_BUS := &"SFX"
 const BGM_BUS := &"BGM"
 
@@ -109,13 +117,15 @@ func _process(_delta: float) -> void:
 	_update_playlist()
 
 
-func play(id: StringName) -> void:
+## pitch: 재생 속도·음높이 (1.0 = 원래). 흔들림 소리처럼 매번 조금씩 다르게 낼 때 (v0.54)
+func play(id: StringName, pitch: float = 1.0) -> void:
 	if id == &"encounter" and not Settings.get_value(&"encounter_sound"):
 		return
 	var p: AudioStreamPlayer = _players.get(id)
 	if p == null:
 		return
 	p.volume_db = linear_to_db(clampf(Settings.get_value(&"sfx_volume"), 0.0, 1.0))
+	p.pitch_scale = pitch
 	p.play()
 	if not NO_BGM_PAUSE.has(id):
 		_set_bgm_paused(true)

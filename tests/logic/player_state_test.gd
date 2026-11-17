@@ -66,6 +66,7 @@ func test_storage_full_at_capacity() -> void:
 func test_stats_of_instance() -> void:
 	var inst := PlayerState.add_caught(_enc(25, 50))
 	inst.traits = []   # 무작위 특성의 능력치 배율을 빼고 비교
+	inst.ivs = {"hp": 0, "atk": 0, "def": 0, "spa": 0, "spd": 0, "spe": 0}   # 개체치 0 기준 (v0.55)
 	var st := PlayerState.stats_of(inst)
 	assert_int(st[&"hp"]).is_equal(95)
 	assert_int(st[&"spe"]).is_equal(95)

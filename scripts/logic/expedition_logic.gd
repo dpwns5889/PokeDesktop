@@ -102,7 +102,7 @@ static func pokemon_power(inst: Dictionary, expedition: ExpeditionData) -> float
 	if species == null:
 		return 0.0
 	var traits: Array = inst.get("traits", [])
-	var stats := Formulas.calc_stats(species.base_stats, inst.level)
+	var stats := Formulas.calc_stats(species.base_stats, inst.level, {}, inst.get("ivs", {}))
 	var power := 0.0
 	for v in stats.values():
 		power += v

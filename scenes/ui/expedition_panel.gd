@@ -93,7 +93,7 @@ func _build_content(box: VBoxContainer) -> void:
 	_party_list = ItemList.new()
 	_party_list.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	_party_list.select_mode = ItemList.SELECT_TOGGLE
-	_party_list.fixed_icon_size = Vector2i(20, 20)
+	_party_list.fixed_icon_size = Vector2i(UiUtil.ICON_SIZE, UiUtil.ICON_SIZE)   # v0.55 오버월드 아이콘 1:1
 	_party_list.multi_selected.connect(func(_i: int, _s: bool) -> void: _update_summary())
 	pleft.add_child(_party_list)
 	var pright := VBoxContainer.new()

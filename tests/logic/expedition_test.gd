@@ -21,6 +21,7 @@ func after_test() -> void:
 func _add(dex_id: int, level: int, traits: Array = []) -> String:
 	var inst := PlayerState.add_caught({&"dex_id": dex_id, &"level": level, &"gender": &"male", &"region": &"grassland"})
 	inst.traits = traits
+	inst.ivs = Formulas.max_ivs()   # 개체치(v0.55)를 고정해 특성 효과만 비교
 	return inst.uid
 
 
@@ -90,7 +91,8 @@ func test_roll_traits_distribution_and_rules() -> void:
 		assert_int(uniq.size()).is_equal(ts.size())
 		assert_bool(ts.has("quick_feet") and ts.has("truant")).is_false()
 		assert_bool(ts.has("legend")).is_false()
-	assert_int(counts[0]).is_between(850, 1150)   # 가중치 50%
+	assert_int(counts[0]).is_between(1050, 1350)   # 가중치 60% (v0.54: 0/1/2/3개 = 60/25/12/3)
+	assert_int(counts[1]).is_between(380, 620)     # 25%
 	assert_int(counts[3]).is_less(150)
 
 
