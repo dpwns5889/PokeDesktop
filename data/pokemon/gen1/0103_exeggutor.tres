@@ -1,0 +1,23 @@
+[gd_resource type="Resource" script_class="PokemonSpecies" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/pokemon_species.gd" id="1_7q3o2"]
+
+[resource]
+script = ExtResource("1_7q3o2")
+dex_id = 103
+generation = 1
+name_ko = "나시"
+name_en = "exeggutor"
+types = Array[StringName]([&"grass", &"psychic"])
+base_stats = {
+"atk": 95,
+"def": 85,
+"hp": 95,
+"spa": 125,
+"spd": 75,
+"spe": 55
+}
+catch_rate = 45
+base_exp = 186
+gender_ratio = 0.5
+evo_stage = 1

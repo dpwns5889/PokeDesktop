@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="TraitData" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/trait_data.gd" id="1_1bu3q"]
+
+[resource]
+script = ExtResource("1_1bu3q")
+id = &"cheek_pouch"
+name_ko = "볼주머니"
+description = "[원정] 원정에 성공하면 20% 확률로 경험사탕 S를 1~2개 더 가져온다."
+tier = &"rare"
+effects = Array[Dictionary]([{
+"chance": 0.2,
+"item": "exp_candy_s",
+"kind": "bonus_item",
+"max": 2.0,
+"min": 1.0,
+"scope": "party"
+}])

@@ -1,0 +1,28 @@
+[gd_resource type="Resource" script_class="PokemonSpecies" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/pokemon_species.gd" id="1_ebmlk"]
+
+[resource]
+script = ExtResource("1_ebmlk")
+dex_id = 19
+generation = 1
+name_ko = "꼬렛"
+name_en = "rattata"
+types = Array[StringName]([&"normal"])
+base_stats = {
+"atk": 56,
+"def": 35,
+"hp": 30,
+"spa": 25,
+"spd": 35,
+"spe": 72
+}
+catch_rate = 255
+base_exp = 51
+gender_ratio = 0.5
+has_gender_sprites = true
+evolutions = Array[Dictionary]([{
+"method": &"level",
+"to": 20,
+"value": 20
+}])

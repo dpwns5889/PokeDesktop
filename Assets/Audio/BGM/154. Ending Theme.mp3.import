@@ -1,0 +1,19 @@
+[remap]
+
+importer="mp3"
+type="AudioStreamMP3"
+uid="uid://clutskbppx0ct"
+path="res://.godot/imported/154. Ending Theme.mp3-66e369e6714ffa7c7c626b5c81a8fb7b.mp3str"
+
+[deps]
+
+source_file="res://Assets/Audio/BGM/154. Ending Theme.mp3"
+dest_files=["res://.godot/imported/154. Ending Theme.mp3-66e369e6714ffa7c7c626b5c81a8fb7b.mp3str"]
+
+[params]
+
+loop=false
+loop_offset=0
+bpm=0
+beat_count=0
+bar_beats=4

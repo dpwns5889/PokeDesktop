@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/item_data.gd" id="1_47d6j"]
+
+[resource]
+script = ExtResource("1_47d6j")
+id = &"shiny_incense"
+name_ko = "특이한 향로"
+description = "30분 동안 색이 다른 포켓몬이 4배 잘 나온다(1/512 → 1/128)."
+category = &"incense"
+order = 26
+params = {
+&"duration_min": 30.0,
+&"shiny_mult": 4.0
+}
+sources = Array[StringName]([&"shop", &"expedition"])
+buy_price = 8000
+sell_price = 2000

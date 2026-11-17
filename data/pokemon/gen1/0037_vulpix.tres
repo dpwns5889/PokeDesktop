@@ -1,0 +1,27 @@
+[gd_resource type="Resource" script_class="PokemonSpecies" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/pokemon_species.gd" id="1_n406v"]
+
+[resource]
+script = ExtResource("1_n406v")
+dex_id = 37
+generation = 1
+name_ko = "식스테일"
+name_en = "vulpix"
+types = Array[StringName]([&"fire"])
+base_stats = {
+"atk": 41,
+"def": 40,
+"hp": 38,
+"spa": 50,
+"spd": 65,
+"spe": 65
+}
+catch_rate = 190
+base_exp = 60
+gender_ratio = 0.25
+evolutions = Array[Dictionary]([{
+"item": &"fire_stone",
+"method": &"item",
+"to": 38
+}])

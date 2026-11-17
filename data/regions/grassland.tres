@@ -1,0 +1,117 @@
+[gd_resource type="Resource" script_class="RegionData" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/encounter_entry.gd" id="1_usgow"]
+[ext_resource type="Script" path="res://scripts/data/region_data.gd" id="2_oyyc5"]
+
+[sub_resource type="Resource" id="Resource_8n4dl"]
+script = ExtResource("1_usgow")
+dex_id = 16
+weight = 18
+min_level = 2
+max_level = 5
+
+[sub_resource type="Resource" id="Resource_8dsns"]
+script = ExtResource("1_usgow")
+dex_id = 19
+weight = 18
+min_level = 2
+max_level = 5
+
+[sub_resource type="Resource" id="Resource_qvpg4"]
+script = ExtResource("1_usgow")
+dex_id = 21
+weight = 12
+min_level = 3
+max_level = 6
+
+[sub_resource type="Resource" id="Resource_ic4xb"]
+script = ExtResource("1_usgow")
+dex_id = 10
+weight = 12
+min_level = 2
+max_level = 4
+
+[sub_resource type="Resource" id="Resource_ch6ut"]
+script = ExtResource("1_usgow")
+dex_id = 13
+weight = 12
+min_level = 2
+max_level = 4
+
+[sub_resource type="Resource" id="Resource_hlu0i"]
+script = ExtResource("1_usgow")
+dex_id = 29
+weight = 6
+min_level = 3
+max_level = 6
+
+[sub_resource type="Resource" id="Resource_4mpal"]
+script = ExtResource("1_usgow")
+dex_id = 32
+weight = 6
+min_level = 3
+max_level = 6
+
+[sub_resource type="Resource" id="Resource_y181c"]
+script = ExtResource("1_usgow")
+dex_id = 39
+weight = 4
+min_level = 3
+max_level = 6
+
+[sub_resource type="Resource" id="Resource_i2mx6"]
+script = ExtResource("1_usgow")
+dex_id = 52
+weight = 4
+min_level = 3
+max_level = 6
+
+[sub_resource type="Resource" id="Resource_m2ppg"]
+script = ExtResource("1_usgow")
+dex_id = 25
+weight = 4
+min_level = 3
+max_level = 6
+min_player_level = 3
+
+[sub_resource type="Resource" id="Resource_ocxrf"]
+script = ExtResource("1_usgow")
+dex_id = 11
+weight = 5
+min_level = 4
+max_level = 6
+
+[sub_resource type="Resource" id="Resource_8ailx"]
+script = ExtResource("1_usgow")
+dex_id = 14
+weight = 5
+min_level = 4
+max_level = 6
+
+[sub_resource type="Resource" id="Resource_i5pjn"]
+script = ExtResource("1_usgow")
+dex_id = 84
+weight = 5
+min_level = 4
+max_level = 7
+min_player_level = 4
+
+[sub_resource type="Resource" id="Resource_l68lf"]
+script = ExtResource("1_usgow")
+dex_id = 83
+weight = 4
+min_level = 4
+max_level = 7
+min_player_level = 5
+
+[resource]
+script = ExtResource("2_oyyc5")
+id = &"grassland"
+name_ko = "초원"
+order = 1
+main_types = Array[StringName]([&"normal", &"bug", &"flying"])
+sky_color = Color(0.5764706, 0.73333335, 0.9254902, 1)
+ground_color = Color(0.5294118, 0.7490196, 0.41960785, 1)
+encounters = Array[ExtResource("1_usgow")]([SubResource("Resource_8n4dl"), SubResource("Resource_8dsns"), SubResource("Resource_qvpg4"), SubResource("Resource_ic4xb"), SubResource("Resource_ch6ut"), SubResource("Resource_hlu0i"), SubResource("Resource_4mpal"), SubResource("Resource_y181c"), SubResource("Resource_i2mx6"), SubResource("Resource_m2ppg"), SubResource("Resource_ocxrf"), SubResource("Resource_8ailx"), SubResource("Resource_i5pjn"), SubResource("Resource_l68lf")])
+level_cap = 8
+encounter_interval = Vector2(30, 120)

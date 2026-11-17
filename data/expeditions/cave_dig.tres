@@ -1,0 +1,41 @@
+[gd_resource type="Resource" script_class="ExpeditionData" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/expedition_data.gd" id="1_8u03a"]
+
+[resource]
+script = ExtResource("1_8u03a")
+id = &"cave_dig"
+name_ko = "동굴 발굴"
+order = 4
+duration_sec = 3600
+required_power = 3000
+recommended_types = Array[StringName]([&"rock", &"ground"])
+weak_types = Array[StringName]([&"flying"])
+reward_table = Array[Dictionary]([{
+"item": &"exp_candy_s",
+"max": 4,
+"min": 2,
+"weight": 25
+}, {
+"item": &"exp_candy_m",
+"max": 1,
+"min": 1,
+"weight": 10
+}, {
+"item": &"great_ball",
+"max": 4,
+"min": 2,
+"weight": 20
+}, {
+"item": &"moon_stone",
+"max": 1,
+"min": 1,
+"weight": 12
+}])
+currency_reward = Vector2i(600, 1000)
+exp_reward = 400
+player_exp_reward = 80
+unlock_conditions = Array[Dictionary]([{
+"type": "region_unlocked",
+"value": "cave"
+}])

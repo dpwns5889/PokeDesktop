@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/item_data.gd" id="1_mxw34"]
+
+[resource]
+script = ExtResource("1_mxw34")
+id = &"incense"
+name_ko = "향로"
+description = "쓸 때 고른 타입의 포켓몬이 30분 동안 2배 잘 나온다."
+category = &"incense"
+order = 25
+params = {
+&"duration_min": 30.0,
+&"type_weight": 2.0
+}
+sources = Array[StringName]([&"shop", &"expedition"])
+buy_price = 1500
+sell_price = 500

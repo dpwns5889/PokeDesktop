@@ -1,0 +1,28 @@
+[gd_resource type="Resource" script_class="PokemonSpecies" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/pokemon_species.gd" id="1_6kyjw"]
+
+[resource]
+script = ExtResource("1_6kyjw")
+dex_id = 118
+generation = 1
+name_ko = "콘치"
+name_en = "goldeen"
+types = Array[StringName]([&"water"])
+base_stats = {
+"atk": 67,
+"def": 60,
+"hp": 45,
+"spa": 35,
+"spd": 50,
+"spe": 63
+}
+catch_rate = 225
+base_exp = 64
+gender_ratio = 0.5
+has_gender_sprites = true
+evolutions = Array[Dictionary]([{
+"method": &"level",
+"to": 119,
+"value": 33
+}])

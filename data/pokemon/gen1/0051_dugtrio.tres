@@ -1,0 +1,23 @@
+[gd_resource type="Resource" script_class="PokemonSpecies" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/pokemon_species.gd" id="1_b5xrd"]
+
+[resource]
+script = ExtResource("1_b5xrd")
+dex_id = 51
+generation = 1
+name_ko = "닥트리오"
+name_en = "dugtrio"
+types = Array[StringName]([&"ground"])
+base_stats = {
+"atk": 100,
+"def": 50,
+"hp": 35,
+"spa": 50,
+"spd": 70,
+"spe": 120
+}
+catch_rate = 50
+base_exp = 149
+gender_ratio = 0.5
+evo_stage = 1

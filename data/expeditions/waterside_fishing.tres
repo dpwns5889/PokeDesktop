@@ -1,0 +1,36 @@
+[gd_resource type="Resource" script_class="ExpeditionData" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/expedition_data.gd" id="1_12os0"]
+
+[resource]
+script = ExtResource("1_12os0")
+id = &"waterside_fishing"
+name_ko = "물가 낚시"
+order = 3
+duration_sec = 1800
+required_power = 2100
+recommended_types = Array[StringName]([&"water"])
+weak_types = Array[StringName]([&"fire", &"rock"])
+reward_table = Array[Dictionary]([{
+"item": &"exp_candy_s",
+"max": 3,
+"min": 1,
+"weight": 30
+}, {
+"item": &"great_ball",
+"max": 3,
+"min": 1,
+"weight": 20
+}, {
+"item": &"water_stone",
+"max": 1,
+"min": 1,
+"weight": 10
+}])
+currency_reward = Vector2i(300, 500)
+exp_reward = 150
+player_exp_reward = 40
+unlock_conditions = Array[Dictionary]([{
+"type": "region_unlocked",
+"value": "waterside"
+}])

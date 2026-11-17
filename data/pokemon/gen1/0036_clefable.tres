@@ -1,0 +1,23 @@
+[gd_resource type="Resource" script_class="PokemonSpecies" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/pokemon_species.gd" id="1_mv1xw"]
+
+[resource]
+script = ExtResource("1_mv1xw")
+dex_id = 36
+generation = 1
+name_ko = "픽시"
+name_en = "clefable"
+types = Array[StringName]([&"normal"])
+base_stats = {
+"atk": 70,
+"def": 73,
+"hp": 95,
+"spa": 95,
+"spd": 90,
+"spe": 60
+}
+catch_rate = 25
+base_exp = 217
+gender_ratio = 0.25
+evo_stage = 1

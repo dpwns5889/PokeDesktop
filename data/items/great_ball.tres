@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/item_data.gd" id="1_8a00f"]
+
+[resource]
+script = ExtResource("1_8a00f")
+id = &"great_ball"
+name_ko = "슈퍼볼"
+description = "몬스터볼보다 게이지가 1.5배 잘 찬다."
+category = &"ball"
+order = 2
+params = {
+&"catch_modifier": 1.5
+}
+sources = Array[StringName]([&"shop", &"expedition"])
+buy_price = 500
+sell_price = 250

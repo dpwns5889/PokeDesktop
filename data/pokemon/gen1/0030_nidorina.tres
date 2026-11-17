@@ -1,0 +1,27 @@
+[gd_resource type="Resource" script_class="PokemonSpecies" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/pokemon_species.gd" id="1_lnaua"]
+
+[resource]
+script = ExtResource("1_lnaua")
+dex_id = 30
+generation = 1
+name_ko = "니드리나"
+name_en = "nidorina"
+types = Array[StringName]([&"poison"])
+base_stats = {
+"atk": 62,
+"def": 67,
+"hp": 70,
+"spa": 55,
+"spd": 55,
+"spe": 56
+}
+catch_rate = 120
+base_exp = 128
+evo_stage = 1
+evolutions = Array[Dictionary]([{
+"item": &"moon_stone",
+"method": &"item",
+"to": 31
+}])

@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="TraitData" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/trait_data.gd" id="1_yl1id"]
+
+[resource]
+script = ExtResource("1_yl1id")
+id = &"flash_fire"
+name_ko = "타오르는불꽃"
+description = "[전투] 불꽃 타입 포켓몬이 더 잘 나온다."
+trigger = &"battle"
+effects = Array[Dictionary]([{
+"kind": "encounter_type_weight",
+"types": ["fire"],
+"value": 1.5
+}])

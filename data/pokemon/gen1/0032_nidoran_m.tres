@@ -1,0 +1,27 @@
+[gd_resource type="Resource" script_class="PokemonSpecies" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/pokemon_species.gd" id="1_cjcbe"]
+
+[resource]
+script = ExtResource("1_cjcbe")
+dex_id = 32
+generation = 1
+name_ko = "니드런♂"
+name_en = "nidoran-m"
+types = Array[StringName]([&"poison"])
+base_stats = {
+"atk": 57,
+"def": 40,
+"hp": 46,
+"spa": 40,
+"spd": 40,
+"spe": 50
+}
+catch_rate = 235
+base_exp = 55
+gender_ratio = 1.0
+evolutions = Array[Dictionary]([{
+"method": &"level",
+"to": 33,
+"value": 16
+}])

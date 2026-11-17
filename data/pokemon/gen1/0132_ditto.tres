@@ -1,0 +1,22 @@
+[gd_resource type="Resource" script_class="PokemonSpecies" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/pokemon_species.gd" id="1_whv2h"]
+
+[resource]
+script = ExtResource("1_whv2h")
+dex_id = 132
+generation = 1
+name_ko = "메타몽"
+name_en = "ditto"
+types = Array[StringName]([&"normal"])
+base_stats = {
+"atk": 48,
+"def": 48,
+"hp": 48,
+"spa": 48,
+"spd": 48,
+"spe": 48
+}
+catch_rate = 35
+base_exp = 101
+gender_ratio = -1.0

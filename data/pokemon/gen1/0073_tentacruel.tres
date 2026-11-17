@@ -1,0 +1,23 @@
+[gd_resource type="Resource" script_class="PokemonSpecies" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/pokemon_species.gd" id="1_yeiih"]
+
+[resource]
+script = ExtResource("1_yeiih")
+dex_id = 73
+generation = 1
+name_ko = "독파리"
+name_en = "tentacruel"
+types = Array[StringName]([&"water", &"poison"])
+base_stats = {
+"atk": 70,
+"def": 65,
+"hp": 80,
+"spa": 80,
+"spd": 120,
+"spe": 100
+}
+catch_rate = 60
+base_exp = 180
+gender_ratio = 0.5
+evo_stage = 1

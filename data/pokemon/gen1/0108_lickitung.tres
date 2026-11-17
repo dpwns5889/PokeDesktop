@@ -1,0 +1,22 @@
+[gd_resource type="Resource" script_class="PokemonSpecies" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/pokemon_species.gd" id="1_v261y"]
+
+[resource]
+script = ExtResource("1_v261y")
+dex_id = 108
+generation = 1
+name_ko = "내루미"
+name_en = "lickitung"
+types = Array[StringName]([&"normal"])
+base_stats = {
+"atk": 55,
+"def": 75,
+"hp": 90,
+"spa": 60,
+"spd": 75,
+"spe": 30
+}
+catch_rate = 45
+base_exp = 77
+gender_ratio = 0.5

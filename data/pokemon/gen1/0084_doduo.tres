@@ -1,0 +1,28 @@
+[gd_resource type="Resource" script_class="PokemonSpecies" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/pokemon_species.gd" id="1_y0mcm"]
+
+[resource]
+script = ExtResource("1_y0mcm")
+dex_id = 84
+generation = 1
+name_ko = "두두"
+name_en = "doduo"
+types = Array[StringName]([&"normal", &"flying"])
+base_stats = {
+"atk": 85,
+"def": 45,
+"hp": 35,
+"spa": 35,
+"spd": 35,
+"spe": 75
+}
+catch_rate = 190
+base_exp = 62
+gender_ratio = 0.5
+has_gender_sprites = true
+evolutions = Array[Dictionary]([{
+"method": &"level",
+"to": 85,
+"value": 31
+}])

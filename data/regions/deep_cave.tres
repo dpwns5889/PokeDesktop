@@ -1,0 +1,122 @@
+[gd_resource type="Resource" script_class="RegionData" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/encounter_entry.gd" id="1_x163j"]
+[ext_resource type="Script" path="res://scripts/data/region_data.gd" id="2_42153"]
+
+[sub_resource type="Resource" id="Resource_i1vf5"]
+script = ExtResource("1_x163j")
+dex_id = 147
+weight = 14
+min_level = 40
+max_level = 48
+
+[sub_resource type="Resource" id="Resource_v42lv"]
+script = ExtResource("1_x163j")
+dex_id = 42
+weight = 12
+min_level = 40
+max_level = 48
+
+[sub_resource type="Resource" id="Resource_gooub"]
+script = ExtResource("1_x163j")
+dex_id = 75
+weight = 12
+min_level = 40
+max_level = 48
+
+[sub_resource type="Resource" id="Resource_ilqn5"]
+script = ExtResource("1_x163j")
+dex_id = 95
+min_level = 40
+max_level = 48
+
+[sub_resource type="Resource" id="Resource_mr3ck"]
+script = ExtResource("1_x163j")
+dex_id = 112
+weight = 6
+min_level = 42
+max_level = 50
+
+[sub_resource type="Resource" id="Resource_psu7b"]
+script = ExtResource("1_x163j")
+dex_id = 148
+weight = 6
+min_level = 45
+max_level = 52
+
+[sub_resource type="Resource" id="Resource_8u8kw"]
+script = ExtResource("1_x163j")
+dex_id = 130
+weight = 6
+min_level = 42
+max_level = 50
+
+[sub_resource type="Resource" id="Resource_fqkpb"]
+script = ExtResource("1_x163j")
+dex_id = 142
+weight = 7
+min_level = 44
+max_level = 52
+
+[sub_resource type="Resource" id="Resource_h3dhq"]
+script = ExtResource("1_x163j")
+dex_id = 143
+weight = 7
+min_level = 44
+max_level = 52
+
+[sub_resource type="Resource" id="Resource_vmgno"]
+script = ExtResource("1_x163j")
+dex_id = 132
+weight = 6
+min_level = 40
+max_level = 48
+
+[sub_resource type="Resource" id="Resource_5ipdf"]
+script = ExtResource("1_x163j")
+dex_id = 113
+weight = 7
+min_level = 42
+max_level = 50
+
+[sub_resource type="Resource" id="Resource_p8efa"]
+script = ExtResource("1_x163j")
+dex_id = 149
+weight = 5
+min_level = 55
+max_level = 60
+min_player_level = 38
+
+[sub_resource type="Resource" id="Resource_fbj2q"]
+script = ExtResource("1_x163j")
+dex_id = 68
+weight = 7
+min_level = 44
+max_level = 52
+
+[sub_resource type="Resource" id="Resource_r8apq"]
+script = ExtResource("1_x163j")
+dex_id = 76
+weight = 7
+min_level = 44
+max_level = 52
+
+[resource]
+script = ExtResource("2_42153")
+id = &"deep_cave"
+name_ko = "깊은 동굴"
+order = 9
+main_types = Array[StringName]([&"dragon", &"rock"])
+sky_color = Color(0.23137255, 0.24705882, 0.33333334, 1)
+ground_color = Color(0.34117648, 0.3137255, 0.3529412, 1)
+encounters = Array[ExtResource("1_x163j")]([SubResource("Resource_i1vf5"), SubResource("Resource_v42lv"), SubResource("Resource_gooub"), SubResource("Resource_ilqn5"), SubResource("Resource_mr3ck"), SubResource("Resource_psu7b"), SubResource("Resource_8u8kw"), SubResource("Resource_fqkpb"), SubResource("Resource_h3dhq"), SubResource("Resource_vmgno"), SubResource("Resource_5ipdf"), SubResource("Resource_p8efa"), SubResource("Resource_fbj2q"), SubResource("Resource_r8apq")])
+level_cap = 60
+encounter_interval = Vector2(240, 540)
+battle_ground = 4
+unlock_conditions = Array[Dictionary]([{
+"type": "player_level",
+"value": 32
+}, {
+"type": "dex_caught_count",
+"value": 100
+}])

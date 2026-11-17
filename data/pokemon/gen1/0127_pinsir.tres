@@ -1,0 +1,22 @@
+[gd_resource type="Resource" script_class="PokemonSpecies" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/pokemon_species.gd" id="1_kxoea"]
+
+[resource]
+script = ExtResource("1_kxoea")
+dex_id = 127
+generation = 1
+name_ko = "쁘사이저"
+name_en = "pinsir"
+types = Array[StringName]([&"bug"])
+base_stats = {
+"atk": 125,
+"def": 100,
+"hp": 65,
+"spa": 55,
+"spd": 70,
+"spe": 85
+}
+catch_rate = 45
+base_exp = 175
+gender_ratio = 0.5

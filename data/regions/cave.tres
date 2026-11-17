@@ -1,0 +1,142 @@
+[gd_resource type="Resource" script_class="RegionData" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/encounter_entry.gd" id="1_blhwm"]
+[ext_resource type="Script" path="res://scripts/data/region_data.gd" id="2_s22ow"]
+
+[sub_resource type="Resource" id="Resource_ylit3"]
+script = ExtResource("1_blhwm")
+dex_id = 41
+weight = 20
+min_level = 12
+max_level = 18
+
+[sub_resource type="Resource" id="Resource_lgqlo"]
+script = ExtResource("1_blhwm")
+dex_id = 74
+weight = 16
+min_level = 12
+max_level = 18
+
+[sub_resource type="Resource" id="Resource_nxfy8"]
+script = ExtResource("1_blhwm")
+dex_id = 27
+min_level = 12
+max_level = 18
+
+[sub_resource type="Resource" id="Resource_ihxrh"]
+script = ExtResource("1_blhwm")
+dex_id = 50
+min_level = 12
+max_level = 18
+
+[sub_resource type="Resource" id="Resource_oggxl"]
+script = ExtResource("1_blhwm")
+dex_id = 35
+weight = 6
+min_level = 13
+max_level = 19
+
+[sub_resource type="Resource" id="Resource_1fexe"]
+script = ExtResource("1_blhwm")
+dex_id = 66
+weight = 8
+min_level = 13
+max_level = 19
+
+[sub_resource type="Resource" id="Resource_8wuim"]
+script = ExtResource("1_blhwm")
+dex_id = 56
+weight = 8
+min_level = 13
+max_level = 19
+
+[sub_resource type="Resource" id="Resource_mfajo"]
+script = ExtResource("1_blhwm")
+dex_id = 104
+weight = 6
+min_level = 14
+max_level = 20
+
+[sub_resource type="Resource" id="Resource_ttegt"]
+script = ExtResource("1_blhwm")
+dex_id = 95
+weight = 4
+min_level = 15
+max_level = 22
+
+[sub_resource type="Resource" id="Resource_eoha3"]
+script = ExtResource("1_blhwm")
+dex_id = 111
+weight = 5
+min_level = 15
+max_level = 22
+
+[sub_resource type="Resource" id="Resource_yxsj3"]
+script = ExtResource("1_blhwm")
+dex_id = 81
+weight = 4
+min_level = 13
+max_level = 19
+
+[sub_resource type="Resource" id="Resource_fhdfn"]
+script = ExtResource("1_blhwm")
+dex_id = 42
+weight = 5
+min_level = 20
+max_level = 24
+
+[sub_resource type="Resource" id="Resource_uopp3"]
+script = ExtResource("1_blhwm")
+dex_id = 75
+weight = 4
+min_level = 20
+max_level = 24
+
+[sub_resource type="Resource" id="Resource_s46km"]
+script = ExtResource("1_blhwm")
+dex_id = 138
+weight = 4
+min_level = 18
+max_level = 22
+min_player_level = 12
+
+[sub_resource type="Resource" id="Resource_ugps8"]
+script = ExtResource("1_blhwm")
+dex_id = 140
+weight = 4
+min_level = 18
+max_level = 22
+min_player_level = 12
+
+[sub_resource type="Resource" id="Resource_07phd"]
+script = ExtResource("1_blhwm")
+dex_id = 142
+weight = 3
+min_level = 20
+max_level = 24
+min_player_level = 16
+
+[sub_resource type="Resource" id="Resource_ndbtc"]
+script = ExtResource("1_blhwm")
+dex_id = 108
+weight = 4
+min_level = 16
+max_level = 22
+min_player_level = 12
+
+[resource]
+script = ExtResource("2_s22ow")
+id = &"cave"
+name_ko = "동굴"
+order = 4
+main_types = Array[StringName]([&"rock", &"ground"])
+sky_color = Color(0.41960785, 0.43529412, 0.5019608, 1)
+ground_color = Color(0.5411765, 0.45490196, 0.34509805, 1)
+encounters = Array[ExtResource("1_blhwm")]([SubResource("Resource_ylit3"), SubResource("Resource_lgqlo"), SubResource("Resource_nxfy8"), SubResource("Resource_ihxrh"), SubResource("Resource_oggxl"), SubResource("Resource_1fexe"), SubResource("Resource_8wuim"), SubResource("Resource_mfajo"), SubResource("Resource_ttegt"), SubResource("Resource_eoha3"), SubResource("Resource_yxsj3"), SubResource("Resource_fhdfn"), SubResource("Resource_uopp3"), SubResource("Resource_s46km"), SubResource("Resource_ugps8"), SubResource("Resource_07phd"), SubResource("Resource_ndbtc")])
+level_cap = 24
+encounter_interval = Vector2(90, 240)
+battle_ground = 6
+unlock_conditions = Array[Dictionary]([{
+"type": "player_level",
+"value": 10
+}])

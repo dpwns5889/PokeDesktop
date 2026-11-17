@@ -1,0 +1,21 @@
+[gd_resource type="Resource" script_class="LegendaryRule" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/legendary_rule.gd" id="1_xg58t"]
+
+[resource]
+script = ExtResource("1_xg58t")
+dex_id = 150
+level = 70
+chance = 0.03
+region_ids = Array[StringName]([&"ghost_tower"])
+conditions = Array[Dictionary]([{
+"type": "player_level",
+"value": 34
+}, {
+"type": "type_caught_count",
+"type_id": "psychic",
+"value": 8
+}, {
+"type": "dex_caught_count",
+"value": 131
+}])

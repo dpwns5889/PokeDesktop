@@ -1,0 +1,24 @@
+[gd_resource type="Resource" script_class="PokemonSpecies" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/pokemon_species.gd" id="1_wn2dr"]
+
+[resource]
+script = ExtResource("1_wn2dr")
+dex_id = 145
+generation = 1
+name_ko = "썬더"
+name_en = "zapdos"
+types = Array[StringName]([&"electric", &"flying"])
+base_stats = {
+"atk": 90,
+"def": 85,
+"hp": 90,
+"spa": 125,
+"spd": 90,
+"spe": 100
+}
+catch_rate = 3
+base_exp = 261
+gender_ratio = -1.0
+is_legendary = true
+fixed_trait_ids = Array[StringName]([&"legend"])

@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="TraitData" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/trait_data.gd" id="1_1xh1t"]
+
+[resource]
+script = ExtResource("1_1xh1t")
+id = &"slow_start"
+name_ko = "슬로스타트"
+description = "[원정] 1시간 이하 원정에서 자신의 전투력 ×0.5."
+tier = &"negative"
+effects = Array[Dictionary]([{
+"kind": "power_mult",
+"scope": "self",
+"value": 0.5,
+"when": {
+"max_duration_min": 60.0
+}
+}])
+exclusive_with = Array[StringName]([&"early_bird"])

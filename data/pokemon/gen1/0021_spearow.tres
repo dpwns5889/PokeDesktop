@@ -1,0 +1,27 @@
+[gd_resource type="Resource" script_class="PokemonSpecies" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/pokemon_species.gd" id="1_msifc"]
+
+[resource]
+script = ExtResource("1_msifc")
+dex_id = 21
+generation = 1
+name_ko = "깨비참"
+name_en = "spearow"
+types = Array[StringName]([&"normal", &"flying"])
+base_stats = {
+"atk": 60,
+"def": 30,
+"hp": 40,
+"spa": 31,
+"spd": 31,
+"spe": 70
+}
+catch_rate = 255
+base_exp = 52
+gender_ratio = 0.5
+evolutions = Array[Dictionary]([{
+"method": &"level",
+"to": 22,
+"value": 20
+}])

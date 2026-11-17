@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="TraitData" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/trait_data.gd" id="1_t7d5m"]
+
+[resource]
+script = ExtResource("1_t7d5m")
+id = &"pickup"
+name_ko = "픽업"
+description = "[전투] 전투가 끝나면 15% 확률로 아이템을 주워 온다."
+tier = &"rare"
+trigger = &"battle"
+effects = Array[Dictionary]([{
+"chance": 0.15,
+"kind": "after_battle_item",
+"table": [["poke_ball", 45.0], ["great_ball", 35.0], ["ultra_ball", 12.0], ["nugget", 7.0], ["big_nugget", 1.0]]
+}])
+exclusive_with = Array[StringName]([&"unnerve", &"stench"])

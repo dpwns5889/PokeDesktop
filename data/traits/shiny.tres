@@ -1,0 +1,20 @@
+[gd_resource type="Resource" script_class="TraitData" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/trait_data.gd" id="1_f146i"]
+
+[resource]
+script = ExtResource("1_f146i")
+id = &"shiny"
+name_ko = "색이다른"
+description = "색이 다른 포켓몬만 가진다. 원정 전투력 ×1.2, 원정 보상 ×1.2."
+tier = &"legend"
+weight = 0
+effects = Array[Dictionary]([{
+"kind": "power_mult",
+"scope": "self",
+"value": 1.2
+}, {
+"kind": "reward_mult",
+"scope": "party",
+"value": 1.2
+}])

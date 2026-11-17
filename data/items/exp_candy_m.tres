@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/item_data.gd" id="1_truul"]
+
+[resource]
+script = ExtResource("1_truul")
+id = &"exp_candy_m"
+name_ko = "경험사탕 M"
+description = "포켓몬의 경험치가 800 오른다. 원정이나 박사에게서 얻는다."
+category = &"exp_candy"
+order = 11
+params = {
+&"exp": 800.0
+}
+sources = Array[StringName]([&"expedition", &"professor"])
+sell_price = 800

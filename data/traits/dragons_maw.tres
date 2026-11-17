@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="TraitData" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/trait_data.gd" id="1_78hxh"]
+
+[resource]
+script = ExtResource("1_78hxh")
+id = &"dragons_maw"
+name_ko = "용의턱"
+description = "[원정] 자신이 드래곤 타입이면 전투력 ×1.2."
+tier = &"rare"
+effects = Array[Dictionary]([{
+"kind": "power_mult",
+"scope": "self",
+"value": 1.2,
+"when": {
+"self_types": ["dragon"]
+}
+}])

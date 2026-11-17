@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="TraitData" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/trait_data.gd" id="1_st58t"]
+
+[resource]
+script = ExtResource("1_st58t")
+id = &"blaze"
+name_ko = "맹화"
+description = "[원정] 자신이 불꽃 타입이면 전투력 ×1.2."
+tier = &"rare"
+effects = Array[Dictionary]([{
+"kind": "power_mult",
+"scope": "self",
+"value": 1.2,
+"when": {
+"self_types": ["fire"]
+}
+}])

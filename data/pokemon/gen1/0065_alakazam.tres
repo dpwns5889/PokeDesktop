@@ -1,0 +1,24 @@
+[gd_resource type="Resource" script_class="PokemonSpecies" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/pokemon_species.gd" id="1_tv2r7"]
+
+[resource]
+script = ExtResource("1_tv2r7")
+dex_id = 65
+generation = 1
+name_ko = "후딘"
+name_en = "alakazam"
+types = Array[StringName]([&"psychic"])
+base_stats = {
+"atk": 50,
+"def": 45,
+"hp": 55,
+"spa": 135,
+"spd": 95,
+"spe": 120
+}
+catch_rate = 50
+base_exp = 225
+gender_ratio = 0.75
+has_gender_sprites = true
+evo_stage = 2

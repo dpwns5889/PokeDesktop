@@ -1,0 +1,28 @@
+[gd_resource type="Resource" script_class="PokemonSpecies" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/pokemon_species.gd" id="1_sun6w"]
+
+[resource]
+script = ExtResource("1_sun6w")
+dex_id = 2
+generation = 1
+name_ko = "이상해풀"
+name_en = "ivysaur"
+types = Array[StringName]([&"grass", &"poison"])
+base_stats = {
+"atk": 62,
+"def": 63,
+"hp": 60,
+"spa": 80,
+"spd": 80,
+"spe": 60
+}
+catch_rate = 45
+base_exp = 142
+gender_ratio = 0.875
+evo_stage = 1
+evolutions = Array[Dictionary]([{
+"method": &"level",
+"to": 3,
+"value": 32
+}])

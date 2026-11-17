@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="TraitData" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/trait_data.gd" id="1_2x4ht"]
+
+[resource]
+script = ExtResource("1_2x4ht")
+id = &"swift_swim"
+name_ko = "쓱쓱"
+description = "[원정] 물가 낚시·설산 등반에서 전투력 ×1.2."
+effects = Array[Dictionary]([{
+"kind": "power_mult",
+"scope": "self",
+"value": 1.2,
+"when": {
+"expeditions": ["waterside_fishing", "snow_climb"]
+}
+}])

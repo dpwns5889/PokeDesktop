@@ -1,0 +1,140 @@
+extends OverlayPanel
+## 설정 패널 (위 버튼 줄의 톱니바퀴). (기획서 6.3)
+## 창: 항상 위에 표시, 창 크기, 우하단으로 되돌리기 / 소리: 효과음 크기, 배경음 크기(M11), 인카운터 알림음
+## 개발용 기능은 메인 창 우클릭 메뉴(디버그 빌드만)에 있다.
+
+const SCALES := ["자동", "1배", "2배", "3배", "4배"]
+
+var _on_top: CheckButton
+var _scale: OptionButton
+var _volume: HSlider
+var _volume_label: Label
+var _bgm_volume: HSlider
+var _bgm_label: Label
+var _encounter_sound: CheckButton
+var _loading := false
+
+
+func _panel_title() -> String:
+	return "설정"
+
+
+func _build_content(box: VBoxContainer) -> void:
+	var scroll := ScrollContainer.new()
+	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	box.add_child(scroll)
+	var list := VBoxContainer.new()
+	list.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	list.add_theme_constant_override(&"separation", 3)
+	scroll.add_child(list)
+
+	_section(list, "창")
+	_on_top = CheckButton.new()
+	_on_top.text = "항상 위에 표시"
+	_on_top.focus_mode = Control.FOCUS_NONE
+	_on_top.toggled.connect(func(on: bool) -> void:
+		if not _loading:
+			WindowManager.set_always_on_top(on))
+	list.add_child(_on_top)
+
+	var scale_row := _row(list, "창 크기")
+	_scale = OptionButton.new()
+	_scale.focus_mode = Control.FOCUS_NONE
+	for s in SCALES:
+		_scale.add_item(s)
+	_scale.item_selected.connect(func(i: int) -> void:
+		if not _loading:
+			WindowManager.set_scale(i))   # 0 = 자동, 1~4 = 배율
+	scale_row.add_child(_scale)
+
+	var reset := Button.new()
+	reset.text = "우하단으로 되돌리기"
+	reset.focus_mode = Control.FOCUS_NONE
+	reset.pressed.connect(WindowManager.reset_position)
+	list.add_child(reset)
+
+	_section(list, "소리")
+	var vol_row := _row(list, "효과음 크기")
+	_volume = HSlider.new()
+	_volume.min_value = 0
+	_volume.max_value = 100
+	_volume.step = 5
+	_volume.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_volume.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	_volume.custom_minimum_size.x = 100
+	_volume.focus_mode = Control.FOCUS_NONE
+	_volume.value_changed.connect(_on_volume_changed)
+	_volume.drag_ended.connect(func(_changed: bool) -> void:
+		Settings.save_settings()
+		AudioManager.play(&"button_click"))   # 바뀐 크기로 들려준다
+	vol_row.add_child(_volume)
+	_volume_label = Label.new()
+	_volume_label.custom_minimum_size.x = 40
+	_volume_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+	vol_row.add_child(_volume_label)
+
+	var bgm_row := _row(list, "배경음 크기")
+	_bgm_volume = HSlider.new()
+	_bgm_volume.min_value = 0
+	_bgm_volume.max_value = 100
+	_bgm_volume.step = 5
+	_bgm_volume.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_bgm_volume.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	_bgm_volume.custom_minimum_size.x = 100
+	_bgm_volume.focus_mode = Control.FOCUS_NONE
+	_bgm_volume.value_changed.connect(func(v: float) -> void:
+		_bgm_label.text = "%d%%" % int(v)
+		if not _loading:
+			Settings.set_value(&"bgm_volume", v / 100.0, false))   # 끄는 동안 바로 들리게, 저장은 놓을 때
+	_bgm_volume.drag_ended.connect(func(_changed: bool) -> void: Settings.save_settings())
+	bgm_row.add_child(_bgm_volume)
+	_bgm_label = Label.new()
+	_bgm_label.custom_minimum_size.x = 40
+	_bgm_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+	bgm_row.add_child(_bgm_label)
+
+	_encounter_sound = CheckButton.new()
+	_encounter_sound.text = "인카운터 알림음"
+	_encounter_sound.focus_mode = Control.FOCUS_NONE
+	_encounter_sound.toggled.connect(func(on: bool) -> void:
+		if not _loading:
+			Settings.set_value(&"encounter_sound", on))
+	list.add_child(_encounter_sound)
+
+
+
+func refresh() -> void:
+	_loading = true
+	_on_top.button_pressed = WindowManager.is_always_on_top()
+	_scale.select(clampi(int(Settings.get_value(&"window_scale")), 0, SCALES.size() - 1))
+	_volume.value = roundi(float(Settings.get_value(&"sfx_volume")) * 100.0)
+	_volume_label.text = "%d%%" % int(_volume.value)
+	_bgm_volume.value = roundi(float(Settings.get_value(&"bgm_volume")) * 100.0)
+	_bgm_label.text = "%d%%" % int(_bgm_volume.value)
+	_encounter_sound.button_pressed = bool(Settings.get_value(&"encounter_sound"))
+	_loading = false
+
+
+func _on_volume_changed(v: float) -> void:
+	_volume_label.text = "%d%%" % int(v)
+	if not _loading:
+		Settings.set_value(&"sfx_volume", v / 100.0, false)   # 끌 때마다 파일에 쓰지 않음 (놓을 때 저장)
+
+
+func _section(parent: Control, text: String) -> void:
+	var l := Label.new()
+	l.text = text
+	l.add_theme_color_override(&"font_color", Color(1, 0.85, 0.35))
+	parent.add_child(l)
+
+
+func _row(parent: Control, label: String) -> HBoxContainer:
+	var row := HBoxContainer.new()
+	parent.add_child(row)
+	var l := Label.new()
+	l.text = label
+	l.custom_minimum_size.x = 90
+	row.add_child(l)
+	return row
+

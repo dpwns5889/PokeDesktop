@@ -1,0 +1,27 @@
+[gd_resource type="Resource" script_class="PokemonSpecies" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/pokemon_species.gd" id="1_fbl33"]
+
+[resource]
+script = ExtResource("1_fbl33")
+dex_id = 35
+generation = 1
+name_ko = "삐삐"
+name_en = "clefairy"
+types = Array[StringName]([&"normal"])
+base_stats = {
+"atk": 45,
+"def": 48,
+"hp": 70,
+"spa": 60,
+"spd": 65,
+"spe": 35
+}
+catch_rate = 150
+base_exp = 113
+gender_ratio = 0.25
+evolutions = Array[Dictionary]([{
+"item": &"moon_stone",
+"method": &"item",
+"to": 36
+}])

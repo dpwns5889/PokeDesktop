@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="TraitData" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/trait_data.gd" id="1_whne5"]
+
+[resource]
+script = ExtResource("1_whne5")
+id = &"volt_absorb"
+name_ko = "축전"
+description = "[원정] 발전소 순찰에서 전투력 ×1.2."
+effects = Array[Dictionary]([{
+"kind": "power_mult",
+"scope": "self",
+"value": 1.2,
+"when": {
+"expeditions": ["power_plant_patrol"]
+}
+}])

@@ -1,0 +1,22 @@
+[gd_resource type="Resource" script_class="PokemonSpecies" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/pokemon_species.gd" id="1_6qsj3"]
+
+[resource]
+script = ExtResource("1_6qsj3")
+dex_id = 125
+generation = 1
+name_ko = "에레브"
+name_en = "electabuzz"
+types = Array[StringName]([&"electric"])
+base_stats = {
+"atk": 83,
+"def": 57,
+"hp": 65,
+"spa": 95,
+"spd": 85,
+"spe": 105
+}
+catch_rate = 45
+base_exp = 172
+gender_ratio = 0.75

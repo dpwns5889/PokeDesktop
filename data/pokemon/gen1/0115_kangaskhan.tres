@@ -1,0 +1,21 @@
+[gd_resource type="Resource" script_class="PokemonSpecies" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/pokemon_species.gd" id="1_mf4wg"]
+
+[resource]
+script = ExtResource("1_mf4wg")
+dex_id = 115
+generation = 1
+name_ko = "캥카"
+name_en = "kangaskhan"
+types = Array[StringName]([&"normal"])
+base_stats = {
+"atk": 95,
+"def": 80,
+"hp": 105,
+"spa": 40,
+"spd": 80,
+"spe": 90
+}
+catch_rate = 45
+base_exp = 172

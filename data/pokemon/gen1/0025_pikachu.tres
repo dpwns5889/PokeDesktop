@@ -1,0 +1,28 @@
+[gd_resource type="Resource" script_class="PokemonSpecies" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/pokemon_species.gd" id="1_p7op7"]
+
+[resource]
+script = ExtResource("1_p7op7")
+dex_id = 25
+generation = 1
+name_ko = "피카츄"
+name_en = "pikachu"
+types = Array[StringName]([&"electric"])
+base_stats = {
+"atk": 55,
+"def": 40,
+"hp": 35,
+"spa": 50,
+"spd": 50,
+"spe": 90
+}
+catch_rate = 190
+base_exp = 112
+gender_ratio = 0.5
+has_gender_sprites = true
+evolutions = Array[Dictionary]([{
+"item": &"thunder_stone",
+"method": &"item",
+"to": 26
+}])

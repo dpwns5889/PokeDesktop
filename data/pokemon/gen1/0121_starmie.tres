@@ -1,0 +1,23 @@
+[gd_resource type="Resource" script_class="PokemonSpecies" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/pokemon_species.gd" id="1_0vt03"]
+
+[resource]
+script = ExtResource("1_0vt03")
+dex_id = 121
+generation = 1
+name_ko = "아쿠스타"
+name_en = "starmie"
+types = Array[StringName]([&"water", &"psychic"])
+base_stats = {
+"atk": 75,
+"def": 85,
+"hp": 60,
+"spa": 100,
+"spd": 85,
+"spe": 115
+}
+catch_rate = 60
+base_exp = 182
+gender_ratio = -1.0
+evo_stage = 1

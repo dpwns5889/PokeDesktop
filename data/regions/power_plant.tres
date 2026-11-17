@@ -1,0 +1,110 @@
+[gd_resource type="Resource" script_class="RegionData" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/encounter_entry.gd" id="1_5r04t"]
+[ext_resource type="Script" path="res://scripts/data/region_data.gd" id="2_6o0fc"]
+
+[sub_resource type="Resource" id="Resource_d81gi"]
+script = ExtResource("1_5r04t")
+dex_id = 81
+weight = 18
+min_level = 18
+max_level = 24
+
+[sub_resource type="Resource" id="Resource_050cc"]
+script = ExtResource("1_5r04t")
+dex_id = 100
+weight = 18
+min_level = 18
+max_level = 24
+
+[sub_resource type="Resource" id="Resource_rdkii"]
+script = ExtResource("1_5r04t")
+dex_id = 25
+min_level = 18
+max_level = 24
+
+[sub_resource type="Resource" id="Resource_nohg3"]
+script = ExtResource("1_5r04t")
+dex_id = 88
+weight = 12
+min_level = 18
+max_level = 24
+
+[sub_resource type="Resource" id="Resource_bkpsk"]
+script = ExtResource("1_5r04t")
+dex_id = 109
+weight = 12
+min_level = 18
+max_level = 24
+
+[sub_resource type="Resource" id="Resource_mnp3k"]
+script = ExtResource("1_5r04t")
+dex_id = 132
+weight = 6
+min_level = 20
+max_level = 26
+
+[sub_resource type="Resource" id="Resource_cc655"]
+script = ExtResource("1_5r04t")
+dex_id = 137
+weight = 5
+min_level = 20
+max_level = 26
+min_player_level = 18
+
+[sub_resource type="Resource" id="Resource_gyir3"]
+script = ExtResource("1_5r04t")
+dex_id = 125
+weight = 5
+min_level = 22
+max_level = 28
+min_player_level = 18
+
+[sub_resource type="Resource" id="Resource_ne48t"]
+script = ExtResource("1_5r04t")
+dex_id = 82
+weight = 5
+min_level = 26
+max_level = 30
+
+[sub_resource type="Resource" id="Resource_1nmon"]
+script = ExtResource("1_5r04t")
+dex_id = 101
+weight = 5
+min_level = 26
+max_level = 30
+
+[sub_resource type="Resource" id="Resource_jcrxv"]
+script = ExtResource("1_5r04t")
+dex_id = 89
+weight = 4
+min_level = 26
+max_level = 30
+
+[sub_resource type="Resource" id="Resource_rddj8"]
+script = ExtResource("1_5r04t")
+dex_id = 110
+weight = 4
+min_level = 26
+max_level = 30
+
+[resource]
+script = ExtResource("2_6o0fc")
+id = &"power_plant"
+name_ko = "발전소"
+order = 5
+main_types = Array[StringName]([&"electric"])
+sky_color = Color(0.7882353, 0.77254903, 0.5411765, 1)
+ground_color = Color(0.47843137, 0.47843137, 0.47843137, 1)
+encounters = Array[ExtResource("1_5r04t")]([SubResource("Resource_d81gi"), SubResource("Resource_050cc"), SubResource("Resource_rdkii"), SubResource("Resource_nohg3"), SubResource("Resource_bkpsk"), SubResource("Resource_mnp3k"), SubResource("Resource_cc655"), SubResource("Resource_gyir3"), SubResource("Resource_ne48t"), SubResource("Resource_1nmon"), SubResource("Resource_jcrxv"), SubResource("Resource_rddj8")])
+level_cap = 30
+encounter_interval = Vector2(120, 300)
+battle_ground = 5
+unlock_conditions = Array[Dictionary]([{
+"type": "player_level",
+"value": 14
+}, {
+"type": "type_caught_count",
+"type_id": "electric",
+"value": 2
+}])

@@ -1,0 +1,28 @@
+[gd_resource type="Resource" script_class="PokemonSpecies" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/pokemon_species.gd" id="1_2coov"]
+
+[resource]
+script = ExtResource("1_2coov")
+dex_id = 11
+generation = 1
+name_ko = "단데기"
+name_en = "metapod"
+types = Array[StringName]([&"bug"])
+base_stats = {
+"atk": 20,
+"def": 55,
+"hp": 50,
+"spa": 25,
+"spd": 25,
+"spe": 30
+}
+catch_rate = 120
+base_exp = 72
+gender_ratio = 0.5
+evo_stage = 1
+evolutions = Array[Dictionary]([{
+"method": &"level",
+"to": 12,
+"value": 10
+}])

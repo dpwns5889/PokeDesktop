@@ -1,0 +1,27 @@
+[gd_resource type="Resource" script_class="PokemonSpecies" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/pokemon_species.gd" id="1_5d8ld"]
+
+[resource]
+script = ExtResource("1_5d8ld")
+dex_id = 77
+generation = 1
+name_ko = "포니타"
+name_en = "ponyta"
+types = Array[StringName]([&"fire"])
+base_stats = {
+"atk": 85,
+"def": 55,
+"hp": 50,
+"spa": 65,
+"spd": 65,
+"spe": 90
+}
+catch_rate = 190
+base_exp = 82
+gender_ratio = 0.5
+evolutions = Array[Dictionary]([{
+"method": &"level",
+"to": 78,
+"value": 40
+}])

@@ -1,0 +1,27 @@
+[gd_resource type="Resource" script_class="PokemonSpecies" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/pokemon_species.gd" id="1_8pwhq"]
+
+[resource]
+script = ExtResource("1_8pwhq")
+dex_id = 98
+generation = 1
+name_ko = "크랩"
+name_en = "krabby"
+types = Array[StringName]([&"water"])
+base_stats = {
+"atk": 105,
+"def": 90,
+"hp": 30,
+"spa": 25,
+"spd": 25,
+"spe": 50
+}
+catch_rate = 225
+base_exp = 65
+gender_ratio = 0.5
+evolutions = Array[Dictionary]([{
+"method": &"level",
+"to": 99,
+"value": 28
+}])

@@ -1,0 +1,21 @@
+[gd_resource type="Resource" script_class="PokemonSpecies" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/pokemon_species.gd" id="1_q4tf3"]
+
+[resource]
+script = ExtResource("1_q4tf3")
+dex_id = 124
+generation = 1
+name_ko = "루주라"
+name_en = "jynx"
+types = Array[StringName]([&"ice", &"psychic"])
+base_stats = {
+"atk": 50,
+"def": 35,
+"hp": 65,
+"spa": 115,
+"spd": 95,
+"spe": 95
+}
+catch_rate = 45
+base_exp = 159

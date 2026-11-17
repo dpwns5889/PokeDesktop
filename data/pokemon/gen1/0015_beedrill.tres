@@ -1,0 +1,23 @@
+[gd_resource type="Resource" script_class="PokemonSpecies" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/pokemon_species.gd" id="1_3uy4x"]
+
+[resource]
+script = ExtResource("1_3uy4x")
+dex_id = 15
+generation = 1
+name_ko = "독침붕"
+name_en = "beedrill"
+types = Array[StringName]([&"bug", &"poison"])
+base_stats = {
+"atk": 90,
+"def": 40,
+"hp": 65,
+"spa": 45,
+"spd": 80,
+"spe": 75
+}
+catch_rate = 45
+base_exp = 178
+gender_ratio = 0.5
+evo_stage = 2

@@ -1,0 +1,23 @@
+{
+	"sheet": "res://Assets/Sprites/DS _ DSi - Pokemon HeartGold _ SoulSilver - Miscellaneous - Items.png",
+	"background": [255, 255, 255],
+	"icon_size": 24,
+	"_comment": "region = [x, y, w, h] (아이콘 외곽선을 포함하도록 1px 여유). recolor = 다른 아이콘의 색상(hue)을 돌려 만든 아이콘",
+	"icons": {
+		"poke_ball": { "region": [80, 333, 20, 20] },
+		"great_ball": { "region": [99, 333, 20, 20] },
+		"ultra_ball": { "region": [118, 333, 20, 20] },
+		"rare_candy": { "region": [188, 300, 23, 23] },
+		"fire_stone": { "region": [212, 300, 22, 23] },
+		"water_stone": { "region": [233, 301, 22, 22] },
+		"leaf_stone": { "region": [255, 301, 21, 23] },
+		"thunder_stone": { "region": [276, 302, 22, 22] },
+		"moon_stone": { "region": [298, 303, 23, 21] },
+		"nugget": { "sheet": "res://Assets/Sprites/Nuggets.png", "region": [33, 33, 14, 14] },
+		"incense": { "region": [500, 102, 22, 21] },
+		"shiny_incense": { "region": [593, 102, 22, 21] },
+		"big_nugget": { "sheet": "res://Assets/Sprites/Nuggets.png", "region": [111, 31, 18, 18] },
+		"exp_candy_s": { "recolor": "rare_candy", "hue_shift": 0.42 },
+		"exp_candy_m": { "recolor": "rare_candy", "hue_shift": 0.55 }
+	}
+}

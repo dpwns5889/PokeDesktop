@@ -1,0 +1,27 @@
+[gd_resource type="Resource" script_class="PokemonSpecies" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/pokemon_species.gd" id="1_hge4a"]
+
+[resource]
+script = ExtResource("1_hge4a")
+dex_id = 4
+generation = 1
+name_ko = "파이리"
+name_en = "charmander"
+types = Array[StringName]([&"fire"])
+base_stats = {
+"atk": 52,
+"def": 43,
+"hp": 39,
+"spa": 60,
+"spd": 50,
+"spe": 65
+}
+catch_rate = 45
+base_exp = 62
+gender_ratio = 0.875
+evolutions = Array[Dictionary]([{
+"method": &"level",
+"to": 5,
+"value": 16
+}])

@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="TraitData" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/trait_data.gd" id="1_odhq4"]
+
+[resource]
+script = ExtResource("1_odhq4")
+id = &"synchronize"
+name_ko = "싱크로"
+description = "[전투] 에스퍼 타입 포켓몬이 더 잘 나온다."
+trigger = &"battle"
+effects = Array[Dictionary]([{
+"kind": "encounter_type_weight",
+"types": ["psychic"],
+"value": 1.5
+}])

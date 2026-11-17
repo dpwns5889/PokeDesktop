@@ -1,0 +1,28 @@
+[gd_resource type="Resource" script_class="PokemonSpecies" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/pokemon_species.gd" id="1_41u61"]
+
+[resource]
+script = ExtResource("1_41u61")
+dex_id = 70
+generation = 1
+name_ko = "우츠동"
+name_en = "weepinbell"
+types = Array[StringName]([&"grass", &"poison"])
+base_stats = {
+"atk": 90,
+"def": 50,
+"hp": 65,
+"spa": 85,
+"spd": 45,
+"spe": 55
+}
+catch_rate = 120
+base_exp = 137
+gender_ratio = 0.5
+evo_stage = 1
+evolutions = Array[Dictionary]([{
+"item": &"leaf_stone",
+"method": &"item",
+"to": 71
+}])

@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="TraitData" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/trait_data.gd" id="1_uh76c"]
+
+[resource]
+script = ExtResource("1_uh76c")
+id = &"truant"
+name_ko = "게으름"
+description = "[원정] 원정 시간 ×1.1."
+tier = &"negative"
+effects = Array[Dictionary]([{
+"kind": "duration_mult",
+"scope": "party",
+"value": 1.1
+}])
+exclusive_with = Array[StringName]([&"quick_feet", &"speed_boost"])

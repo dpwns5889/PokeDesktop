@@ -1,0 +1,27 @@
+[gd_resource type="Resource" script_class="PokemonSpecies" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/pokemon_species.gd" id="1_0pgwm"]
+
+[resource]
+script = ExtResource("1_0pgwm")
+dex_id = 120
+generation = 1
+name_ko = "별가사리"
+name_en = "staryu"
+types = Array[StringName]([&"water"])
+base_stats = {
+"atk": 45,
+"def": 55,
+"hp": 30,
+"spa": 70,
+"spd": 55,
+"spe": 85
+}
+catch_rate = 225
+base_exp = 68
+gender_ratio = -1.0
+evolutions = Array[Dictionary]([{
+"item": &"water_stone",
+"method": &"item",
+"to": 121
+}])

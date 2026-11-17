@@ -1,0 +1,27 @@
+[gd_resource type="Resource" script_class="PokemonSpecies" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/pokemon_species.gd" id="1_cv4xw"]
+
+[resource]
+script = ExtResource("1_cv4xw")
+dex_id = 147
+generation = 1
+name_ko = "미뇽"
+name_en = "dratini"
+types = Array[StringName]([&"dragon"])
+base_stats = {
+"atk": 64,
+"def": 45,
+"hp": 41,
+"spa": 50,
+"spd": 50,
+"spe": 50
+}
+catch_rate = 45
+base_exp = 60
+gender_ratio = 0.5
+evolutions = Array[Dictionary]([{
+"method": &"level",
+"to": 148,
+"value": 30
+}])

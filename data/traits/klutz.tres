@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="TraitData" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/trait_data.gd" id="1_ihsaf"]
+
+[resource]
+script = ExtResource("1_ihsaf")
+id = &"klutz"
+name_ko = "서투름"
+description = "[원정] 원정 보상(재화·아이템 수량) ×0.9."
+tier = &"negative"
+effects = Array[Dictionary]([{
+"kind": "reward_mult",
+"scope": "party",
+"value": 0.9
+}])
+exclusive_with = Array[StringName]([&"super_luck"])

@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="TraitData" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/trait_data.gd" id="1_8hwbr"]
+
+[resource]
+script = ExtResource("1_8hwbr")
+id = &"speed_boost"
+name_ko = "가속"
+description = "[원정] 원정 시간 ×0.85."
+tier = &"rare"
+effects = Array[Dictionary]([{
+"kind": "duration_mult",
+"scope": "party",
+"value": 0.85
+}])
+exclusive_with = Array[StringName]([&"truant", &"defeatist"])

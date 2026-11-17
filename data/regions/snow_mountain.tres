@@ -1,0 +1,111 @@
+[gd_resource type="Resource" script_class="RegionData" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/encounter_entry.gd" id="1_ybsqf"]
+[ext_resource type="Script" path="res://scripts/data/region_data.gd" id="2_2vmwp"]
+
+[sub_resource type="Resource" id="Resource_8mqbm"]
+script = ExtResource("1_ybsqf")
+dex_id = 86
+weight = 16
+min_level = 30
+max_level = 37
+
+[sub_resource type="Resource" id="Resource_q7v5q"]
+script = ExtResource("1_ybsqf")
+dex_id = 124
+weight = 12
+min_level = 30
+max_level = 37
+
+[sub_resource type="Resource" id="Resource_3pv13"]
+script = ExtResource("1_ybsqf")
+dex_id = 90
+weight = 14
+min_level = 30
+max_level = 37
+
+[sub_resource type="Resource" id="Resource_r5k2q"]
+script = ExtResource("1_ybsqf")
+dex_id = 87
+weight = 6
+min_level = 36
+max_level = 42
+
+[sub_resource type="Resource" id="Resource_60nmy"]
+script = ExtResource("1_ybsqf")
+dex_id = 91
+weight = 7
+min_level = 36
+max_level = 42
+
+[sub_resource type="Resource" id="Resource_pdkno"]
+script = ExtResource("1_ybsqf")
+dex_id = 131
+weight = 7
+min_level = 32
+max_level = 40
+
+[sub_resource type="Resource" id="Resource_nwdma"]
+script = ExtResource("1_ybsqf")
+dex_id = 117
+weight = 6
+min_level = 32
+max_level = 38
+
+[sub_resource type="Resource" id="Resource_pi6in"]
+script = ExtResource("1_ybsqf")
+dex_id = 119
+weight = 6
+min_level = 33
+max_level = 38
+
+[sub_resource type="Resource" id="Resource_6a022"]
+script = ExtResource("1_ybsqf")
+dex_id = 121
+weight = 7
+min_level = 36
+max_level = 42
+
+[sub_resource type="Resource" id="Resource_opssn"]
+script = ExtResource("1_ybsqf")
+dex_id = 115
+weight = 7
+min_level = 32
+max_level = 40
+min_player_level = 28
+
+[sub_resource type="Resource" id="Resource_5ga2r"]
+script = ExtResource("1_ybsqf")
+dex_id = 143
+weight = 6
+min_level = 34
+max_level = 42
+min_player_level = 30
+
+[sub_resource type="Resource" id="Resource_o87vg"]
+script = ExtResource("1_ybsqf")
+dex_id = 80
+weight = 6
+min_level = 37
+max_level = 42
+
+[resource]
+script = ExtResource("2_2vmwp")
+id = &"snow_mountain"
+name_ko = "설산"
+order = 8
+main_types = Array[StringName]([&"ice"])
+sky_color = Color(0.8117647, 0.8901961, 0.9490196, 1)
+ground_color = Color(0.9490196, 0.9647059, 0.98039216, 1)
+encounters = Array[ExtResource("1_ybsqf")]([SubResource("Resource_8mqbm"), SubResource("Resource_q7v5q"), SubResource("Resource_3pv13"), SubResource("Resource_r5k2q"), SubResource("Resource_60nmy"), SubResource("Resource_pdkno"), SubResource("Resource_nwdma"), SubResource("Resource_pi6in"), SubResource("Resource_6a022"), SubResource("Resource_opssn"), SubResource("Resource_5ga2r"), SubResource("Resource_o87vg")])
+level_cap = 45
+encounter_interval = Vector2(210, 480)
+battle_ground = 7
+unlock_conditions = Array[Dictionary]([{
+"type": "player_level",
+"value": 27
+}, {
+"type": "type_caught_count",
+"type_id": "water",
+"value": 10
+}])
