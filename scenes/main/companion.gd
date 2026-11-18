@@ -9,7 +9,7 @@ extends Control
 ## - 인카운터: 풀숲 흔들림 → 포켓몬 등장 → 클릭하면 전투 → 결과 (M3)
 ## - 풀숲 위 말풍선(v0.33): 대기 중 ". .. ..." 반복, 인카운터가 나면 "!" 가 2배로 확 커지며 나타남,
 ##   타이머가 멈추면(선택한 볼이 없음) "?" (v0.34)
-## - 장면 왼쪽 아래: 엔트리 포켓몬 오버월드 앞모습(걷기 애니메이션, 누르면 파티 패널) / 오른쪽 위: 엔트리로 받는 버프 (v0.27, 기획서 6.1)
+## - 장면 오른쪽 아래: 엔트리 포켓몬 오버월드 앞모습(걷기 애니메이션, 누르면 파티 패널, v0.59) / 오른쪽 위: 쓰고 있는 아이템 효과 (v0.62, 기획서 6.1)
 ## - 엔트리 포켓몬이 장면 안을 걸어다닌다 (M12, v0.45, OverworldWalker). 인카운터·전투 중에는 멈춰서 발판을 바라본다.
 ## 상태는 EncounterManager가 갖고, 이 화면은 EventBus 시그널을 받아 표시만 바꾼다.
 
@@ -958,7 +958,7 @@ func _layout_entry_strip(animate: bool) -> void:
 func _refresh_buffs(force: bool = false) -> void:
 	if _buff_list == null:
 		return
-	var buffs := EncounterManager.entry_buffs()
+	var buffs := EncounterManager.active_buffs()
 	var key := "\n".join(PackedStringArray(buffs.map(func(b) -> String: return b.text)))
 	if not force and key == _buff_key:
 		return

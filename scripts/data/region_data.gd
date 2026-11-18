@@ -18,6 +18,8 @@ extends Resource
 @export var level_cap: int = 100
 ## 다음 인카운터까지 [최소, 최대] 초. (0, 0)이면 기본값 (기획서 4.2, v0.24)
 @export var encounter_interval: Vector2 = Vector2.ZERO
+## 과녁 한 번에 차는 게이지 배율 (v0.63). 후반 지역일수록 작아 상위 볼·엔트리가 필요하게 (1.0 = 기본)
+@export var capture_fill: float = 1.0
 ## 전투 바닥 번호 (Assets/Generated/ui/ground.png 의 칸, tools/import_battle_ground.gd 참고) (v0.35)
 ## 0 풀밭 1 물 2 모래 3 흙길 4 얼음 5 진흙 6 바위 7 눈 8 어두운 바위
 @export var battle_ground: int = 0

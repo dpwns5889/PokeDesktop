@@ -119,3 +119,60 @@ func test_capture_sounds_loaded_and_pitch() -> void:
 	AudioManager.play(&"ball_wobble")
 	assert_float(AudioManager._players[&"ball_wobble"].pitch_scale).is_equal(1.0)
 	AudioManager._players[&"ball_wobble"].stop()
+
+
+## v0.62: 새 효과음 파일 연결 — 이름에 맞는 파일, 떨어짐 소리는 BGM 을 멈추지 않음
+func test_v062_sound_files() -> void:
+	assert_str(AudioManager.SOUNDS[&"buy_item"]).is_equal("ItemBuy.ogg")
+	assert_str(AudioManager.SOUNDS[&"use_item"]).is_equal("Use item.ogg")
+	assert_str(AudioManager.SOUNDS[&"pokemon_run"]).is_equal("Battle flee.ogg")
+	assert_str(AudioManager.SOUNDS[&"ball_throw"]).is_equal("Pokeballthrow.ogg")
+	assert_str(AudioManager.SOUNDS[&"ball_drop"]).is_equal("Pokeball drop.ogg")
+	assert_str(AudioManager.SOUNDS[&"ball_wobble"]).is_equal("PokemonBallShake.mp3")
+	assert_str(AudioManager.SOUNDS[&"ball_open"]).is_equal("PokemonBallOpen.mp3")
+	assert_bool(AudioManager.NO_BGM_PAUSE.has(&"ball_open")).is_true()
+	assert_str(AudioManager.SOUNDS[&"ball_catch"]).is_equal("Pokeballcatch click.ogg")
+	assert_bool(AudioManager.NO_BGM_PAUSE.has(&"ball_drop")).is_true()
+
+
+## v0.62: 아이템을 쓰면 use_item 소리 (향로·특이한 향로·행복의 알·경험사탕)
+func test_using_items_plays_use_item() -> void:
+	var p: AudioStreamPlayer = AudioManager._players[&"use_item"]
+	var now := 2_000_000_000
+	for id in [&"incense", &"shiny_incense", &"lucky_egg"]:
+		PlayerState.add_item(id, 1)
+	PlayerState.add_item(&"exp_candy_s", 1)
+	var inst := PlayerState.add_caught({&"dex_id": 16, &"level": 5, &"gender": &"male", &"region": &"grassland"})
+	var uses := [
+		func() -> void: PlayerState.use_incense(&"fire", now),
+		func() -> void: PlayerState.use_shiny_incense(now),
+		func() -> void: PlayerState.use_lucky_egg(now),
+		func() -> void: ProfessorManager.use_candy(inst.uid, &"exp_candy_s"),
+	]
+	for use in uses:
+		p.stop()
+		use.call()
+		assert_bool(p.playing).is_true()
+	p.stop()
+	# 실패(아이템 없음)면 소리 없음
+	PlayerState.use_lucky_egg(now)
+	assert_bool(p.playing).is_false()
+
+
+## v0.62: 경험사탕으로 레벨업하면 레벨업 소리 없이 아이템 사용 소리만
+func test_candy_levelup_plays_only_use_item() -> void:
+	var lv: AudioStreamPlayer = AudioManager._players[&"pokemon_levelup"]
+	var use: AudioStreamPlayer = AudioManager._players[&"use_item"]
+	lv.stop()
+	use.stop()
+	var inst := PlayerState.add_caught({&"dex_id": 16, &"level": 5, &"gender": &"male", &"region": &"grassland"})
+	PlayerState.add_item(&"exp_candy_m", 1)
+	var r := ProfessorManager.use_candy(inst.uid, &"exp_candy_m")
+	assert_int(r.levels).is_greater(0)
+	assert_bool(lv.playing).is_false()
+	assert_bool(use.playing).is_true()
+	use.stop()
+	# 원정 등 아이템이 아닌 레벨업은 그대로 레벨업 소리
+	PlayerState.add_pokemon_exp(inst, 10_000)
+	assert_bool(lv.playing).is_true()
+	lv.stop()

@@ -238,6 +238,7 @@ func use_incense(type_id: StringName, now: int) -> String:
 	remove_item(&"incense", 1)
 	active_items["incense"] = {"type": String(type_id), "end_at": start + dur}
 	changed.emit()
+	EventBus.item_used.emit(&"incense")
 	return ""
 
 
@@ -251,6 +252,7 @@ func use_shiny_incense(now: int) -> String:
 	remove_item(&"shiny_incense", 1)
 	active_items["shiny_incense"] = {"end_at": start + dur}
 	changed.emit()
+	EventBus.item_used.emit(&"shiny_incense")
 	return ""
 
 
@@ -295,6 +297,7 @@ func use_lucky_egg(now: int) -> String:
 	remove_item(&"lucky_egg", 1)
 	active_items["lucky_egg"] = {"end_at": start + dur}
 	changed.emit()
+	EventBus.item_used.emit(&"lucky_egg")
 	return ""
 
 

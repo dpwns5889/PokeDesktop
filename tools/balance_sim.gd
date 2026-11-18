@@ -146,6 +146,7 @@ func _encounter() -> void:
 	var item := GameData.get_item(ball)
 	var params := Formulas.capture_params(species.catch_rate, enc[&"level"], legendary, item.catch_modifier(),
 		EncounterManager.entry_bonus())
+	params[&"fill"] = float(params[&"fill"]) * EncounterManager.region_capture_fill()   # v0.63 지역 배율
 	stats.battles += 1
 	stats.diff_sum += difficulty
 	if _play_capture(params):

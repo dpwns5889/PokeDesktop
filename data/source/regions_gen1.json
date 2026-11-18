@@ -2,7 +2,7 @@
 	"_comment": "지역 정의 (기획서 4.4). tools/json_to_regions.gd 가 data/regions/*.tres 로 변환한다. encounters = [도감번호, 가중치, 최소Lv, 최대Lv, 필요 플레이어Lv(생략=1)]. 진화형은 가중치를 낮게. M10: 희귀(가중치 1~3) +2, 초원 구구·꼬렛 18. interval = 다음 인카운터까지 [최소, 최대] 초 (v0.24). battle_ground = 전투 바닥 번호(0 풀밭 1 물 2 모래 3 흙길 4 얼음 5 진흙 6 바위 7 눈 8 어두운 바위, v0.35).",
 	"regions": [
 		{
-			"id": "grassland", "name_ko": "초원", "order": 1, "main_types": ["normal", "bug", "flying"], "level_cap": 8, "sky": "#93bbec", "ground": "#87bf6b",
+			"id": "grassland", "capture_fill": 1.0, "name_ko": "초원", "order": 1, "main_types": ["normal", "bug", "flying"], "level_cap": 8, "sky": "#93bbec", "ground": "#87bf6b",
 			"interval": [30, 120], "battle_ground": 0,
 			"unlock": [],
 			"encounters": [
@@ -12,7 +12,7 @@
 			]
 		},
 		{
-			"id": "forest", "name_ko": "숲", "order": 2, "main_types": ["bug", "grass", "poison"], "level_cap": 12, "sky": "#8fc9a8", "ground": "#4f8f45",
+			"id": "forest", "capture_fill": 0.95, "name_ko": "숲", "order": 2, "main_types": ["bug", "grass", "poison"], "level_cap": 12, "sky": "#8fc9a8", "ground": "#4f8f45",
 			"interval": [45, 150], "battle_ground": 3,
 			"unlock": [{"type": "player_level", "value": 3}],
 			"encounters": [
@@ -23,7 +23,7 @@
 			]
 		},
 		{
-			"id": "waterside", "name_ko": "물가", "order": 3, "main_types": ["water"], "level_cap": 18, "sky": "#7fb6e6", "ground": "#d9c98f",
+			"id": "waterside", "capture_fill": 0.9, "name_ko": "물가", "order": 3, "main_types": ["water"], "level_cap": 18, "sky": "#7fb6e6", "ground": "#d9c98f",
 			"interval": [100, 200], "battle_ground": 1,
 			"unlock": [{"type": "player_level", "value": 6}, {"type": "dex_caught_count", "value": 10}],
 			"encounters": [
@@ -34,7 +34,7 @@
 			]
 		},
 		{
-			"id": "cave", "name_ko": "동굴", "order": 4, "main_types": ["rock", "ground"], "level_cap": 24, "sky": "#6b6f80", "ground": "#8a7458",
+			"id": "cave", "capture_fill": 0.85, "name_ko": "동굴", "order": 4, "main_types": ["rock", "ground"], "level_cap": 24, "sky": "#6b6f80", "ground": "#8a7458",
 			"interval": [150, 270], "battle_ground": 6,
 			"unlock": [{"type": "player_level", "value": 10}],
 			"encounters": [
@@ -45,7 +45,7 @@
 			]
 		},
 		{
-			"id": "power_plant", "name_ko": "발전소", "order": 5, "main_types": ["electric"], "level_cap": 30, "sky": "#c9c58a", "ground": "#7a7a7a",
+			"id": "power_plant", "capture_fill": 0.8, "name_ko": "발전소", "order": 5, "main_types": ["electric"], "level_cap": 30, "sky": "#c9c58a", "ground": "#7a7a7a",
 			"interval": [200, 340], "battle_ground": 5,
 			"unlock": [{"type": "player_level", "value": 14}, {"type": "type_caught_count", "type_id": "electric", "value": 2}],
 			"encounters": [
@@ -55,7 +55,7 @@
 			]
 		},
 		{
-			"id": "volcano", "name_ko": "화산", "order": 6, "main_types": ["fire"], "level_cap": 35, "sky": "#e0a07a", "ground": "#6b3b2e",
+			"id": "volcano", "capture_fill": 0.75, "name_ko": "화산", "order": 6, "main_types": ["fire"], "level_cap": 35, "sky": "#e0a07a", "ground": "#6b3b2e",
 			"interval": [240, 400], "battle_ground": 2,
 			"unlock": [{"type": "player_level", "value": 18}, {"type": "dex_caught_count", "value": 50}],
 			"encounters": [
@@ -65,7 +65,7 @@
 			]
 		},
 		{
-			"id": "ghost_tower", "name_ko": "유령탑", "order": 7, "main_types": ["ghost", "psychic"], "level_cap": 38, "sky": "#7e6a9e", "ground": "#4b4060",
+			"id": "ghost_tower", "capture_fill": 0.72, "name_ko": "유령탑", "order": 7, "main_types": ["ghost", "psychic"], "level_cap": 38, "sky": "#7e6a9e", "ground": "#4b4060",
 			"interval": [280, 460], "battle_ground": 8,
 			"unlock": [{"type": "player_level", "value": 22}],
 			"encounters": [
@@ -75,7 +75,7 @@
 			]
 		},
 		{
-			"id": "snow_mountain", "name_ko": "설산", "order": 8, "main_types": ["ice"], "level_cap": 45, "sky": "#cfe3f2", "ground": "#f2f6fa",
+			"id": "snow_mountain", "capture_fill": 0.68, "name_ko": "설산", "order": 8, "main_types": ["ice"], "level_cap": 45, "sky": "#cfe3f2", "ground": "#f2f6fa",
 			"interval": [320, 520], "battle_ground": 7,
 			"unlock": [{"type": "player_level", "value": 27}, {"type": "type_caught_count", "type_id": "water", "value": 10}],
 			"encounters": [
@@ -85,7 +85,7 @@
 			]
 		},
 		{
-			"id": "deep_cave", "name_ko": "깊은 동굴", "order": 9, "main_types": ["dragon", "rock"], "level_cap": 60, "sky": "#3b3f55", "ground": "#57505a",
+			"id": "deep_cave", "capture_fill": 0.65, "name_ko": "깊은 동굴", "order": 9, "main_types": ["dragon", "rock"], "level_cap": 60, "sky": "#3b3f55", "ground": "#57505a",
 			"interval": [360, 580], "battle_ground": 4,
 			"unlock": [{"type": "player_level", "value": 32}, {"type": "dex_caught_count", "value": 100}],
 			"encounters": [

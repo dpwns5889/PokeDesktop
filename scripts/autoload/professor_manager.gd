@@ -119,6 +119,8 @@ func use_candy(uid: String, item_id: StringName, count: int = 1) -> Dictionary:
 		PlayerState.remove_item(item_id, 1)
 		levels += PlayerState.add_pokemon_exp(p, per)
 		used += 1
+	if used > 0:
+		EventBus.item_used.emit(item_id)   # 효과음 (v0.62)
 	return {"ok": true, "reason": "", "used": used, "levels": levels}
 
 

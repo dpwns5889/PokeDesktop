@@ -99,6 +99,7 @@ ground_color = Color(0.47843137, 0.47843137, 0.47843137, 1)
 encounters = Array[ExtResource("1_5r04t")]([SubResource("Resource_d81gi"), SubResource("Resource_050cc"), SubResource("Resource_rdkii"), SubResource("Resource_nohg3"), SubResource("Resource_bkpsk"), SubResource("Resource_mnp3k"), SubResource("Resource_cc655"), SubResource("Resource_gyir3"), SubResource("Resource_ne48t"), SubResource("Resource_1nmon"), SubResource("Resource_jcrxv"), SubResource("Resource_rddj8")])
 level_cap = 30
 encounter_interval = Vector2(200, 340)
+capture_fill = 0.8
 battle_ground = 5
 unlock_conditions = Array[Dictionary]([{
 "type": "player_level",

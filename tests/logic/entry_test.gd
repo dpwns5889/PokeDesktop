@@ -116,10 +116,16 @@ func test_battle_bonus_rules() -> void:
 
 func test_encounter_manager_uses_entries() -> void:
 	assert_float(EncounterManager.entry_bonus()[&"attack"]).is_equal(0.0)
-	assert_array(EncounterManager.entry_buffs()).is_empty()
 	for i in 3:
 		PlayerState.add_entry(_add(18, 40))
 	assert_float(EncounterManager.entry_bonus()[&"attack"]).is_greater(0.0)
-	var buffs := EncounterManager.entry_buffs()
-	assert_int(buffs.size()).is_greater(0)
-	assert_str(buffs[0].text).contains("%")
+	# v0.62: 엔트리 능력치 보너스는 버프 목록에 나오지 않는다
+	assert_array(EncounterManager.active_buffs()).is_empty()
+	# 엔트리의 전투 특성(픽업 등)은 나온다
+	var picker := _add(25, 20)
+	PlayerState.find_pokemon(picker).traits = [&"pickup"]
+	PlayerState.remove_entry(PlayerState.entries[0])
+	PlayerState.add_entry(picker)
+	var texts := EncounterManager.active_buffs().map(func(b: Dictionary) -> String: return b.text)
+	assert_array(texts).contains(["픽업"])
+	assert_bool(texts.any(func(t: String) -> bool: return t.contains("%") and t.begins_with("게이지 +"))).is_false()

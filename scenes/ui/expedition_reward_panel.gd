@@ -9,9 +9,10 @@ const FAIL := Color("ff8080")
 const LEVEL_COLOR := Color("9be37a")
 ## 아이템·포켓몬 칸 크기와 그림 크기 (기준 해상도)
 const TILE := Vector2(36, 36)
-const TILE_ICON := 22
+const TILE_ICON := 24   # 아이콘 파일 크기 그대로 (1:1, v0.62)
 ## 아이템·포켓몬 영역 좌우 여백
 const SIDE_PAD := 10
+const COIN_ICON := "res://Assets/Generated/icons/coin.png"
 
 var _result: Label
 var _item_tiles: HFlowContainer
@@ -106,10 +107,12 @@ func show_result(r: Dictionary) -> void:
 	open_panel()
 
 
-## 아이템 칸 목록: {icon: Texture2D 또는 null(돈 = 동전 그림), amount: 칸 아래 글자, tip: 이름}
+## 아이템 칸 목록: {icon: Texture2D, coin: 그림이 없을 때 직접 그린 동전, amount: 칸 아래 글자, tip: 이름}
+## 돈 그림 = Assets/Generated/icons/coin.png (v0.62, tools/import_icons.gd 가 Assets/Sprites/Coin.png 에서 만든다)
 static func item_tiles(r: Dictionary) -> Array[Dictionary]:
-	var out: Array[Dictionary] = [{"icon": null, "coin": true, "amount": ShopManager.format_money(r.currency).trim_suffix("원"),
-		"tip": ShopManager.format_money(r.currency)}]
+	var coin_tex: Texture2D = load(COIN_ICON) if ResourceLoader.exists(COIN_ICON) else null
+	var out: Array[Dictionary] = [{"icon": coin_tex, "coin": coin_tex == null,
+		"amount": ShopManager.format_money(r.currency).trim_suffix("원"), "tip": ShopManager.format_money(r.currency)}]
 	for id in r.items:
 		var item := GameData.get_item(id)
 		var item_name := item.name_ko if item else String(id)
@@ -180,7 +183,7 @@ func _clear(node: Node) -> void:
 		c.queue_free()
 
 
-## 돈 칸 그림: 픽셀 동전 (돈 아이콘 그림이 없어 직접 그림)
+## 돈 칸 대체 그림: coin.png 가 없을 때(스프라이트 없는 저장소 등) 직접 그리는 픽셀 동전
 class Coin extends Control:
 	func _draw() -> void:
 		var c := size / 2.0

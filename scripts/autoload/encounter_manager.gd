@@ -13,8 +13,6 @@ enum State { WAITING, PAUSED, PREVIEW, APPEARED, BATTLE, RESULT }
 
 const FAST_INTERVAL_SEC := 12.0
 const FAST_JITTER_SEC := 4.0
-## 버프 표시 이름: [묶음, 이름, 부호]
-const BUFF_NAMES := [[&"attack", "게이지", "+"], [&"speed", "과녁", "+"], [&"defense", "감점", "-"], [&"hp", "시간", "+"]]
 
 var state: State = State.WAITING
 ## 현재 인카운터 {dex_id, level, gender, shiny, region}. 없으면 빈 Dictionary.
@@ -122,7 +120,14 @@ func begin_battle() -> Dictionary:
 		species.is_legendary or species.is_mythical, _ball_modifier(ball),
 		entry_bonus())
 	params[&"fill"] = float(params[&"fill"]) * float(entry_traits().fill_mult)   # 긴장감 (4.6)
+	params[&"fill"] = float(params[&"fill"]) * region_capture_fill()   # 후반 지역일수록 덜 참 (v0.63)
 	return params
+
+
+## 지금 지역의 게이지 배율 (RegionData.capture_fill, v0.63). 지역이 없으면 1.0
+func region_capture_fill() -> float:
+	var region := GameData.get_region(PlayerState.current_region)
+	return region.capture_fill if region else 1.0
 
 
 ## 엔트리의 전투 특성을 합친 효과 (BattleTraits.collect, 기획서 4.6)
@@ -139,15 +144,10 @@ func entry_bonus() -> Dictionary:
 
 
 ## 메인 화면 오른쪽 위에 보여 줄 버프 [{text, good}] (기획서 6.1).
-## 엔트리 능력치 보너스(0.5% 이상) + 엔트리의 전투 특성 (v0.28)
-func entry_buffs() -> Array[Dictionary]:
-	var out: Array[Dictionary] = []
-	var b := entry_bonus()
-	for pair in BUFF_NAMES:
-		var v := float(b.get(pair[0], 0.0))
-		if v >= 0.005:
-			out.append({"text": "%s %s%d%%" % [pair[1], pair[2], roundi(v * 100)], "good": true})
-	out.append_array(BattleTraits.buff_lines(entry_traits()))
+## v0.62: 엔트리 능력치 보너스("게이지 +9%" 등)는 빼고,
+## 엔트리의 전투 특성(픽업·꿀모으기·볼줍기·타입 출현 증가 등) + 쓰고 있는 아이템 효과(향로·특이한 향로·행복의 알, 남은 분)
+func active_buffs() -> Array[Dictionary]:
+	var out: Array[Dictionary] = BattleTraits.buff_lines(entry_traits())
 	# 향로 (v0.41): 남은 분
 	var now := int(_now())
 	var t := PlayerState.incense_type(now)

@@ -98,6 +98,7 @@ func play(ball_id: StringName, from: Vector2, to: Vector2, rest_y: float, pokemo
 
 	# 2) 열리고 포켓몬이 하얗게 빛나며 볼 속으로
 	_ball.frame = OPEN_FRAME
+	AudioManager.play(&"ball_open")   # v0.62
 	if pokemon:
 		var base_scale := pokemon.scale
 		var absorb := create_tween().set_parallel()
@@ -114,8 +115,10 @@ func play(ball_id: StringName, from: Vector2, to: Vector2, rest_y: float, pokemo
 	_ball.frame = FRONT_FRAME
 	var drop := create_tween()
 	drop.tween_property(_ball, ^"position:y", rest_y, DROP_SEC).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
+	drop.tween_callback(AudioManager.play.bind(&"ball_drop"))   # 발판에 처음 닿는 순간 (v0.62)
 	drop.tween_property(_ball, ^"position:y", rest_y - BOUNCE_PX, DROP_SEC * 0.4).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
 	drop.tween_property(_ball, ^"position:y", rest_y, DROP_SEC * 0.4).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
+	drop.tween_callback(AudioManager.play.bind(&"ball_drop"))   # 튀었다가 다시 닿는 순간 (2번째)
 	await drop.finished
 
 	# 4) 3번 흔들림 (볼 아래를 축으로 좌우)

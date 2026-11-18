@@ -62,5 +62,5 @@ func test_saved_and_shown_as_buff() -> void:
 	PlayerState.reset()
 	PlayerState.load_save_dict(d)
 	assert_int(PlayerState.item_seconds_left("lucky_egg", now)).is_equal(15 * 60)
-	var texts := EncounterManager.entry_buffs().map(func(b: Dictionary) -> String: return b.text)
+	var texts := EncounterManager.active_buffs().map(func(b: Dictionary) -> String: return b.text)
 	assert_array(texts).contains(["행복의 알 15분"])

@@ -1,0 +1,19 @@
+[remap]
+
+importer="oggvorbisstr"
+type="AudioStreamOggVorbis"
+uid="uid://4yx44bdm0cs3"
+path="res://.godot/imported/Pokeball drop.ogg-0dbe148a726d5b8fbd347098644f0f97.oggvorbisstr"
+
+[deps]
+
+source_file="res://Assets/Audio/SFX/Pokeball drop.ogg"
+dest_files=["res://.godot/imported/Pokeball drop.ogg-0dbe148a726d5b8fbd347098644f0f97.oggvorbisstr"]
+
+[params]
+
+loop=false
+loop_offset=0
+bpm=0
+beat_count=0
+bar_beats=4

@@ -5,17 +5,20 @@ extends Node
 ##   button_click     Button.mp3              모든 UI 버튼을 누를 때, HUD 볼 바꾸기
 ##   encounter        Encounter.mp3           인카운터 알림 (풀숲이 흔들릴 때)
 ##   attack           Attack.mp3              전투 중 과녁을 맞혔을 때
-##   buy_item         BuyItem.mp3             상점에서 살 때
+##   buy_item         ItemBuy.ogg             상점에서 살 때 (v0.62 교체)
+##   use_item         Use item.ogg            아이템을 쓸 때: 향로·특이한 향로·행복의 알·경험사탕 (v0.62)
 ##   get_item         GetItem.mp3             아이템을 받을 때: 원정 보상, 박사에게 보내기 보상, 픽업
 ##   region_unlocked  NewRegionUnlocked.mp3   새 지역 해금
 ##   pokemon_evolved  PokemonEvolved.mp3      진화 완료
-##   pokemon_levelup  PokemonLevelup.mp3      포켓몬 레벨업 (경험사탕·원정), 플레이어 레벨업 (M11: 같은 소리)
+##   pokemon_levelup  PokemonLevelup.mp3      포켓몬 레벨업 (원정), 플레이어 레벨업 (M11: 같은 소리). 경험사탕으로 오르면 use_item 만 (v0.62)
 ##   pokemon_catch    PokemonCatch.mp3        포획 성공 (M11)
-##   pokemon_run      PokemonRun.mp3          야생 포켓몬이 도망침 (포획 실패, 90초 무반응) (M11)
+##   pokemon_run      Battle flee.ogg         야생 포켓몬이 도망침 (포획 실패, 90초 무반응) (M11, v0.62 교체)
 ##   shiny            ShinyPokemon.mp3        색이 다른 포켓몬 등장 (M11)
-##   ball_throw       PokemonBallThrow.wav    포획 연출: 볼을 던질 때 (v0.54)
-##   ball_wobble      PokemonBallWobble.wav   포획 연출: 볼이 흔들릴 때마다 (피치 0.9~1.1 무작위, v0.54)
-##   ball_catch       PokemonBallCatch.wav    포획 연출: 잡힌 순간 "착" (tools/make_catch_click.py 로 합성, v0.54)
+##   ball_throw       Pokeballthrow.ogg       포획 연출: 볼을 던질 때 (v0.54, v0.62 교체)
+##   ball_open        PokemonBallOpen.mp3     포획 연출: 볼이 열리며 포켓몬을 빨아들일 때 (v0.62)
+##   ball_drop        Pokeball drop.ogg       포획 연출: 볼이 발판에 닿을 때마다 (떨어질 때·튀고 다시 닿을 때 = 2번, v0.62)
+##   ball_wobble      PokemonBallShake.mp3    포획 연출: 볼이 흔들릴 때마다 (피치 0.9~1.1 무작위, v0.54, v0.62 소리 키운 파일로 교체)
+##   ball_catch       Pokeballcatch click.ogg 포획 연출: 잡힌 순간 "착" (v0.54, v0.62 교체)
 ## 인카운터 파일이 없으면 코드로 합성한 2음 차임을 대신 쓴다.
 ##
 ## 소리마다 플레이어가 따로 있어서 서로 다른 소리는 겹쳐 나고, 같은 소리는 처음부터 다시 난다.
@@ -32,26 +35,29 @@ const SOUNDS := {
 	&"button_click": "Button.mp3",
 	&"encounter": "Encounter.mp3",
 	&"attack": "Attack.mp3",
-	&"buy_item": "BuyItem.mp3",
+	&"buy_item": "ItemBuy.ogg",
+	&"use_item": "Use item.ogg",
 	&"get_item": "GetItem.mp3",
 	&"region_unlocked": "NewRegionUnlocked.mp3",
 	&"pokemon_evolved": "PokemonEvolved.mp3",
 	&"pokemon_levelup": "PokemonLevelup.mp3",
 	&"pokemon_catch": "PokemonCatch.mp3",
-	&"pokemon_run": "PokemonRun.mp3",
+	&"pokemon_run": "Battle flee.ogg",
 	&"shiny": "ShinyPokemon.mp3",
-	&"ball_throw": "PokemonBallThrow.wav",
-	&"ball_wobble": "PokemonBallWobble.wav",
-	&"ball_catch": "PokemonBallCatch.wav",
+	&"ball_throw": "Pokeballthrow.ogg",
+	&"ball_open": "PokemonBallOpen.mp3",
+	&"ball_drop": "Pokeball drop.ogg",
+	&"ball_wobble": "PokemonBallShake.mp3",
+	&"ball_catch": "Pokeballcatch click.ogg",
 }
 
 const BGM_DIR := "res://Assets/Audio/BGM/"
 const BGM_EXTS := ["ogg", "mp3", "wav"]
 const BGM_FADE_SEC := 3.0
 ## BGM 을 멈추지 않는 효과음
-## 포획 연출의 짧은 소리(던지기·흔들림·착)도 멈추지 않는다 — 4초 남짓한 연출 동안 BGM 이 뚝뚝 끊기지 않게 (v0.54).
+## 포획 연출의 짧은 소리(던지기·열림·떨어짐·흔들림·착)도 멈추지 않는다 — 4초 남짓한 연출 동안 BGM 이 뚝뚝 끊기지 않게 (v0.54).
 ## 연출 끝의 포획 효과음(pokemon_catch)은 그대로 BGM 을 멈춘다.
-const NO_BGM_PAUSE := [&"button_click", &"attack", &"ball_throw", &"ball_wobble", &"ball_catch"]
+const NO_BGM_PAUSE := [&"button_click", &"attack", &"ball_throw", &"ball_open", &"ball_drop", &"ball_wobble", &"ball_catch"]
 const SFX_BUS := &"SFX"
 const BGM_BUS := &"BGM"
 
@@ -98,6 +104,7 @@ func _ready() -> void:
 	# 이벤트 → 효과음
 	EventBus.items_received.connect(func(_items: Dictionary, source: StringName) -> void:
 		play(&"buy_item" if source == &"shop" else &"get_item"))
+	EventBus.item_used.connect(_on_item_used)   # v0.62
 	EventBus.region_unlocked.connect(func(_id: StringName) -> void: play(&"region_unlocked"))
 	EventBus.pokemon_evolved.connect(func(_u: String, _f: int, _t: int) -> void: play(&"pokemon_evolved"))
 	EventBus.pokemon_leveled_up.connect(func(_u: String, _l: int) -> void: play(&"pokemon_levelup"))
@@ -129,6 +136,15 @@ func play(id: StringName, pitch: float = 1.0) -> void:
 	p.play()
 	if not NO_BGM_PAUSE.has(id):
 		_set_bgm_paused(true)
+
+
+## 아이템 사용 소리 (v0.62). 경험사탕은 레벨을 올린 직후에 item_used 가 오므로,
+## 방금 시작된 레벨업 소리는 멈추고 사용 소리만 낸다 — 아이템으로 레벨업하면 레벨업 소리를 내지 않는다.
+func _on_item_used(_id: StringName) -> void:
+	var lv: AudioStreamPlayer = _players.get(&"pokemon_levelup")
+	if lv and lv.playing:
+		lv.stop()
+	play(&"use_item")
 
 
 ## 효과음이 나는 동안 BGM 일시정지 / 모두 끝나면 이어서 (v0.31)

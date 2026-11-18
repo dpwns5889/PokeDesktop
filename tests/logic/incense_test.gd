@@ -104,5 +104,5 @@ func test_buff_line_shows_minutes_left() -> void:
 	var now := int(Time.get_unix_time_from_system())
 	PlayerState.add_item(&"incense", 1)
 	PlayerState.use_incense(&"fire", now)
-	var texts := EncounterManager.entry_buffs().map(func(b): return b.text)
+	var texts := EncounterManager.active_buffs().map(func(b): return b.text)
 	assert_array(texts).contains(["불꽃 향로 30분"])

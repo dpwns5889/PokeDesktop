@@ -35,6 +35,8 @@ signal current_region_changed(region_id: StringName)
 signal currency_changed(new_amount: int)
 ## 아이템을 받음. items = {item_id: 개수}, source = &"shop" / &"expedition" / &"professor" — 효과음 등
 signal items_received(items: Dictionary, source: StringName)
+## 아이템을 씀 (향로·특이한 향로·행복의 알·경험사탕, v0.62) — 효과음
+signal item_used(item_id: StringName)
 ## 저장된 진행을 초기화함 (개발용) → 화면들은 전체를 다시 그린다
 signal game_reset
 

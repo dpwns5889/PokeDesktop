@@ -34,6 +34,8 @@ func test_popup_shows_item_and_pokemon_tiles_and_closes_on_ok() -> void:
 	var items := RewardPanel.item_tiles(_result({}, {}))
 	assert_int(items.size()).is_equal(2)
 	assert_str(items[0].amount).is_equal("1,200")
+	assert_object(items[0].icon).is_not_null()   # coin.png (v0.62)
+	assert_bool(items[0].coin).is_false()
 	assert_str(items[1].amount).is_equal("×3")
 	assert_object(items[1].icon).is_not_null()
 	assert_int(p._item_tiles.get_child_count()).is_equal(2)
