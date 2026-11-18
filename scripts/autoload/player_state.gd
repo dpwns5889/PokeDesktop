@@ -67,9 +67,13 @@ func exp_to_next() -> int:
 
 
 ## 경험치 추가. 레벨업하면 player_leveled_up 발생. 최대 레벨에서는 경험치가 쌓이지 않는다.
-func add_exp(amount: int) -> void:
+## 플레이어 경험치 얻기. 행복의 알(v0.61)을 쓰고 있으면 배율을 곱한다(반올림).
+func add_exp(amount: int, now: int = -1) -> void:
 	if level >= MAX_PLAYER_LEVEL or amount <= 0:
 		return
+	if now < 0:
+		now = int(Time.get_unix_time_from_system())
+	amount = roundi(amount * player_exp_multiplier(now))
 	experience += amount
 	while level < MAX_PLAYER_LEVEL and experience >= exp_to_next():
 		experience -= exp_to_next()
@@ -276,6 +280,30 @@ func shiny_multiplier(now: int) -> float:
 		return 1.0
 	var item := GameData.get_item(&"shiny_incense")
 	return float(item.params.get("shiny_mult", 4.0)) if item else 4.0
+
+
+# ---------------------------------------------------------------- 행복의 알 (기획서 4.11, v0.61)
+
+## 행복의 알 사용: 15분 동안 플레이어 경험치 ×1.5. 쓰고 있는 중이면 15분 연장(특이한 향로와 같은 방식).
+## 반환: "" = 성공, 아니면 이유
+func use_lucky_egg(now: int) -> String:
+	var item := GameData.get_item(&"lucky_egg")
+	if item == null or item_count(&"lucky_egg") <= 0:
+		return "행복의 알이 없습니다."
+	var dur := int(item.params.get("duration_min", 15)) * 60
+	var start := maxi(now, int(active_items.get("lucky_egg", {}).get("end_at", 0)))
+	remove_item(&"lucky_egg", 1)
+	active_items["lucky_egg"] = {"end_at": start + dur}
+	changed.emit()
+	return ""
+
+
+## 플레이어 경험치 배율 (행복의 알)
+func player_exp_multiplier(now: int) -> float:
+	if item_seconds_left("lucky_egg", now) <= 0:
+		return 1.0
+	var item := GameData.get_item(&"lucky_egg")
+	return float(item.params.get("player_exp_mult", 1.5)) if item else 1.5
 
 
 # ---------------------------------------------------------------- 엔트리 (기획서 4.13)
@@ -511,10 +539,10 @@ func load_save_dict(d: Dictionary) -> void:
 			x["mods"] = {}
 		expeditions.append(x)
 
-	# 향로: 형식이 맞는 것만 (끝난 것은 그대로 두어도 효과가 없다)
+	# 향로·행복의 알: 형식이 맞는 것만 (끝난 것은 그대로 두어도 효과가 없다)
 	var raw_active = d.get("active_items", {})
 	if raw_active is Dictionary:
-		for k in ["incense", "shiny_incense"]:
+		for k in ["incense", "shiny_incense", "lucky_egg"]:
 			var v = raw_active.get(k)
 			if v is Dictionary and v.has("end_at"):
 				active_items[k] = {"end_at": int(v.end_at), "type": String(v.get("type", ""))}

@@ -1,11 +1,12 @@
 extends OverlayPanel
 ## 설정 패널 (위 버튼 줄의 톱니바퀴). (기획서 6.3)
-## 창: 항상 위에 표시, 창 크기, 우하단으로 되돌리기 / 소리: 효과음 크기, 배경음 크기(M11), 인카운터 알림음
+## 창: 항상 위에 표시, 창 옮기기(v0.60), 창 크기, 우하단으로 되돌리기 / 소리: 효과음 크기, 배경음 크기(M11), 인카운터 알림음
 ## 개발용 기능은 메인 창 우클릭 메뉴(디버그 빌드만)에 있다.
 
 const SCALES := ["자동", "1배", "2배", "3배", "4배"]
 
 var _on_top: CheckButton
+var _move: CheckButton
 var _scale: OptionButton
 var _volume: HSlider
 var _volume_label: Label
@@ -47,6 +48,15 @@ func _build_content(box: VBoxContainer) -> void:
 		if not _loading:
 			WindowManager.set_scale(i))   # 0 = 자동, 1~4 = 배율
 	scale_row.add_child(_scale)
+
+	# 창 옮기기 (v0.60): 켜면 화면 빈 곳을 잡고 창을 끌 수 있다. 끄면 드래그 안 됨
+	_move = CheckButton.new()
+	_move.text = "창 옮기기 (켜면 화면을 잡고 끌기)"
+	_move.focus_mode = Control.FOCUS_NONE
+	_move.toggled.connect(func(on: bool) -> void:
+		if not _loading:
+			WindowManager.move_mode = on)
+	list.add_child(_move)
 
 	var reset := Button.new()
 	reset.text = "우하단으로 되돌리기"
@@ -107,6 +117,7 @@ func _build_content(box: VBoxContainer) -> void:
 func refresh() -> void:
 	_loading = true
 	_on_top.button_pressed = WindowManager.is_always_on_top()
+	_move.button_pressed = WindowManager.move_mode
 	_scale.select(clampi(int(Settings.get_value(&"window_scale")), 0, SCALES.size() - 1))
 	_volume.value = roundi(float(Settings.get_value(&"sfx_volume")) * 100.0)
 	_volume_label.text = "%d%%" % int(_volume.value)

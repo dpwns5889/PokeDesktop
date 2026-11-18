@@ -16,6 +16,7 @@
 		"nugget": { "sheet": "res://Assets/Sprites/Nuggets.png", "region": [33, 33, 14, 14] },
 		"incense": { "region": [500, 102, 22, 21] },
 		"shiny_incense": { "region": [593, 102, 22, 21] },
+		"lucky_egg": { "region": [531, 220, 17, 20] },
 		"big_nugget": { "sheet": "res://Assets/Sprites/Nuggets.png", "region": [111, 31, 18, 18] },
 		"exp_candy_s": { "recolor": "rare_candy", "hue_shift": 0.42 },
 		"exp_candy_m": { "recolor": "rare_candy", "hue_shift": 0.55 }

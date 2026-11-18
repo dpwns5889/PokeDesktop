@@ -33,7 +33,7 @@ const WIDTH := 320.0
 const BATTLE_COLUMN := Rect2(320, 0, 128, 200)
 ## 전투 칸 테두리 두께 (v0.47, 버튼 줄 색)
 const BATTLE_FRAME_PX := 2
-## 엔트리 상자 접기/펴기 화살표 탭 (v0.47): 상자 오른쪽에 붙은 작은 탭. 접으면 상자가 왼쪽 밖으로 들어간다.
+## 엔트리 상자 접기/펴기 화살표 탭 (v0.47, v0.59): 상자 왼쪽에 붙은 작은 탭. 접으면 상자가 왼쪽 UI 오른쪽 끝 밖으로 들어간다.
 const ENTRY_TAB_SIZE := Vector2(9, 34)
 const ENTRY_SLIDE_SEC := 0.18
 ## 지역 바닥 발판(예전 풀숲 자리, v0.37): 타원 중심 위치(기준 해상도). 포켓몬은 이 위에 나타난다.
@@ -54,8 +54,15 @@ const FLOATING_SPECIES := [12, 15, 18, 22, 41, 42, 49, 81, 82, 92, 93, 109, 110,
 const EMOTE_POS := Vector2(384, 105)
 ## 색이 다른 포켓몬 이름 색 (전투 칸 이름 줄, v0.46)
 const SHINY_NAME_COLOR := "#b07800"
-## 엔트리 아이콘 줄 영역 (기준 해상도, 장면 왼쪽 아래)
-const ENTRY_STRIP_RECT := Rect2(3, 145, 104, 34)
+## 엔트리 아이콘 줄: 장면 오른쪽 아래(v0.59, 이전 왼쪽 아래). 상자 오른쪽 끝 x, 위 y
+const ENTRY_STRIP_RIGHT := WIDTH - 3.0
+const ENTRY_STRIP_TOP := 145.0
+## 알림 문구(원정 귀환·지역 해금·레벨 업·전투 후 특성, v0.59): 장면 왼쪽 아래, 아래부터 쌓인다
+const NOTICE_LEFT := 6.0
+const NOTICE_BOTTOM := 179.0
+const NOTICE_HEIGHT := 68.0
+const NOTICE_MAX_LINES := 4
+const NOTICE_SEC := 10.0
 ## 엔트리는 오버월드 앞모습(32×32, 걷기 2프레임)으로 표시 (v0.28). 없으면 메뉴 아이콘.
 const ENTRY_ICON := 32
 const ENTRY_ANIM_SEC := 0.45
@@ -95,8 +102,14 @@ var _ground_plate: BattleGround
 var _capture: CaptureAnim
 ## 이번 전투에 쓴 볼 (battle_started)
 var _battle_ball: StringName = &"poke_ball"
-## 장면 왼쪽 아래 엔트리 아이콘 줄, 오른쪽 위 버프 상자 (v0.27)
+## 장면 오른쪽 아래 엔트리 아이콘 줄(v0.59), 오른쪽 위 버프 상자 (v0.27)
 var _entry_strip: PanelContainer
+## 엔트리 상자·탭을 왼쪽 UI(0~WIDTH) 안에서만 그리는 틀: 접힌 상자가 전투 칸 위로 보이지 않게 (v0.59)
+var _entry_clip: Control
+## 왼쪽 아래 알림 문구 (v0.59): {id, text}. 오래된 줄부터 NOTICE_SEC 뒤 사라진다
+var _notice: RichTextLabel
+var _notices: Array[Dictionary] = []
+var _notice_seq := 0
 var _entry_icons: HBoxContainer
 var _buff_box: PanelContainer
 var _buff_list: VBoxContainer
@@ -133,6 +146,9 @@ var _autoplay := false
 func _ready() -> void:
 	_autoplay = OS.is_debug_build() and OS.get_cmdline_user_args().has("--autoplay")
 	gui_input.connect(_on_gui_input)
+	# 창 옮기기 모드(v0.60)일 때는 배경 위에서 이동 커서
+	WindowManager.move_mode_changed.connect(func(on: bool) -> void:
+		mouse_default_cursor_shape = Control.CURSOR_MOVE if on else Control.CURSOR_ARROW)
 	_hitbox.gui_input.connect(_on_hitbox_gui_input)
 	_build_panels()
 	_build_hud_widgets()
@@ -173,9 +189,9 @@ func _ready() -> void:
 	EventBus.entries_changed.connect(_refresh_entry_widgets)
 	# 타이머 멈춤/재개 → 말풍선 "?" / ". .. ..." (v0.34)
 	EventBus.ball_shortage_changed.connect(func(_short: bool) -> void: _update_waiting_emote())
-	# 전투 후 엔트리 특성(픽업·꿀모으기·볼줍기) 결과는 안내 문구 아래 한 줄로 (기획서 6.1, v0.28)
+	# 전투 후 엔트리 특성(픽업·꿀모으기·볼줍기) 결과는 왼쪽 아래 알림 한 줄로 (기획서 6.1, v0.28, v0.59)
 	EventBus.battle_traits_triggered.connect(func(lines: PackedStringArray) -> void:
-		_append_title.call_deferred("  ".join(lines)))
+		_push_notice.call_deferred("  ".join(lines)))
 	EventBus.battle_started.connect(func(_e: Dictionary, _b: StringName) -> void: _refresh_entry_widgets())
 	EventBus.encounter_ended.connect(_refresh_entry_widgets)
 
@@ -264,7 +280,7 @@ func _style_bar_button(b: Button, normal: StyleBox, hover: StyleBox, pressed: St
 
 ## X 버튼: 화면 안 확인 창을 먼저 띄우고, 확인하면 종료 (M11)
 func _ask_quit() -> void:
-	_confirm.ask("종료", "게임을 종료할까요?\n(진행 상황은 저장된다)", "종료", quit_game, true)   # v0.57 가운데 정렬
+	_confirm.ask("종료", "진행 상황을 저장하고 게임을 종료할까요?", "종료", quit_game, true)   # v0.57 가운데 정렬, v0.59 문구
 
 
 ## 색이 다른 포켓몬 등장 연출: 포켓몬 주변에 별 모양 반짝임이 퍼졌다 사라진다 (M11)
@@ -331,8 +347,8 @@ func _sync_buttons() -> void:
 
 func _on_expedition_finished(id: StringName) -> void:
 	var x := GameData.get_expedition(id)
-	if x and EncounterManager.state in [EncounterManager.State.WAITING, EncounterManager.State.PAUSED]:
-		_title.text += "\n%s에서 돌아왔다!" % x.name_ko
+	if x:
+		_push_notice("%s에서 돌아왔다!" % x.name_ko)   # v0.59: 왼쪽 아래 알림 (전투 중에도)
 	_sync_buttons()
 
 
@@ -349,6 +365,7 @@ func _on_game_reset() -> void:
 		_battle = null
 	_battle_info.hide()
 	_title.text = "저장을 초기화했다"
+	_clear_notices()
 	_set_walkers_watching(false)
 	_update_hud()
 
@@ -384,7 +401,7 @@ func _on_region_unlocked(id: StringName) -> void:
 	var region := GameData.get_region(id)
 	if region:
 		# 레벨업 문구 뒤에 붙도록 한 박자 늦게 (해금 판정이 레벨업 처리보다 먼저 실행됨)
-		_append_title.call_deferred("새 지역 해금: %s!" % region.name_ko)   # 효과음은 AudioManager
+		_push_notice.call_deferred("새 지역 해금: %s!" % region.name_ko)   # 효과음은 AudioManager
 		_unlock_names.append(region.name_ko)
 		_show_unlock_notice.call_deferred()
 
@@ -586,6 +603,7 @@ func _start_battle() -> void:
 	# 전투 칸(오른쪽 128px)만 차지한다 → 왼쪽 UI 클릭을 막지 않는다 (v0.46)
 	_battle.position = BATTLE_COLUMN.position
 	_battle.size = BATTLE_COLUMN.size
+	_battle.clip_contents = true   # v0.60: 과녁 끝이 왼쪽 UI 쪽으로 넘어가 보이지 않게
 	move_child(_battle_frame, _panel_layer.get_index())   # 테두리는 과녁 위
 	_battle.start(params, EncounterManager.rng)
 	# 전투 중: 전투 칸 맨 윗줄에 이름·성별·레벨 → 그 아래 포획 게이지(battle.gd). 안내는 왼쪽 안내 문구로 (v0.46)
@@ -652,12 +670,37 @@ func _on_encounter_fled(enc: Dictionary) -> void:
 
 
 func _on_player_leveled_up(new_level: int) -> void:
-	_title.text += "\n레벨 업! Lv%d" % new_level
+	_push_notice("레벨 업! Lv%d" % new_level)
 	_update_hud()
 
 
-func _append_title(line: String) -> void:
-	_title.text += "\n" + line
+## 왼쪽 아래 알림 한 줄 추가 (v0.59). 최대 NOTICE_MAX_LINES 줄, 각 줄은 NOTICE_SEC 뒤 사라진다.
+func _push_notice(line: String) -> void:
+	_notice_seq += 1
+	var id := _notice_seq
+	_notices.append({"id": id, "text": line})
+	while _notices.size() > NOTICE_MAX_LINES:
+		_notices.pop_front()
+	_render_notices()
+	get_tree().create_timer(NOTICE_SEC).timeout.connect(_expire_notice.bind(id))
+
+
+func _expire_notice(id: int) -> void:
+	for i in _notices.size():
+		if _notices[i].id == id:
+			_notices.remove_at(i)
+			break
+	_render_notices()
+
+
+func _clear_notices() -> void:
+	_notices.clear()
+	_render_notices()
+
+
+func _render_notices() -> void:
+	if _notice:
+		_notice.text = "\n".join(PackedStringArray(_notices.map(func(n: Dictionary) -> String: return n.text)))
 
 
 # ---------------------------------------------------------------- HUD
@@ -693,12 +736,18 @@ func _build_entry_widgets() -> void:
 	anim.autostart = true
 	anim.timeout.connect(_tick_entry_anim)
 	add_child(anim)
+	_entry_clip = Control.new()
+	_entry_clip.name = "EntryClip"
+	_entry_clip.size = Vector2(WIDTH, 200)
+	_entry_clip.clip_contents = true
+	_entry_clip.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	add_child(_entry_clip)
+	move_child(_entry_clip, _panel_layer.get_index())   # 패널·버튼 줄·HUD 아래
 	_entry_strip = PanelContainer.new()
-	_entry_strip.position = ENTRY_STRIP_RECT.position
+	_entry_strip.position = Vector2(ENTRY_STRIP_RIGHT, ENTRY_STRIP_TOP)
 	_entry_strip.add_theme_stylebox_override(&"panel", _overlay_style())
 	_entry_strip.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	add_child(_entry_strip)
-	move_child(_entry_strip, _panel_layer.get_index())   # 패널·버튼 줄·HUD 아래
+	_entry_clip.add_child(_entry_strip)
 	_entry_icons = HBoxContainer.new()
 	_entry_icons.add_theme_constant_override(&"separation", 2)
 	_entry_icons.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -709,8 +758,23 @@ func _build_entry_widgets() -> void:
 	_entry_tab.size = ENTRY_TAB_SIZE
 	_entry_tab.style = _overlay_style()
 	_entry_tab.pressed.connect(_toggle_entry_strip)
-	add_child(_entry_tab)
-	move_child(_entry_tab, _panel_layer.get_index())
+	_entry_clip.add_child(_entry_tab)
+
+	# 알림 문구 (v0.59): 안내 문구와 같은 흰 글자 + 외곽선, 아래 정렬
+	_notice = RichTextLabel.new()
+	_notice.name = "Notice"
+	_notice.bbcode_enabled = true
+	_notice.scroll_active = false
+	_notice.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_notice.vertical_alignment = VERTICAL_ALIGNMENT_BOTTOM
+	_notice.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_notice.position = Vector2(NOTICE_LEFT, NOTICE_BOTTOM - NOTICE_HEIGHT)
+	_notice.size = Vector2(WIDTH - NOTICE_LEFT * 2, NOTICE_HEIGHT)
+	_notice.add_theme_color_override(&"default_color", Color(1, 1, 1))
+	_notice.add_theme_constant_override(&"outline_size", 4)
+	_notice.add_theme_color_override(&"font_outline_color", Color(0.1, 0.13, 0.2))
+	add_child(_notice)
+	move_child(_notice, _entry_clip.get_index())
 
 	_buff_box = PanelContainer.new()
 	_buff_box.add_theme_stylebox_override(&"panel", _overlay_style())
@@ -859,7 +923,7 @@ func _refresh_entry_widgets() -> void:
 	_refresh_buffs(true)
 
 
-## 엔트리 상자 접기/펴기 (v0.47): 화살표 탭을 누르면 상자가 왼쪽 밖으로 미끄러져 들어가거나 나온다.
+## 엔트리 상자 접기/펴기 (v0.47): 화살표 탭을 누르면 상자가 오른쪽 밖으로(v0.59) 미끄러져 들어가거나 나온다.
 func _toggle_entry_strip() -> void:
 	_entry_open = not _entry_open
 	Settings.set_value(&"entry_strip_open", _entry_open)
@@ -867,14 +931,17 @@ func _toggle_entry_strip() -> void:
 	_layout_entry_strip(true)
 
 
-## 펼침: 상자는 제자리, 탭은 상자 오른쪽에 붙어 "◀". 접힘: 상자는 창 왼쪽 밖, 탭만 왼쪽 끝에 "▶".
+## 펼침: 상자는 오른쪽 아래 제자리, 탭은 상자 왼쪽에 붙어 "▶". 접힘: 상자는 왼쪽 UI 오른쪽 끝 밖, 탭만 오른쪽 끝에 "◀". (v0.59)
 func _layout_entry_strip(animate: bool) -> void:
 	var w := _entry_strip.size.x
-	var strip_x := ENTRY_STRIP_RECT.position.x if _entry_open else -w - 1.0
-	var tab_x := strip_x + w + 1.0 if _entry_open else 0.0
-	var y := ENTRY_STRIP_RECT.position.y
+	var strip_x := ENTRY_STRIP_RIGHT - w if _entry_open else WIDTH + 1.0
+	var tab_x := strip_x - 1.0 - ENTRY_TAB_SIZE.x if _entry_open else WIDTH - ENTRY_TAB_SIZE.x
+	var y := ENTRY_STRIP_TOP
 	_entry_tab.position.y = y + (_entry_strip.size.y - ENTRY_TAB_SIZE.y) / 2.0
-	_entry_tab.pointing_left = _entry_open
+	_entry_tab.pointing_left = not _entry_open
+	# 알림 문구는 엔트리 상자·탭 왼쪽까지만
+	var notice_right := (tab_x if _entry_tab.visible else WIDTH) - 4.0
+	_notice.size.x = notice_right - NOTICE_LEFT
 	_entry_tab.tooltip_text = "엔트리 접기" if _entry_open else "엔트리 펴기"
 	if _entry_slide:
 		_entry_slide.kill()
@@ -1020,7 +1087,7 @@ func _on_gui_input(event: InputEvent) -> void:
 	if mb == null or not mb.pressed:
 		return
 	match mb.button_index:
-		MOUSE_BUTTON_LEFT:
+		MOUSE_BUTTON_LEFT when WindowManager.move_mode:   # v0.60: 설정의 "창 옮기기"가 켜져 있을 때만
 			WindowManager.begin_drag()
 			accept_event()
 		MOUSE_BUTTON_RIGHT when _dev_menu != null:

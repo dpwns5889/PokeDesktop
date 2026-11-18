@@ -4,6 +4,8 @@ extends OverlayPanel
 ## 편성 화면: 원정 중이 아닌 포켓몬을 5마리 이상 고르면 전투력·성공 확률·시간을 바로 보여준다.
 ## "자동 선택" = 전투력 높은 순으로 요구치를 넘을 때까지 (ExpeditionLogic.auto_select)
 
+const RewardPanel := preload("res://scenes/ui/expedition_reward_panel.gd")
+
 enum View { LIST, PARTY }
 
 var _view: View = View.LIST
@@ -18,7 +20,11 @@ const LIST_WIDTH := 150
 var _list_box: HBoxContainer
 var _slots: Label
 var _list: ItemList
+var _detail_head_box: MarginContainer
+var _detail_head: Label
 var _detail: RichTextLabel
+## 원정지 이름 아래 여백 (v0.59)
+const DETAIL_HEAD_GAP := 5
 var _action: Button
 var _action2: Button
 # 편성 화면: 왼쪽 포켓몬 목록 / 오른쪽 원정지 정보·전투력·버튼
@@ -27,6 +33,8 @@ var _party_title: RichTextLabel
 var _party_list: ItemList
 var _summary: Label
 var _start: Button
+## 보상 팝업 (v0.59): 원정 패널 위에 겹쳐 뜬다
+var _reward: RewardPanel
 
 
 func _panel_title() -> String:
@@ -70,6 +78,12 @@ func _build_content(box: VBoxContainer) -> void:
 	var right := VBoxContainer.new()
 	right.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_list_box.add_child(right)
+	# 원정지 이름 + 아래 여백 (v0.59)
+	_detail_head_box = MarginContainer.new()
+	_detail_head_box.add_theme_constant_override(&"margin_bottom", DETAIL_HEAD_GAP)
+	right.add_child(_detail_head_box)
+	_detail_head = Label.new()
+	_detail_head_box.add_child(_detail_head)
 	_detail = UiUtil.rich_label(false)
 	_detail.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	right.add_child(_detail)
@@ -116,6 +130,11 @@ func _build_content(box: VBoxContainer) -> void:
 	_start = _button("출발", _on_start)
 	_start.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	pbtns.add_child(_start)
+
+	# 보상 팝업: 이 패널의 자식이라 패널을 꽉 덮는다
+	_reward = RewardPanel.new()
+	_reward.position = Vector2.ZERO
+	add_child(_reward)
 
 
 func _button(text: String, cb: Callable) -> Button:
@@ -179,6 +198,7 @@ func _show_list_detail() -> void:
 	var row := _selected_row()
 	_action2.visible = false
 	if row.is_empty():
+		_detail_head_box.visible = false
 		_detail.text = _last_message
 		_action.visible = false
 		return
@@ -186,24 +206,28 @@ func _show_list_detail() -> void:
 	if row.kind == "active":
 		var e: Dictionary = PlayerState.expeditions[row.index]
 		var done := ExpeditionManager.is_done(e)
-		var names := ", ".join(e.party.map(func(u: String) -> String: return _pokemon_name(u)))
 		var x := GameData.get_expedition(StringName(e.id))
-		var lines: Array[String] = [x.name_ko if x else String(e.id),
-			"귀환! 보상을 받을 수 있다" if done else "남은 시간 %s" % _time_text(ExpeditionManager.seconds_left(e)),
-			"전투력 %d (요구치의 %d%%)" % [e.power, roundi(e.ratio * 100)],
-			"파티: %s" % names]
-		_detail.text = _last_message if _last_message != "" else "\n".join(lines)
+		var lines: Array[String] = []
+		var heading := x.name_ko if x else String(e.id)
+		# 보낸 원정은 전투력·요구치·참여 포켓몬 이름을 보여 주지 않고 마릿수만 (v0.59)
+		if done:
+			lines.append("귀환! 보상을 받을 수 있다")
+		else:
+			heading += "  " + _time_text(ExpeditionManager.seconds_left(e))   # 남은 시간은 원정지 옆 (v0.59)
+		lines.append("파티 %d마리" % e.party.size())
+		_set_detail(heading, lines)
 		_action.text = "보상 받기" if done else "진행 중"
 		_action.disabled = not done
 		_action2.visible = not done
 		_action2.text = "취소"
 	else:
 		var x := GameData.get_expedition(row.id)
-		var lines: Array[String] = [x.name_ko, "시간 %s · 요구 전투력 %d" % [_duration_text(x.duration_sec), x.required_power]]
+		# 시간은 원정지 이름 옆에만 (v0.59), 설명은 요구 전투력부터
+		var lines: Array[String] = ["요구 전투력: %d" % x.required_power]
 		if not x.recommended_types.is_empty():
-			lines.append("추천 " + UiUtil.types_bbcode(x.recommended_types, ", "))
+			lines.append("추천: " + UiUtil.types_bbcode(x.recommended_types, ", "))
 		if not x.weak_types.is_empty():
-			lines.append("불리 " + UiUtil.types_bbcode(x.weak_types, ", "))
+			lines.append("불리: " + UiUtil.types_bbcode(x.weak_types, ", "))
 		if not ExpeditionManager.is_unlocked(x):
 			for c in x.unlock_conditions:
 				var p := UnlockManager.progress(c)
@@ -217,7 +241,14 @@ func _show_list_detail() -> void:
 		else:
 			_action.disabled = false
 			_action.text = "파티 편성"
-		_detail.text = _last_message if _last_message != "" else "\n".join(lines)
+		_set_detail("%s  %s" % [x.name_ko, _duration_text(x.duration_sec)], lines)
+
+
+## 오른쪽 설명: 맨 위 원정지 이름(아래 여백을 두어 한눈에 보이게, v0.59) + 내용. 안내 메시지가 있으면 메시지만.
+func _set_detail(heading: String, lines: Array[String]) -> void:
+	_detail_head_box.visible = _last_message == ""
+	_detail_head.text = heading
+	_detail.text = _last_message if _last_message != "" else "\n".join(lines)
 
 
 func _on_action() -> void:
@@ -226,8 +257,10 @@ func _on_action() -> void:
 		return
 	if row.kind == "active":
 		var r := ExpeditionManager.claim(row.index)
-		_last_message = _result_text(r)
+		_last_message = "" if r.ok else r.reason
 		refresh()
+		if r.ok:
+			_reward.show_result(r)
 	else:
 		_target = row.id
 		_view = View.PARTY
@@ -242,27 +275,13 @@ func _on_action2() -> void:
 		refresh()
 
 
-func _result_text(r: Dictionary) -> String:
-	if not r.ok:
-		return r.reason
-	var parts: Array[String] = [ShopManager.format_money(r.currency)]
-	for id in r.items:
-		var item := GameData.get_item(id)
-		parts.append("%s %d" % [item.name_ko if item else String(id), r.items[id]])
-	var head := "성공!" if r.success else "실패... (보상 30%)"
-	var lv := ""
-	if r.levels.size() > 0:
-		lv = "  레벨 업 %d마리" % r.levels.size()
-	return "%s %s\n경험치 +%d%s" % [head, ", ".join(parts), r.pokemon_exp.values().max() if r.pokemon_exp.size() > 0 else 0, lv]
-
-
 # ---------------------------------------------------------------- 편성
 
 func _refresh_party() -> void:
 	var x := GameData.get_expedition(_target)
 	var title := "%s · %s" % [x.name_ko, _duration_text(x.duration_sec)]
 	if not x.recommended_types.is_empty():
-		title += "\n추천 " + UiUtil.types_bbcode(x.recommended_types, ", ")
+		title += "\n추천: " + UiUtil.types_bbcode(x.recommended_types, ", ")
 	_party_title.text = title
 	var keep := _selected_party()
 	# 원정 중이 아닌 개체를 이 원정지 기준 전투력 순으로
@@ -328,7 +347,8 @@ func _on_auto() -> void:
 func _on_start() -> void:
 	var r := ExpeditionManager.start(_target, _selected_party())
 	if r.ok:
-		_last_message = "%s에 출발했다! (%s 뒤 귀환)" % [GameData.get_expedition(_target).name_ko, _duration_text(r.entry.end_at - r.entry.started_at)]
+		# v0.59: 출발 안내 다음 줄에 귀환까지 시간
+		_last_message = "%s에 출발했다!\n%s 뒤 귀환" % [GameData.get_expedition(_target).name_ko, _duration_text(r.entry.end_at - r.entry.started_at)]
 		_view = View.LIST
 		refresh()
 	else:
@@ -336,11 +356,6 @@ func _on_start() -> void:
 
 
 # ---------------------------------------------------------------- 공통
-
-func _pokemon_name(uid: String) -> String:
-	var p := PlayerState.find_pokemon(uid)
-	var s := GameData.get_species(p.get("dex_id", 0)) if not p.is_empty() else null
-	return s.name_ko if s else "?"
 
 
 ## 1800 → "30분", 5400 → "1시간 30분"

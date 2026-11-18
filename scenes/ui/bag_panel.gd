@@ -2,8 +2,9 @@ extends OverlayPanel
 ## 가방 패널: 왼쪽 = 소지금·아이템 목록 / 오른쪽 = 고른 아이템 설명·사용 버튼. (기획서 4.11, 6.2)
 ## 경험사탕·진화의 돌은 보관함에서 포켓몬을 골라 쓴다(버튼 → 보관함 패널).
 ## 향로(v0.41): 타입을 고르고 "쓰기" → 30분 동안 그 타입이 잘 나온다. 특이한 향로는 바로 "쓰기".
+## 행복의 알(v0.61): 바로 "쓰기" → 15분 동안 플레이어 경험치 ×1.5.
 
-const CATEGORY_NAMES := {&"ball": "볼", &"exp_candy": "경험사탕", &"evolution": "진화 도구", &"valuable": "귀중품", &"incense": "향로"}
+const CATEGORY_NAMES := {&"ball": "볼", &"exp_candy": "경험사탕", &"evolution": "진화 도구", &"valuable": "귀중품", &"incense": "향로", &"boost": "도구"}
 const LIST_WIDTH := 150
 
 var _money: Label
@@ -134,6 +135,8 @@ func _show_detail() -> void:
 			_action.disabled = false
 		&"incense":
 			_show_incense(item)
+		&"boost":
+			_show_boost(item)
 		_:
 			_action.visible = false
 
@@ -156,6 +159,16 @@ func _show_incense(item: ItemData) -> void:
 		var left := PlayerState.item_seconds_left("shiny_incense", now)
 		if left > 0:
 			_desc.text += "\n지금: %d분 남음 (쓰면 30분 연장)" % ceili(left / 60.0)
+
+
+## 행복의 알 (v0.61): 쓰고 있으면 남은 시간을 설명에 덧붙인다
+func _show_boost(item: ItemData) -> void:
+	var now := int(Time.get_unix_time_from_system())
+	_action.text = "쓰기"
+	_action.disabled = PlayerState.item_count(item.id) <= 0
+	var left := PlayerState.item_seconds_left(String(item.id), now)
+	if left > 0:
+		_desc.text += "\n지금: %d분 남음 (쓰면 연장)" % ceili(left / 60.0)   # 한 줄에 들어가게 (쓰기 버튼이 밀려나지 않게)
 
 
 ## 고를 수 있는 타입 = 이 세대 포켓몬에게 있는 타입 (GameData.type_ids 순서)
@@ -182,6 +195,12 @@ func _on_action() -> void:
 			reason = PlayerState.use_incense(_type_ids[_type_pick.selected] if _type_pick.selected >= 0 else &"", now)
 		else:
 			reason = PlayerState.use_shiny_incense(now)
+		refresh()
+		if reason != "":
+			_desc.text = reason
+		return
+	if item and item.id == &"lucky_egg":
+		var reason := PlayerState.use_lucky_egg(int(Time.get_unix_time_from_system()))
 		refresh()
 		if reason != "":
 			_desc.text = reason

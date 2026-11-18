@@ -8,6 +8,7 @@ extends Node
 
 signal scale_changed(scale: int)
 signal docked_changed(docked: bool)
+signal move_mode_changed(on: bool)
 
 const WATCH_INTERVAL_SEC := 1.0
 
@@ -16,6 +17,13 @@ const DEBUG_START_SCALE := 2
 
 var current_scale: int = 1
 var docked: bool = true
+## 창 옮기기 모드 (v0.60): 켜져 있을 때만 배경을 잡고 창을 끌 수 있다. 저장하지 않음(실행할 때마다 꺼짐).
+var move_mode := false:
+	set(v):
+		if move_mode == v:
+			return
+		move_mode = v
+		move_mode_changed.emit(v)
 ## 이번 실행에서 요청된 배율(0 = 자동). 화면 구성이 바뀌어 다시 맞출 때 쓴다.
 var _requested_scale: int = 0
 

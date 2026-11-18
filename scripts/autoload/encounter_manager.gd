@@ -156,6 +156,9 @@ func entry_buffs() -> Array[Dictionary]:
 	var sl := PlayerState.item_seconds_left("shiny_incense", now)
 	if sl > 0:
 		out.append({"text": "특이한 향로 %d분" % ceili(sl / 60.0), "good": true})
+	var el := PlayerState.item_seconds_left("lucky_egg", now)   # 행복의 알 (v0.61)
+	if el > 0:
+		out.append({"text": "행복의 알 %d분" % ceili(el / 60.0), "good": true})
 	return out
 
 

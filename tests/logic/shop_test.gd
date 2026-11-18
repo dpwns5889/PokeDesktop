@@ -19,7 +19,7 @@ func after_test() -> void:
 func test_v01_items_and_prices() -> void:
 	var ids := GameData.all_items().map(func(i: ItemData) -> String: return String(i.id))
 	assert_array(ids).contains_exactly(["poke_ball", "great_ball", "ultra_ball", "exp_candy_s", "exp_candy_m",
-		"fire_stone", "water_stone", "thunder_stone", "leaf_stone", "moon_stone", "incense", "shiny_incense", "nugget", "big_nugget"])
+		"fire_stone", "water_stone", "thunder_stone", "leaf_stone", "moon_stone", "incense", "shiny_incense", "lucky_egg", "nugget", "big_nugget"])
 	# 금구슬: 판매 전용 (픽업 특성, v0.28)
 	var nugget := GameData.get_item(&"nugget")
 	assert_bool(nugget.can_buy()).is_false()
