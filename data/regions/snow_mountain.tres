@@ -12,82 +12,79 @@ max_level = 37
 
 [sub_resource type="Resource" id="Resource_q7v5q"]
 script = ExtResource("1_ybsqf")
-dex_id = 124
-weight = 12
-min_level = 30
-max_level = 37
+dex_id = 87
+weight = 6
+min_level = 36
+max_level = 42
 
 [sub_resource type="Resource" id="Resource_3pv13"]
 script = ExtResource("1_ybsqf")
 dex_id = 90
-weight = 14
+weight = 12
 min_level = 30
 max_level = 37
 
 [sub_resource type="Resource" id="Resource_r5k2q"]
 script = ExtResource("1_ybsqf")
-dex_id = 87
+dex_id = 91
 weight = 6
 min_level = 36
 max_level = 42
 
 [sub_resource type="Resource" id="Resource_60nmy"]
 script = ExtResource("1_ybsqf")
-dex_id = 91
-weight = 7
-min_level = 36
-max_level = 42
+dex_id = 79
+min_level = 30
+max_level = 37
 
 [sub_resource type="Resource" id="Resource_pdkno"]
 script = ExtResource("1_ybsqf")
-dex_id = 131
-weight = 7
-min_level = 32
-max_level = 40
+dex_id = 80
+weight = 5
+min_level = 37
+max_level = 42
 
 [sub_resource type="Resource" id="Resource_nwdma"]
 script = ExtResource("1_ybsqf")
-dex_id = 117
-weight = 6
-min_level = 32
-max_level = 38
+dex_id = 55
+weight = 5
+min_level = 33
+max_level = 40
 
 [sub_resource type="Resource" id="Resource_pi6in"]
 script = ExtResource("1_ybsqf")
-dex_id = 119
+dex_id = 42
 weight = 6
-min_level = 33
-max_level = 38
+min_level = 30
+max_level = 37
 
 [sub_resource type="Resource" id="Resource_6a022"]
 script = ExtResource("1_ybsqf")
-dex_id = 121
-weight = 7
-min_level = 36
-max_level = 42
+dex_id = 99
+weight = 5
+min_level = 32
+max_level = 38
 
 [sub_resource type="Resource" id="Resource_opssn"]
 script = ExtResource("1_ybsqf")
-dex_id = 115
-weight = 7
+dex_id = 117
+weight = 5
 min_level = 32
-max_level = 40
-min_player_level = 28
+max_level = 38
 
 [sub_resource type="Resource" id="Resource_5ga2r"]
 script = ExtResource("1_ybsqf")
-dex_id = 143
-weight = 6
-min_level = 34
+dex_id = 121
+weight = 5
+min_level = 36
 max_level = 42
-min_player_level = 30
 
 [sub_resource type="Resource" id="Resource_o87vg"]
 script = ExtResource("1_ybsqf")
-dex_id = 80
-weight = 6
-min_level = 37
-max_level = 42
+dex_id = 124
+weight = 7
+min_level = 32
+max_level = 40
 
 [resource]
 script = ExtResource("2_2vmwp")

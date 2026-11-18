@@ -105,4 +105,5 @@ static func roll_encounter(region: RegionData, player_level: int, rng: RandomNum
 		&"shiny": Formulas.roll_shiny(rng, shiny_mult),   # 1/512 (M11), 특이한 향로면 ×4
 		&"region": region.id,
 		&"legendary": false,
+		&"difficulty_bonus": entry.difficulty_bonus,   # 출현 표의 추가 난이도 (v0.76)
 	}

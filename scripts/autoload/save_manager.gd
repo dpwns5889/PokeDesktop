@@ -6,7 +6,7 @@ extends Node
 ## - 자동 저장: 상태가 바뀌면 다음 프레임에 저장(여러 변경을 한 번에), 그리고 60초마다, 종료 직전.
 ## - 헤드리스(테스트) 실행에서는 자동으로 읽거나 쓰지 않는다 → 테스트가 실제 세이브를 건드리지 않는다.
 
-const SAVE_VERSION := 1
+const SAVE_VERSION := 2
 const SAVE_FILE := "save.json"
 const AUTOSAVE_INTERVAL_SEC := 60.0
 
@@ -121,16 +121,29 @@ func _read_save(path: String) -> Dictionary:
 	return migrate(d)
 
 
-## 버전별 마이그레이션. 새 버전이 생기면 migrate_vN_to_vN+1 을 추가한다.
+## 버전별 마이그레이션. 세이브 형식이 바뀌면 SAVE_VERSION 을 올리고 _migrate_vN_to_vN+1 을 추가한다 (기획서 7.5 표에도 한 줄).
 func migrate(d: Dictionary) -> Dictionary:
 	var v := int(d.get("save_version", 0))
 	if v > SAVE_VERSION:
 		push_warning("더 새로운 버전의 세이브(%d)입니다. 알 수 없는 항목은 무시됩니다." % v)
-	# while v < SAVE_VERSION:
-	#     match v:
-	#         1: d = _migrate_v1_to_v2(d)
-	#     v += 1
+	if v <= 1:
+		d = _migrate_v1_to_v2(d)
 	d["save_version"] = SAVE_VERSION
+	return d
+
+
+## v1 → v2 (v0.77): 잠금 → 즐겨찾기(v0.71 변경), 도감에 색이 다른 포획 수(지금 보관함의 색이 다른 개체로 채움)
+static func _migrate_v1_to_v2(d: Dictionary) -> Dictionary:
+	var dex: Dictionary = d.get("dex", {}) if d.get("dex") is Dictionary else {}
+	for p in d.get("pokemon", []):
+		if not p is Dictionary:
+			continue
+		p["favorite"] = bool(p.get("favorite", false)) or bool(p.get("locked", false))
+		p.erase("locked")
+		if bool(p.get("shiny", false)) and p.has("dex_id"):
+			var key := str(int(p.dex_id))
+			if dex.get(key) is Dictionary:
+				dex[key]["shiny"] = int(dex[key].get("shiny", 0)) + 1
 	return d
 
 

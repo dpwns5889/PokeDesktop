@@ -53,6 +53,7 @@ func _run(gen: int) -> int:
 			en.min_level = int(e[2])
 			en.max_level = int(e[3])
 			en.min_player_level = int(e[4]) if e.size() > 4 else 1
+			en.difficulty_bonus = float(e[5]) if e.size() > 5 else 0.0   # 추가 난이도 (v0.76)
 			entries.append(en)
 		region.encounters = entries
 		var path := "%s/%s.tres" % [OUT_DIR, r.id]

@@ -139,13 +139,14 @@ func _encounter() -> void:
 	stats.reacted += 1
 	var species := GameData.get_species(enc[&"dex_id"])
 	var legendary: bool = enc.get(&"legendary", false)
-	var difficulty := Formulas.capture_difficulty(species.catch_rate, enc[&"level"], legendary)
+	var bonus := float(enc.get(&"difficulty_bonus", 0.0))   # 출현 표의 추가 난이도 (v0.76)
+	var difficulty := Formulas.capture_difficulty(species.catch_rate, enc[&"level"], legendary, bonus)
 	var ball := _choose_ball(difficulty)
 	PlayerState.select_ball(ball)
 	PlayerState.consume_selected_ball()
 	var item := GameData.get_item(ball)
 	var params := Formulas.capture_params(species.catch_rate, enc[&"level"], legendary, item.catch_modifier(),
-		EncounterManager.entry_bonus())
+		EncounterManager.entry_bonus(), bonus)
 	params[&"fill"] = float(params[&"fill"]) * EncounterManager.region_capture_fill()   # v0.63 지역 배율
 	stats.battles += 1
 	stats.diff_sum += difficulty

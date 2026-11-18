@@ -5,7 +5,9 @@ extends OverlayPanel
 ##   아래: 상태(원정 중·색이 다른·엔트리), 경험치, 능력치(개체치 표시: 최대 ★★, 높음 ★, 낮음 = 하늘색 값, v0.55), 특성 상자
 ## 오른쪽 아래 버튼(M8): 경험사탕 S·M(왼쪽 클릭 1개, 오른쪽 클릭 = 다음 레벨까지), 박사에게 보내기
 ## 제목 줄 "중복 보내기": 종마다 가장 좋은 1마리를 남기고 나머지를 박사에게 (즐겨찾기·원정 중·특성 있는 개체 제외)
-## 목록 순서: 파티(엔트리) 포켓몬이 정렬 기준과 상관없이 맨 위 (v0.73). 목록 색: 원정 중 = 하늘색, 엔트리 = 연두색, 즐겨찾기 = 금색 + 앞에 ★ (v0.71, 잠금 대신). 필터는 이후 추가.
+## 목록 순서: 파티(엔트리) 포켓몬이 정렬 기준과 상관없이 맨 위 (v0.73). 목록 색: 원정 중 = 하늘색, 엔트리 = 연두색, 즐겨찾기 = 금색 + 앞에 ★ (v0.71, 잠금 대신).
+## 필터(v0.77): 정렬 왼쪽 깔때기 버튼 → 오른쪽 칸에 상태·타입 버튼. 상태끼리 "그리고", 타입끼리 "또는", 둘 사이 "그리고".
+##   고르는 즉시 목록이 걸러지고(파티도), 개수 줄은 "걸러진 수/전체". 실행 중에만 유지(저장 안 함).
 
 const SORTS := ["도감번호", "레벨", "포획일"]
 const LIST_WIDTH := 150
@@ -19,6 +21,9 @@ const SPRITE_BOX := 64
 ## 개체치 표시 색 (v0.55)
 const IV_STAR_COLOR := "#ffd34a"
 const IV_LOW_COLOR := "#8fd3ff"
+## 필터 상태 항목 [id, 이름] (v0.77)
+const FILTER_STATUS := [["favorite", "즐겨찾기"], ["shiny", "색이 다른"], ["traits", "특성 있음"], ["busy", "원정 중"], ["entry", "엔트리"]]
+const FILTER_ON_COLOR := Color(1, 0.85, 0.35)
 
 var _count: Label
 var _sort: OptionButton
@@ -26,6 +31,12 @@ var _list: ItemList
 var _uids: Array[String] = []
 var _icon_cache: Dictionary = {}
 var _selected_uid := ""
+## 켜진 필터 (v0.77)
+var _filter_status: Array[String] = []
+var _filter_types: Array[StringName] = []
+var _filter_button: IconButton
+var _filter_scroll: ScrollContainer
+var _filter_toggles: Array[Button] = []
 
 # 오른쪽 정보
 var _info_scroll: ScrollContainer
@@ -79,6 +90,10 @@ func _build_content(box: VBoxContainer) -> void:
 	_count = Label.new()
 	_count.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	top.add_child(_count)
+	_filter_button = IconButton.new(IconButton.Kind.FILTER)
+	_filter_button.toggle_mode = true
+	_filter_button.toggled.connect(func(_on: bool) -> void: _sync_filter_view())
+	top.add_child(_filter_button)
 	_sort = OptionButton.new()
 	_sort.focus_mode = Control.FOCUS_NONE
 	for s in SORTS:
@@ -100,6 +115,7 @@ func _build_content(box: VBoxContainer) -> void:
 	_info_scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	_info_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
 	right_col.add_child(_info_scroll)
+	_build_filter(right_col)
 	_message = Label.new()
 	_message.add_theme_color_override(&"font_color", Color(1, 0.85, 0.35))
 	# 긴 결과 문구("12마리를 보냈다! 경험사탕 M 3, 경험사탕 S 9")가 한 줄이면 오른쪽 칸을 넓혀 버튼까지
@@ -156,12 +172,9 @@ func _build_content(box: VBoxContainer) -> void:
 	_fav.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
 	_fav.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
 	_fav.add_theme_font_size_override(&"font_size", FAVORITE_FONT_SIZE)
+	var empty := StyleBoxEmpty.new()
+	empty.set_content_margin_all(0)
 	for st in [&"normal", &"hover", &"pressed", &"focus"]:
-		var empty := StyleBoxEmpty.new()
-		empty.content_margin_left = 0
-		empty.content_margin_right = 0
-		empty.content_margin_top = 0
-		empty.content_margin_bottom = 0
 		_fav.add_theme_stylebox_override(st, empty)
 	_fav.pressed.connect(_on_favorite)
 	head.add_child(_fav)
@@ -212,7 +225,6 @@ func _build_content(box: VBoxContainer) -> void:
 
 
 func refresh() -> void:
-	_count.text = "%d/%d" % [PlayerState.storage_count(), PlayerState.storage_capacity]
 	var items: Array[Dictionary] = PlayerState.pokemon.duplicate()
 	match _sort.selected:
 		0: items.sort_custom(func(a, b): return a.dex_id < b.dex_id or (a.dex_id == b.dex_id and a.level > b.level))
@@ -225,6 +237,13 @@ func refresh() -> void:
 		if not e.is_empty():
 			party.append(e)
 	items = party + items.filter(func(p: Dictionary) -> bool: return not PlayerState.is_entry(p.uid))
+	var filtering := not _filter_status.is_empty() or not _filter_types.is_empty()
+	if filtering:
+		items = items.filter(func(p: Dictionary) -> bool: return matches_filter(p, _filter_status, _filter_types))
+		_count.text = "%d/%d" % [items.size(), PlayerState.storage_count()]
+	else:
+		_count.text = "%d/%d" % [PlayerState.storage_count(), PlayerState.storage_capacity]
+	_filter_button.tint = FILTER_ON_COLOR if filtering else IconButton.COLOR
 	_list.clear()
 	_uids.clear()
 	var keep := -1
@@ -256,6 +275,7 @@ func refresh() -> void:
 
 func _on_selected(index: int) -> void:
 	_selected_uid = _uids[index]
+	_filter_button.button_pressed = false   # 필터를 보다가 포켓몬을 고르면 정보로
 	_show_message("")
 	_show_info(PlayerState.find_pokemon(_selected_uid))
 
@@ -283,21 +303,14 @@ func _show_info(p: Dictionary) -> void:
 	for c in _status.get_children():
 		_status.remove_child(c)
 		c.queue_free()
-	if PlayerState.is_busy(p.uid):
-		var busy := Label.new()
-		busy.text = "원정 중"
-		busy.add_theme_color_override(&"font_color", Color(0.6, 0.85, 1))
-		_status.add_child(busy)
-	if p.get("shiny", false):
-		var shiny := Label.new()
-		shiny.text = "색이 다른"
-		shiny.add_theme_color_override(&"font_color", SHINY_COLOR)
-		_status.add_child(shiny)
-	if PlayerState.is_entry(p.uid):
-		var entry := Label.new()
-		entry.text = "엔트리"
-		entry.add_theme_color_override(&"font_color", ENTRY_COLOR)
-		_status.add_child(entry)
+	for tag in [[PlayerState.is_busy(p.uid), "원정 중", Color(0.6, 0.85, 1)],
+			[p.get("shiny", false), "색이 다른", SHINY_COLOR],
+			[PlayerState.is_entry(p.uid), "엔트리", ENTRY_COLOR]]:
+		if tag[0]:
+			var l := Label.new()
+			l.text = tag[1]
+			l.add_theme_color_override(&"font_color", tag[2])
+			_status.add_child(l)
 
 	if p.level >= Formulas.MAX_POKEMON_LEVEL:
 		_exp_bar.max_value = 1
@@ -396,7 +409,7 @@ func _small_button(on_input: Callable) -> Button:
 
 
 func _update_actions(p: Dictionary) -> void:
-	_actions.visible = not p.is_empty()
+	_actions.visible = not p.is_empty() and not _filter_button.button_pressed
 	if p.is_empty():
 		return
 	var busy := PlayerState.is_busy(p.uid)
@@ -481,9 +494,7 @@ func _on_bulk_transfer() -> void:
 		"같은 종이 여러 마리면 가장 좋은 1마리만 남기고\n%d마리를 박사에게 보냅니다.\n(즐겨찾기·원정 중·특성 있는 포켓몬은 남김)\n받는 것: %s" % [uids.size(), _candy_text(c)],
 		"보내기", func() -> void:
 			var r := ProfessorManager.transfer(uids)
-			if not uids.has(_selected_uid):
-				pass
-			else:
+			if uids.has(_selected_uid):
 				_selected_uid = ""
 			refresh()
 			_show_message(("%d마리를 보냈다! " % r.count + _candy_text(r.rewards)) if r.ok else r.reason))
@@ -560,3 +571,110 @@ func _evo_button(text: String, tip: String) -> Button:
 func _request(r: Dictionary) -> void:
 	if not r.ok:
 		_show_message(r.reason)
+
+
+# ---------------------------------------------------------------- 필터 (v0.77)
+
+## 개체 p 가 필터에 맞는가. status: FILTER_STATUS id 들(모두 만족), types: 타입 id 들(하나라도 가지면). 빈 목록은 조건 없음.
+static func matches_filter(p: Dictionary, status: Array[String], types: Array[StringName]) -> bool:
+	for st in status:
+		var ok := true
+		match st:
+			"favorite": ok = bool(p.get("favorite", false))
+			"shiny": ok = bool(p.get("shiny", false))
+			"traits": ok = p.get("traits", []).size() > 0   # 중복 보내기의 "특성 있는 개체"와 같은 기준
+			"busy": ok = PlayerState.is_busy(p.uid)
+			"entry": ok = PlayerState.is_entry(p.uid)
+		if not ok:
+			return false
+	if types.is_empty():
+		return true
+	var s := GameData.get_species(p.dex_id)
+	if s == null:
+		return false
+	for t in s.types:
+		if types.has(StringName(t)):
+			return true
+	return false
+
+
+## 오른쪽 칸(정보 자리)에 상태·타입 버튼. 필터 버튼을 누르면 정보 대신 보인다
+func _build_filter(parent: Control) -> void:
+	_filter_scroll = ScrollContainer.new()
+	_filter_scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	_filter_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	_filter_scroll.visible = false
+	parent.add_child(_filter_scroll)
+	var box := VBoxContainer.new()
+	box.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	box.add_theme_constant_override(&"separation", 2)
+	_filter_scroll.add_child(box)
+	var head := HBoxContainer.new()
+	box.add_child(head)
+	var title := Label.new()
+	title.text = "상태"
+	title.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	head.add_child(title)
+	var clear := Button.new()
+	clear.text = "모두 해제"
+	clear.focus_mode = Control.FOCUS_NONE
+	clear.pressed.connect(func() -> void:
+		_filter_status.clear()
+		_filter_types.clear()
+		for b in _filter_toggles:
+			b.set_pressed_no_signal(false)
+		refresh())
+	head.add_child(clear)
+	var status_flow := HFlowContainer.new()
+	box.add_child(status_flow)
+	for st in FILTER_STATUS:
+		var id: String = st[0]
+		status_flow.add_child(_filter_toggle(st[1], Color(0.3, 0.36, 0.5), func(on: bool) -> void:
+			if on:
+				_filter_status.append(id)
+			else:
+				_filter_status.erase(id)
+			refresh()))
+	var type_title := Label.new()
+	type_title.text = "타입 (하나라도)"
+	box.add_child(type_title)
+	var type_flow := HFlowContainer.new()
+	box.add_child(type_flow)
+	for t in GameData.type_ids():
+		var tid: StringName = t
+		type_flow.add_child(_filter_toggle(GameData.type_name(tid), UiUtil.type_color(tid), func(on: bool) -> void:
+			if on:
+				_filter_types.append(tid)
+			else:
+				_filter_types.erase(tid)
+			refresh()))
+
+
+## 켜면 color 바탕이 되는 작은 토글 버튼
+func _filter_toggle(text: String, color: Color, on_toggled: Callable) -> Button:
+	var b := Button.new()
+	b.text = text
+	b.toggle_mode = true
+	b.focus_mode = Control.FOCUS_NONE
+	var on := StyleBoxFlat.new()
+	on.bg_color = color
+	on.set_corner_radius_all(3)
+	on.set_content_margin_all(3)
+	on.content_margin_top = 0
+	on.content_margin_bottom = 0
+	b.add_theme_stylebox_override(&"pressed", on)
+	b.add_theme_stylebox_override(&"hover_pressed", on)
+	var text_on := Color(0.12, 0.12, 0.14) if color.get_luminance() > 0.55 else Color.WHITE
+	b.add_theme_color_override(&"font_pressed_color", text_on)
+	b.add_theme_color_override(&"font_hover_pressed_color", text_on)
+	b.toggled.connect(on_toggled)
+	_filter_toggles.append(b)
+	return b
+
+
+## 필터 버튼이 눌려 있으면 오른쪽 칸에 필터, 아니면 고른 포켓몬 정보
+func _sync_filter_view() -> void:
+	var on := _filter_button.button_pressed
+	_filter_scroll.visible = on
+	_info_scroll.visible = not on
+	_actions.visible = not on and _selected_uid != ""

@@ -6,6 +6,7 @@ const SECTION := "settings"
 
 const DEFAULTS := {
 	&"always_on_top": true,
+	&"hide_on_fullscreen": true,  # v0.77: 전체화면 앱이 앞에 있으면 창을 숨김 (항상 위에 표시가 켜져 있을 때만)
 	&"window_scale": 1,           # 1× = 448×200. 0 = 자동 (기획서 2.2)
 	&"encounter_sound": true,
 	&"sfx_volume": 0.7,

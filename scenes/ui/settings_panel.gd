@@ -1,11 +1,12 @@
 extends OverlayPanel
 ## 설정 패널 (위 버튼 줄의 톱니바퀴). (기획서 6.3)
-## 창: 항상 위에 표시, 창 옮기기(v0.60), 창 크기, 우하단으로 되돌리기 / 소리: 효과음 크기, 배경음 크기(M11), 인카운터 알림음
+## 창: 항상 위에 표시, 전체화면 앱 실행 중 숨기기(v0.77), 창 옮기기(v0.60), 창 크기, 우하단으로 되돌리기 / 소리: 효과음 크기, 배경음 크기(M11), 인카운터 알림음
 ## 개발용 기능은 메인 창 우클릭 메뉴(디버그 빌드만)에 있다.
 
 const SCALES := ["자동", "1배", "2배", "3배", "4배"]
 
 var _on_top: CheckButton
+var _hide_fullscreen: CheckButton
 var _move: CheckButton
 var _scale: OptionButton
 var _volume: HSlider
@@ -38,6 +39,14 @@ func _build_content(box: VBoxContainer) -> void:
 		if not _loading:
 			WindowManager.set_always_on_top(on))
 	list.add_child(_on_top)
+	_hide_fullscreen = CheckButton.new()
+	_hide_fullscreen.text = "전체화면 앱 실행 중 숨기기"
+	_hide_fullscreen.focus_mode = Control.FOCUS_NONE
+	_hide_fullscreen.tooltip_text = "게임·영상을 전체화면으로 볼 때 창을 숨긴다 (항상 위에 표시가 켜져 있을 때)"
+	_hide_fullscreen.toggled.connect(func(on: bool) -> void:
+		if not _loading:
+			Settings.set_value(&"hide_on_fullscreen", on))
+	list.add_child(_hide_fullscreen)
 
 	var scale_row := _row(list, "창 크기")
 	_scale = OptionButton.new()
@@ -118,6 +127,7 @@ func refresh() -> void:
 	_loading = true
 	_on_top.button_pressed = WindowManager.is_always_on_top()
 	_move.button_pressed = WindowManager.move_mode
+	_hide_fullscreen.button_pressed = bool(Settings.get_value(&"hide_on_fullscreen"))
 	_scale.select(clampi(int(Settings.get_value(&"window_scale")), 0, SCALES.size() - 1))
 	_volume.value = roundi(float(Settings.get_value(&"sfx_volume")) * 100.0)
 	_volume_label.text = "%d%%" % int(_volume.value)

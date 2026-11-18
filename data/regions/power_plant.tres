@@ -32,27 +32,12 @@ max_level = 24
 
 [sub_resource type="Resource" id="Resource_bkpsk"]
 script = ExtResource("1_5r04t")
-dex_id = 109
-weight = 12
-min_level = 18
-max_level = 24
+dex_id = 26
+weight = 4
+min_level = 24
+max_level = 30
 
 [sub_resource type="Resource" id="Resource_mnp3k"]
-script = ExtResource("1_5r04t")
-dex_id = 132
-weight = 6
-min_level = 20
-max_level = 26
-
-[sub_resource type="Resource" id="Resource_cc655"]
-script = ExtResource("1_5r04t")
-dex_id = 137
-weight = 5
-min_level = 20
-max_level = 26
-min_player_level = 18
-
-[sub_resource type="Resource" id="Resource_gyir3"]
 script = ExtResource("1_5r04t")
 dex_id = 125
 weight = 5
@@ -60,33 +45,34 @@ min_level = 22
 max_level = 28
 min_player_level = 18
 
-[sub_resource type="Resource" id="Resource_ne48t"]
+[sub_resource type="Resource" id="Resource_cc655"]
 script = ExtResource("1_5r04t")
 dex_id = 82
 weight = 5
 min_level = 26
 max_level = 30
 
-[sub_resource type="Resource" id="Resource_1nmon"]
+[sub_resource type="Resource" id="Resource_gyir3"]
 script = ExtResource("1_5r04t")
 dex_id = 101
 weight = 5
 min_level = 26
 max_level = 30
 
-[sub_resource type="Resource" id="Resource_jcrxv"]
+[sub_resource type="Resource" id="Resource_ne48t"]
 script = ExtResource("1_5r04t")
 dex_id = 89
 weight = 4
 min_level = 26
 max_level = 30
 
-[sub_resource type="Resource" id="Resource_rddj8"]
+[sub_resource type="Resource" id="Resource_1nmon"]
 script = ExtResource("1_5r04t")
-dex_id = 110
-weight = 4
-min_level = 26
-max_level = 30
+dex_id = 137
+weight = 5
+min_level = 20
+max_level = 26
+min_player_level = 18
 
 [resource]
 script = ExtResource("2_6o0fc")
@@ -96,7 +82,7 @@ order = 5
 main_types = Array[StringName]([&"electric"])
 sky_color = Color(0.7882353, 0.77254903, 0.5411765, 1)
 ground_color = Color(0.47843137, 0.47843137, 0.47843137, 1)
-encounters = Array[ExtResource("1_5r04t")]([SubResource("Resource_d81gi"), SubResource("Resource_050cc"), SubResource("Resource_rdkii"), SubResource("Resource_nohg3"), SubResource("Resource_bkpsk"), SubResource("Resource_mnp3k"), SubResource("Resource_cc655"), SubResource("Resource_gyir3"), SubResource("Resource_ne48t"), SubResource("Resource_1nmon"), SubResource("Resource_jcrxv"), SubResource("Resource_rddj8")])
+encounters = Array[ExtResource("1_5r04t")]([SubResource("Resource_d81gi"), SubResource("Resource_050cc"), SubResource("Resource_rdkii"), SubResource("Resource_nohg3"), SubResource("Resource_bkpsk"), SubResource("Resource_mnp3k"), SubResource("Resource_cc655"), SubResource("Resource_gyir3"), SubResource("Resource_ne48t"), SubResource("Resource_1nmon")])
 level_cap = 30
 encounter_interval = Vector2(200, 340)
 capture_fill = 0.8

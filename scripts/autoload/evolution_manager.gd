@@ -166,7 +166,7 @@ func _evolve(p: Dictionary, to: int) -> void:
 	var from := int(p.dex_id)
 	p.dex_id = to
 	p.evolution_cancelled = false
-	var new_dex := PlayerState.register_caught_species(to)
+	var new_dex := PlayerState.register_caught_species(to, bool(p.get("shiny", false)))
 	PlayerState.add_exp(Formulas.evolution_player_exp(new_dex))
 	PlayerState.changed.emit()
 	EventBus.pokemon_evolved.emit(p.uid, from, to)

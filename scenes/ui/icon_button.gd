@@ -1,27 +1,33 @@
 class_name IconButton
 extends Button
-## 글자 대신 도형을 그리는 작은 버튼 (위 버튼 줄의 설정 톱니바퀴, 종료 X).
+## 글자 대신 도형을 그리는 작은 버튼 (위 버튼 줄의 설정 톱니바퀴, 종료 X, 보관함 필터 깔때기 v0.77).
 ## 폰트에 없는 기호를 쓰지 않으려고 직접 그린다.
 
-enum Kind { GEAR, CLOSE }
+enum Kind { GEAR, CLOSE, FILTER }
 
 const SIZE := Vector2(18, 16)
 const COLOR := Color(0.92, 0.94, 1.0)
 const COLOR_PRESSED := Color(0.15, 0.1, 0.05)
 
 var kind: Kind = Kind.GEAR
+## 도형 색 (눌리지 않았을 때). 보관함 필터는 켜진 필터가 있으면 금색
+var tint := COLOR:
+	set(v):
+		tint = v
+		queue_redraw()
 
 
 func _init(k: Kind = Kind.GEAR) -> void:
 	kind = k
 	custom_minimum_size = SIZE
 	focus_mode = Control.FOCUS_NONE
-	tooltip_text = "설정" if k == Kind.GEAR else "종료"
+	tooltip_text = ["설정", "종료", "필터"][k]
 
 
 func _draw() -> void:
 	var c := size / 2.0
-	var color := COLOR_PRESSED if button_pressed else COLOR
+	# 위 버튼 줄은 눌리면 금색 바탕이라 어두운 도형. 보관함 필터는 어두운 바탕이라 늘 tint
+	var color := COLOR_PRESSED if button_pressed and kind != Kind.FILTER else tint
 	match kind:
 		Kind.GEAR:
 			# 톱니 8개 + 바깥 원 + 가운데 구멍
@@ -43,3 +49,7 @@ func _draw() -> void:
 			var d := 4.5
 			draw_line(c + Vector2(-d, -d), c + Vector2(d, d), color, 2.0)
 			draw_line(c + Vector2(-d, d), c + Vector2(d, -d), color, 2.0)
+		Kind.FILTER:
+			var pts := PackedVector2Array([c + Vector2(-6, -5), c + Vector2(6, -5), c + Vector2(1, 1),
+				c + Vector2(1, 6), c + Vector2(-1, 5), c + Vector2(-1, 1)])
+			draw_colored_polygon(pts, color)

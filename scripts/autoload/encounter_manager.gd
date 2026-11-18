@@ -118,7 +118,7 @@ func begin_battle() -> Dictionary:
 	EventBus.battle_started.emit(current, ball)
 	var params := Formulas.capture_params(species.catch_rate, current[&"level"],
 		species.is_legendary or species.is_mythical, _ball_modifier(ball),
-		entry_bonus())
+		entry_bonus(), float(current.get(&"difficulty_bonus", 0.0)))
 	params[&"fill"] = float(params[&"fill"]) * float(entry_traits().fill_mult)   # 긴장감 (4.6)
 	params[&"fill"] = float(params[&"fill"]) * region_capture_fill()   # 후반 지역일수록 덜 참 (v0.63)
 	return params

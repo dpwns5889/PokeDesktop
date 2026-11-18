@@ -80,9 +80,13 @@ const BUFF_TOP := 20.0
 const BUFF_GOOD := Color(0.62, 0.85, 1.0)
 const BUFF_BAD := Color(1.0, 0.55, 0.5)
 const TITLE_RIGHT := 312.0
+## 도감 완성 알림 문구 (v0.77)
+const DEX_COMPLETE_TEXT := "관동 지방의 포켓몬 151종을 모두 잡았다!\n\n이제 색이 다른 포켓몬이 더 자주 나타난다. (1/512 → 1/128)\n도감에서 색이 다른 포켓몬 기록을 볼 수 있다."
+const CROWN_COLOR := Color(1.0, 0.82, 0.25)
 enum DevMenu { ENCOUNTER, MONEY, RESET_SAVE }
 
 var _dev_menu: PopupMenu        # 개발용 우클릭 메뉴 (디버그 빌드만)
+var _crown: Control             # 도감 완성 왕관 (v0.77)
 var _panels: Dictionary = {}     # id -> OverlayPanel
 var _buttons: Dictionary = {}    # id -> Button
 var _open_id: StringName = &""
@@ -138,6 +142,8 @@ var _version_label: Label
 var _walkers: Node2D
 ## 버프 목록 내용 (바뀔 때만 다시 그림)
 var _buff_key := ""
+## 엔트리 아이콘 내용 (바뀔 때만 다시 그림)
+var _entry_key := ""
 ## 개발용 자동 플레이 (실행 인자 `-- --autoplay`): 등장하면 자동으로 전투를 시작하고 과녁을 누른다.
 var _autoplay := false
 
@@ -180,8 +186,10 @@ func _ready() -> void:
 
 	EventBus.encounter_started.connect(_on_encounter_started)
 	EventBus.encounter_appeared.connect(_on_encounter_appeared)
-	EventBus.battle_started.connect(func(_e: Dictionary, _b: StringName) -> void: _close_panels())
-	EventBus.battle_started.connect(func(_e: Dictionary, b: StringName) -> void: _battle_ball = b)
+	EventBus.battle_started.connect(func(_e: Dictionary, b: StringName) -> void:
+		_battle_ball = b
+		_close_panels()
+		_refresh_entry_widgets())
 	EventBus.battle_finished.connect(_on_battle_finished)
 	EventBus.encounter_fled.connect(_on_encounter_fled)
 	EventBus.pokemon_caught.connect(_on_pokemon_caught)
@@ -189,6 +197,9 @@ func _ready() -> void:
 	EventBus.encounter_started.connect(func(_e: Dictionary) -> void: _set_walkers_watching(true))
 	EventBus.encounter_ended.connect(func() -> void: _set_walkers_watching(false))
 	EventBus.encounter_ended.connect(_show_unlock_notice)
+	# 진화로 도감을 완성할 수도 있다 (v0.77). 이미 완성된 세이브를 처음 불러왔을 때도 한 번 띄운다
+	EventBus.pokemon_evolved.connect(func(_u: String, _f: int, _t: int) -> void: _show_unlock_notice.call_deferred())
+	_show_unlock_notice.call_deferred()
 	EventBus.game_reset.connect(_on_game_reset)
 	EventBus.player_leveled_up.connect(_on_player_leveled_up)
 	EventBus.region_unlocked.connect(_on_region_unlocked)
@@ -202,7 +213,6 @@ func _ready() -> void:
 	# 전투 후 엔트리 특성(픽업·꿀모으기·볼줍기) 결과는 왼쪽 아래 알림 한 줄로 (기획서 6.1, v0.28, v0.59)
 	EventBus.battle_traits_triggered.connect(func(lines: PackedStringArray) -> void:
 		_push_notice.call_deferred("  ".join(lines)))
-	EventBus.battle_started.connect(func(_e: Dictionary, _b: StringName) -> void: _refresh_entry_widgets())
 	EventBus.encounter_ended.connect(_refresh_entry_widgets)
 
 	# 개발용: 실행 인자 `-- --open=dex|party|storage|region|expedition|bag|shop` 으로 시작하자마자 패널을 연다
@@ -249,6 +259,18 @@ func _build_panels() -> void:
 	spacer.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	spacer.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_button_row.add_child(spacer)
+	# 도감 완성 왕관 (v0.77): 완성 알림을 확인하면 톱니바퀴 왼쪽에 보인다. 장식 (툴팁만)
+	_crown = Control.new()
+	_crown.name = "Crown"
+	_crown.custom_minimum_size = Vector2(16, 16)
+	_crown.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	_crown.draw.connect(func() -> void:
+		var pts := PackedVector2Array([Vector2(2, 13), Vector2(2, 4), Vector2(5, 8), Vector2(8, 2),
+			Vector2(11, 8), Vector2(14, 4), Vector2(14, 13)])
+		_crown.draw_colored_polygon(pts, CROWN_COLOR)
+		_crown.draw_rect(Rect2(2, 11, 12, 2), CROWN_COLOR.darkened(0.3))
+		_crown.draw_rect(Rect2(7, 7, 2, 2), Color(0.9, 0.25, 0.3)))   # 가운데 보석
+	_button_row.add_child(_crown)
 	var settings: OverlayPanel = SettingsPanel.new()
 	_panel_layer.add_child(settings)
 	settings.closed.connect(_on_panel_closed.bind(&"settings"))
@@ -350,9 +372,13 @@ func _sync_buttons() -> void:
 		_buttons[id].set_pressed_no_signal(id == _open_id)
 		_buttons[id].disabled = locked
 	# 보상을 기다리는 원정이 있으면 버튼에 표시
-	var waiting := ExpeditionManager.claimable_count()
-	_buttons[&"expedition"].text = "원정!" if waiting > 0 else "원정"
-	_buttons[&"expedition"].add_theme_color_override(&"font_color", Color(1, 0.85, 0.35) if waiting > 0 else Color.WHITE)
+	var waiting := ExpeditionManager.claimable_count() > 0
+	var exp_button: Button = _buttons[&"expedition"]
+	exp_button.text = "원정!" if waiting else "원정"
+	var color := Color(1, 0.85, 0.35) if waiting else Color.WHITE
+	# 0.5초마다 불리므로 바뀔 때만 (테마 덮어쓰기는 같은 값이어도 다시 배치를 일으킨다)
+	if exp_button.get_theme_color(&"font_color") != color:
+		exp_button.add_theme_color_override(&"font_color", color)
 
 
 func _on_expedition_finished(id: StringName) -> void:
@@ -419,8 +445,10 @@ func _on_region_unlocked(id: StringName) -> void:
 ## 새 지역 해금 알림 팝업 (v0.24). 인카운터 대기 중일 때만 띄우고(전투·결과 표시 중이면 끝난 뒤),
 ## 여러 지역이 한꺼번에 열리면 한 팝업에 모은다. "확인"을 눌러야 목록을 비운다
 ## (전투 시작으로 패널이 닫히면 전투가 끝난 뒤 다시 띄운다).
+## 도감 완성 알림(v0.77)도 같은 조건으로, 지역 해금보다 먼저 띄운다 → 포획 정보 창을 확인한 뒤에 뜬다.
 func _show_unlock_notice() -> void:
-	if _unlock_names.is_empty():
+	var dex_due := PlayerState.is_dex_complete() and not PlayerState.dex_complete_noticed
+	if _unlock_names.is_empty() and not dex_due:
 		return
 	if EncounterManager.state not in [EncounterManager.State.WAITING, EncounterManager.State.PAUSED]:
 		return
@@ -428,13 +456,19 @@ func _show_unlock_notice() -> void:
 		return   # 다른 확인 창이 떠 있으면 그 창이 닫힌 뒤
 	if _caught.visible:
 		return   # 포획 정보 창을 확인한 뒤
+	if dex_due:
+		_confirm.notify("도감 완성!", DEX_COMPLETE_TEXT, func() -> void:
+			PlayerState.dex_complete_noticed = true   # 이제 왕관이 보인다
+			PlayerState.changed.emit())
+		AudioManager.play(&"region_unlocked")
+		return
 	_confirm.notify("새 지역 해금", "새로운 지역이 해금되었다!\n%s\n\n지역 버튼에서 이동할 수 있다." % ", ".join(_unlock_names),
 		func() -> void: _unlock_names.clear())
 
 
 ## 지역을 바꾸면 다음 인카운터부터 적용. 대기 중이면 화면도 바로 바꾼다.
 func _on_current_region_changed(_id: StringName) -> void:
-	if EncounterManager.state == EncounterManager.State.WAITING or EncounterManager.state == EncounterManager.State.PAUSED:
+	if not _walkers_should_watch():   # 대기·멈춤 중
 		_show_idle()
 
 
@@ -493,7 +527,6 @@ func _stop_bob() -> void:
 	_shadow.hide()
 
 
-## 이름·레벨 줄(BattleInfo)과 같은 높이, 오른쪽 정렬 (v0.38)
 ## 전투 칸 배경: 하늘색(위) → 땅색(아래) 두 색 그라데이션 (v0.53). 배경·땅 바로 위, 발판·포켓몬 아래.
 func _set_battle_bg(top: Color, bottom: Color) -> void:
 	if _battle_bg == null:
@@ -724,11 +757,7 @@ func _tick_notices() -> void:
 	var dt := _notice_timer.wait_time
 	for n in _notices:
 		n.age = float(n.age) + dt
-	var alive: Array[Dictionary] = []
-	for n in _notices:
-		if float(n.age) < NOTICE_SEC:
-			alive.append(n)
-	_notices = alive
+	_notices = _notices.filter(func(n: Dictionary) -> bool: return float(n.age) < NOTICE_SEC)
 	_render_notices()
 	if _notices.is_empty():
 		_notice_timer.stop()
@@ -754,7 +783,6 @@ func _render_notices() -> void:
 
 # ---------------------------------------------------------------- HUD
 
-## HUD 위쪽 2px 경험치 막대 + 오른쪽 볼 표시
 # ---------------------------------------------------------------- 엔트리 아이콘 · 버프 (v0.27)
 
 func _overlay_style() -> StyleBoxFlat:
@@ -950,8 +978,15 @@ func _set_walkers_watching(on: bool) -> void:
 func _refresh_entry_widgets() -> void:
 	if _entry_icons == null:
 		return
-	_clear_children(_entry_icons)
 	var entries := PlayerState.entry_pokemon()
+	# PlayerState.changed 는 경험치·돈·아이템마다 오므로, 엔트리 모습이 그대로면 아이콘·걷는 포켓몬은 다시 만들지 않는다
+	var key := str(entries.map(func(p: Dictionary) -> String:
+		return "%s:%d:%s:%d" % [p.uid, int(p.dex_id), p.get("gender", ""), int(p.level)]))
+	if key == _entry_key:
+		_refresh_buffs(true)
+		return
+	_entry_key = key
+	_clear_children(_entry_icons)
 	for p in entries:
 		var s := GameData.get_species(p.dex_id)
 		var icon := TextureRect.new()
@@ -1054,6 +1089,7 @@ func _on_entry_icon_input(event: InputEvent) -> void:
 		accept_event()
 
 
+## HUD 위쪽 2px 경험치 막대 + 오른쪽 볼 표시
 func _build_hud_widgets() -> void:
 	var back := ColorRect.new()
 	back.color = Color(0.1, 0.18, 0.35)
@@ -1125,6 +1161,11 @@ func _update_hud() -> void:
 	_hud_label.text = "Lv%d  %s" % [PlayerState.level, status]
 	if not _buttons.is_empty():
 		_sync_buttons()
+	if _crown:
+		_crown.visible = PlayerState.dex_complete_noticed
+		if _crown.visible:
+			var bias_sec := int(Time.get_time_zone_from_system().get("bias", 0)) * 60
+			_crown.tooltip_text = "도감 완성 (%s)" % Time.get_date_string_from_unix_time(PlayerState.dex_completed_at + bias_sec)
 
 
 # ---------------------------------------------------------------- 입력

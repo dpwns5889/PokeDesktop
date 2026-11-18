@@ -125,8 +125,9 @@ const CAPTURE_INNER_BONUS := 1.5         # 중심 명중 시 게이지 배율
 const LEGENDARY_DIFFICULTY_BONUS := 0.15
 
 
-static func capture_difficulty(catch_rate: int, level: int, legendary: bool) -> float:
-	var d := (1.0 - catch_rate / 255.0) * 0.8 + (level / 100.0) * 0.2
+## bonus = 출현 표 한 줄의 추가 난이도 (EncounterEntry.difficulty_bonus, v0.76)
+static func capture_difficulty(catch_rate: int, level: int, legendary: bool, bonus: float = 0.0) -> float:
+	var d := (1.0 - catch_rate / 255.0) * 0.8 + (level / 100.0) * 0.2 + bonus
 	if legendary:
 		d += LEGENDARY_DIFFICULTY_BONUS
 	return clampf(d, 0.0, 1.0)
@@ -134,9 +135,10 @@ static func capture_difficulty(catch_rate: int, level: int, legendary: bool) -> 
 
 ## 전투 파라미터. 거리 단위는 기준 해상도 픽셀.
 ## entry = entry_battle_bonus() 결과 (엔트리 능력치 보너스, 기획서 4.13). 비우면 보너스 없음.
+## difficulty_bonus = 출현 표의 추가 난이도 (v0.76)
 static func capture_params(catch_rate: int, level: int, legendary: bool, ball_modifier: float,
-		entry: Dictionary = {}) -> Dictionary:
-	var d := capture_difficulty(catch_rate, level, legendary)
+		entry: Dictionary = {}, difficulty_bonus: float = 0.0) -> Dictionary:
+	var d := capture_difficulty(catch_rate, level, legendary, difficulty_bonus)
 	var atk := float(entry.get(&"attack", 0.0))
 	var spe := float(entry.get(&"speed", 0.0))
 	var dfn := float(entry.get(&"defense", 0.0))

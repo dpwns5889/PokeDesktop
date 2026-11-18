@@ -108,3 +108,33 @@ func test_battle_ground_index_valid() -> void:
 	assert_int(GameData.get_region(&"grassland").battle_ground).is_equal(0)
 	assert_int(GameData.get_region(&"waterside").battle_ground).is_equal(1)
 	assert_bool(ResourceLoader.exists("res://Assets/Generated/ui/ground.png")).is_true()
+
+
+## v0.76: 스타팅 3마리는 초원, 라프라스는 동굴에서 낮은 확률 + 추가 난이도
+func test_starters_in_grassland_and_rare_hard_lapras_in_cave() -> void:
+	var grass := GameData.get_region(&"grassland")
+	for dex in [1, 4, 7]:
+		var where: Array = []
+		for r in GameData.all_regions():
+			for e in r.encounters:
+				if e.dex_id == dex:
+					where.append(r.id)
+		assert_array(where).override_failure_message("%d" % dex).contains_exactly([&"grassland"])
+	var cave := GameData.get_region(&"cave")
+	var lapras: EncounterEntry = null
+	var total := 0
+	for e in cave.encounters:
+		total += e.weight
+		if e.dex_id == 131:
+			lapras = e
+	assert_object(lapras).is_not_null()
+	assert_float(float(lapras.weight) / total).is_less(0.03)
+	assert_float(lapras.difficulty_bonus).is_equal_approx(0.2, 0.001)
+	for r in GameData.all_regions():
+		if r.id != &"cave":
+			for e in r.encounters:
+				assert_int(e.dex_id).override_failure_message(String(r.id)).is_not_equal(131)
+	# 추가 난이도는 포획 난이도에 더해진다
+	var base := Formulas.capture_difficulty(45, 22, false)
+	assert_float(Formulas.capture_difficulty(45, 22, false, 0.2)).is_equal_approx(base + 0.2, 0.0001)
+	assert_float(Formulas.capture_params(45, 22, false, 1.0, {}, 0.2)[&"difficulty"]).is_equal_approx(base + 0.2, 0.0001)

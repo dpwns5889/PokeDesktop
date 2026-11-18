@@ -6,58 +6,63 @@
 [sub_resource type="Resource" id="Resource_dnuef"]
 script = ExtResource("1_u1ffs")
 dex_id = 10
-weight = 12
 min_level = 4
 max_level = 7
 
 [sub_resource type="Resource" id="Resource_gt8sq"]
 script = ExtResource("1_u1ffs")
-dex_id = 13
-weight = 12
-min_level = 4
-max_level = 7
+dex_id = 11
+weight = 6
+min_level = 5
+max_level = 8
 
 [sub_resource type="Resource" id="Resource_moq2w"]
 script = ExtResource("1_u1ffs")
-dex_id = 43
-weight = 14
-min_level = 5
-max_level = 9
+dex_id = 13
+min_level = 4
+max_level = 7
 
 [sub_resource type="Resource" id="Resource_f1ok5"]
 script = ExtResource("1_u1ffs")
-dex_id = 69
-weight = 14
+dex_id = 14
+weight = 6
 min_level = 5
-max_level = 9
+max_level = 8
 
 [sub_resource type="Resource" id="Resource_st8aa"]
 script = ExtResource("1_u1ffs")
-dex_id = 46
+dex_id = 25
+weight = 6
 min_level = 5
 max_level = 9
 
 [sub_resource type="Resource" id="Resource_b5r2p"]
 script = ExtResource("1_u1ffs")
-dex_id = 48
-min_level = 6
-max_level = 10
+dex_id = 43
+weight = 12
+min_level = 5
+max_level = 9
 
 [sub_resource type="Resource" id="Resource_l6wc0"]
 script = ExtResource("1_u1ffs")
-dex_id = 23
-weight = 8
-min_level = 6
-max_level = 10
+dex_id = 69
+weight = 12
+min_level = 5
+max_level = 9
 
 [sub_resource type="Resource" id="Resource_8r1u1"]
 script = ExtResource("1_u1ffs")
-dex_id = 25
-weight = 4
+dex_id = 46
 min_level = 5
 max_level = 9
 
 [sub_resource type="Resource" id="Resource_qlmkf"]
+script = ExtResource("1_u1ffs")
+dex_id = 48
+min_level = 6
+max_level = 10
+
+[sub_resource type="Resource" id="Resource_mlwhl"]
 script = ExtResource("1_u1ffs")
 dex_id = 102
 weight = 5
@@ -65,7 +70,7 @@ min_level = 7
 max_level = 11
 min_player_level = 5
 
-[sub_resource type="Resource" id="Resource_mlwhl"]
+[sub_resource type="Resource" id="Resource_25iwk"]
 script = ExtResource("1_u1ffs")
 dex_id = 114
 weight = 4
@@ -73,43 +78,23 @@ min_level = 8
 max_level = 12
 min_player_level = 6
 
-[sub_resource type="Resource" id="Resource_25iwk"]
-script = ExtResource("1_u1ffs")
-dex_id = 11
-weight = 4
-min_level = 6
-max_level = 9
-
 [sub_resource type="Resource" id="Resource_3q2bd"]
 script = ExtResource("1_u1ffs")
-dex_id = 14
+dex_id = 30
 weight = 4
-min_level = 6
-max_level = 9
+min_level = 9
+max_level = 12
+min_player_level = 6
 
 [sub_resource type="Resource" id="Resource_jr4v6"]
 script = ExtResource("1_u1ffs")
-dex_id = 12
+dex_id = 33
 weight = 4
 min_level = 9
 max_level = 12
+min_player_level = 6
 
 [sub_resource type="Resource" id="Resource_pbbb6"]
-script = ExtResource("1_u1ffs")
-dex_id = 15
-weight = 4
-min_level = 9
-max_level = 12
-
-[sub_resource type="Resource" id="Resource_t7gxe"]
-script = ExtResource("1_u1ffs")
-dex_id = 1
-weight = 4
-min_level = 5
-max_level = 8
-min_player_level = 5
-
-[sub_resource type="Resource" id="Resource_sabf2"]
 script = ExtResource("1_u1ffs")
 dex_id = 123
 weight = 3
@@ -117,10 +102,26 @@ min_level = 10
 max_level = 12
 min_player_level = 8
 
-[sub_resource type="Resource" id="Resource_pebwl"]
+[sub_resource type="Resource" id="Resource_t7gxe"]
 script = ExtResource("1_u1ffs")
 dex_id = 127
 weight = 3
+min_level = 10
+max_level = 12
+min_player_level = 8
+
+[sub_resource type="Resource" id="Resource_sabf2"]
+script = ExtResource("1_u1ffs")
+dex_id = 115
+weight = 2
+min_level = 10
+max_level = 12
+min_player_level = 8
+
+[sub_resource type="Resource" id="Resource_pebwl"]
+script = ExtResource("1_u1ffs")
+dex_id = 128
+weight = 2
 min_level = 10
 max_level = 12
 min_player_level = 8

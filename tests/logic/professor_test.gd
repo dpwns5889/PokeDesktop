@@ -146,7 +146,8 @@ func test_old_lock_becomes_favorite() -> void:
 	for p in d.pokemon:
 		p.erase("favorite")
 		p["locked"] = true
-	PlayerState.load_save_dict(d)
+	d["save_version"] = 1   # v0.77: 잠금 → 즐겨찾기는 세이브 v1→v2 마이그레이션에서
+	PlayerState.load_save_dict(SaveManager.migrate(d))
 	var p := PlayerState.find_pokemon(uid)
 	assert_bool(p.favorite).is_true()
 	assert_bool(p.has("locked")).is_false()
