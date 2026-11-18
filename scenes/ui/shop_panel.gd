@@ -3,7 +3,7 @@ extends OverlayPanel
 ## 왼쪽 = 소지금·구매/판매·상품 목록 / 오른쪽 = 고른 상품 설명, 개수, 합계, 구매/판매 버튼, 결과 문구
 
 const STORAGE_ROW := &"__storage__"
-## 보관함 확장 그림 (v0.64, tools/import_icons.gd 가 Assets/Sprites/ExpandBag.png 를 24px 로 줄여 만든다)
+## 보관함 확장 그림 (v0.66, tools/import_icons.gd 가 Assets/Sprites/ExpandBag.png 를 24px 로 줄여 만든다)
 const STORAGE_ICON := "res://Assets/Generated/icons/expand_storage.png"
 const LIST_WIDTH := 150
 
@@ -17,7 +17,7 @@ var _ids: Array[StringName] = []
 var _icon: TextureRect
 var _name: Label
 var _desc: Label
-## 가격(판매가): 개수 칸 오른쪽, 합계 바로 위 줄 (v0.64)
+## 가격(판매가): 개수 칸 오른쪽, 합계 바로 위 줄 (v0.66)
 var _price: Label
 var _qty_row: HBoxContainer
 var _qty: SpinBox
@@ -87,7 +87,7 @@ func _build_content(box: VBoxContainer) -> void:
 	_desc.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	_desc.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	right.add_child(_desc)
-	# 개수 칸 | 오른쪽에 가격(위)·합계(아래) 두 줄 — 줄을 하나 더 쓰지 않아 구매 버튼이 밀려나지 않게 (v0.64)
+	# 개수 칸 | 오른쪽에 가격(위)·합계(아래) 두 줄 — 줄을 하나 더 쓰지 않아 구매 버튼이 밀려나지 않게 (v0.66)
 	_qty_row = HBoxContainer.new()
 	right.add_child(_qty_row)
 	_qty = SpinBox.new()
@@ -190,7 +190,7 @@ func _update_order() -> void:
 	_name.text = item.name_ko
 	var price := item.sell_price if _selling() else item.buy_price
 	_desc.text = item.description
-	_price.text = "%s %s" % ["판매가" if _selling() else "가격", ShopManager.format_money(price)]   # 합계 바로 위 (v0.64)
+	_price.text = "%s %s" % ["판매가" if _selling() else "가격", ShopManager.format_money(price)]   # 합계 바로 위 (v0.66)
 	_qty_row.visible = true
 	_qty.max_value = maxi(1, PlayerState.item_count(id)) if _selling() else 99
 	_total.text = "합계 %s" % ShopManager.format_money(price * int(_qty.value))
@@ -204,7 +204,7 @@ func _on_order() -> void:
 	if _selling():
 		result = ShopManager.sell(id, qty)
 		if result.ok:
-			# v0.64: "팔았다" 문구는 판매 버튼을 밀어내 잘리게 해서 없앴다 → 구매와 같은 소리로 알린다
+			# v0.66: "팔았다" 문구는 판매 버튼을 밀어내 잘리게 해서 없앴다 → 구매와 같은 소리로 알린다
 			_message.text = ""
 			AudioManager.play(&"buy_item")
 	elif id == STORAGE_ROW:

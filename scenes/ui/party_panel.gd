@@ -107,7 +107,13 @@ func refresh() -> void:
 	for p in PlayerState.pokemon:
 		if not PlayerState.is_entry(p.uid) and not PlayerState.is_busy(p.uid):
 			avail.append(p)
-	avail.sort_custom(func(a, b): return a.level > b.level or (a.level == b.level and a.dex_id < b.dex_id))
+	# 즐겨찾기 먼저 (v0.71), 그 안에서 레벨 높은 순 → 도감번호 순
+	avail.sort_custom(func(a, b):
+		var fa: bool = a.get("favorite", false)
+		var fb: bool = b.get("favorite", false)
+		if fa != fb:
+			return fa
+		return a.level > b.level or (a.level == b.level and a.dex_id < b.dex_id))
 	for p in avail:
 		_add_row(_pick_list, p)
 		_pick_uids.append(p.uid)
@@ -122,7 +128,7 @@ func _add_row(list: ItemList, p: Dictionary) -> void:
 	var s := GameData.get_species(p.dex_id)
 	# 전투 특성(엔트리일 때 발동)이 있으면 * 표시, 마우스를 올리면 특성 이름 (기획서 4.6)
 	var battle := ExpeditionLogic.traits_of(p.get("traits", []), &"battle")
-	var idx := list.add_item("%s Lv%d%s" % [s.name_ko if s else "?", p.level, " *" if not battle.is_empty() else ""])
+	var idx := list.add_item("%s%s Lv%d%s" % ["★" if p.get("favorite", false) else "", s.name_ko if s else "?", p.level, " *" if not battle.is_empty() else ""])
 	if not battle.is_empty():
 		list.set_item_tooltip(idx, "전투 특성: " + ", ".join(battle.map(func(t: TraitData) -> String: return t.name_ko)))
 	if s:

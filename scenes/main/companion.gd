@@ -65,7 +65,7 @@ const NOTICE_BOTTOM := 179.0
 const NOTICE_HEIGHT := 68.0
 const NOTICE_MAX_LINES := 4
 const NOTICE_SEC := 10.0
-## 사라지기 전 흐려지는 시간 (v0.64)
+## 사라지기 전 흐려지는 시간 (v0.66)
 const NOTICE_FADE_SEC := 3.0
 const NOTICE_OUTLINE := Color(0.1, 0.13, 0.2)
 ## 엔트리는 오버월드 앞모습(32×32, 걷기 2프레임)으로 표시 (v0.28). 없으면 메뉴 아이콘.
@@ -115,7 +115,7 @@ var _entry_clip: Control
 var _notice: RichTextLabel
 var _notices: Array[Dictionary] = []
 var _notice_seq := 0
-## 알림 줄 나이를 올리고 흐리게 다시 그리는 타이머 (줄이 있을 때만 돈다, v0.64)
+## 알림 줄 나이를 올리고 흐리게 다시 그리는 타이머 (줄이 있을 때만 돈다, v0.66)
 var _notice_timer: Timer
 var _entry_icons: HBoxContainer
 var _buff_box: PanelContainer
@@ -704,7 +704,7 @@ func _on_player_leveled_up(new_level: int) -> void:
 
 
 ## 왼쪽 아래 알림 한 줄 추가 (v0.59). 최대 NOTICE_MAX_LINES 줄.
-## 각 줄은 (NOTICE_SEC - NOTICE_FADE_SEC)초 동안 그대로 보이다가 NOTICE_FADE_SEC 동안 천천히 흐려져 사라진다 (v0.64).
+## 각 줄은 (NOTICE_SEC - NOTICE_FADE_SEC)초 동안 그대로 보이다가 NOTICE_FADE_SEC 동안 천천히 흐려져 사라진다 (v0.66).
 func _push_notice(line: String) -> void:
 	_notice_seq += 1
 	_notices.append({"id": _notice_seq, "text": line, "age": 0.0})
@@ -715,7 +715,7 @@ func _push_notice(line: String) -> void:
 		_notice_timer.start()
 
 
-## 나이(초)에 따른 줄의 불투명도: 처음엔 1, 마지막 NOTICE_FADE_SEC 동안 0까지 (v0.64)
+## 나이(초)에 따른 줄의 불투명도: 처음엔 1, 마지막 NOTICE_FADE_SEC 동안 0까지 (v0.66)
 static func notice_alpha(age: float) -> float:
 	return clampf((NOTICE_SEC - age) / NOTICE_FADE_SEC, 0.0, 1.0)
 
@@ -899,7 +899,7 @@ func _refresh_walkers(entries: Array[Dictionary]) -> void:
 			w.look_key = key
 			w.rng.randomize()
 			w.blocked = _field_blocked
-			w.grid_origin = _field_map.position if _field_map else Vector2(0, 18)   # 들판 칸에 맞춰 걷기 (v0.64)
+			w.grid_origin = _field_map.position if _field_map else Vector2(0, 18)   # 들판 칸에 맞춰 걷기 (v0.67)
 			var start := Vector2(w.rng.randf_range(WALK_AREA.position.x, WALK_AREA.end.x),
 				w.rng.randf_range(WALK_AREA.position.y, WALK_AREA.end.y))
 			w.setup(sheet, icon, WALK_AREA, start)

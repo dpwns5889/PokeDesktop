@@ -178,7 +178,7 @@ func add_caught(encounter: Dictionary) -> Dictionary:
 		"traits": _roll_traits(dex_id, bool(encounter.get(&"shiny", false))),   # 고정 특성(전설·색이다른) + 무작위 특성 (기획서 4.6)
 		"ivs": Formulas.roll_ivs(rng),   # 개체치 (v0.55)
 		"evolution_cancelled": false,
-		"locked": false,
+		"favorite": false,   # 즐겨찾기 (v0.71, 이전 "locked" 잠금을 대신함)
 		"caught_at": now,
 		"region": String(encounter.get(&"region", "")),
 		"nickname": "",
@@ -511,6 +511,9 @@ func load_save_dict(d: Dictionary) -> void:
 			push_warning("세이브: 알 수 없는 종 %d (활성 세대 밖?) — 보관은 유지" % inst.dex_id)
 		inst["traits"] = _known_traits(inst.get("traits", []))
 		inst["ivs"] = _valid_ivs(inst.get("ivs"))
+		# v0.71: 잠금이 없어지고 즐겨찾기로 바뀜 — 예전 세이브의 잠금은 즐겨찾기로 옮긴다
+		inst["favorite"] = bool(inst.get("favorite", false)) or bool(inst.get("locked", false))
+		inst.erase("locked")
 		pokemon.append(inst)
 
 	for k in d.get("inventory", {}):

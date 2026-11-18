@@ -1,16 +1,17 @@
 extends OverlayPanel
 ## 보관함 패널. (기획서 4.7, 6.2)
 ## 왼쪽: 보유 포켓몬 목록(정렬, 아래까지 스크롤) / 오른쪽: 고른 포켓몬의 정보
-## 오른쪽 — 위: 전투 모습(64×64) + 옆에 이름·성별 / 레벨 / 타입 (v0.55)
+## 오른쪽 — 위: 전투 모습(64×64) + 옆에 이름·성별·즐겨찾기 별 / 레벨 / 타입 (v0.55, 별 v0.71)
 ##   아래: 상태(원정 중·색이 다른·엔트리), 경험치, 능력치(개체치 표시: 최대 ★★, 높음 ★, 낮음 = 하늘색 값, v0.55), 특성 상자
-## 오른쪽 아래 버튼(M8): 경험사탕 S·M(왼쪽 클릭 1개, 오른쪽 클릭 = 다음 레벨까지), 박사에게 보내기, 잠금
-## 제목 줄 "중복 보내기": 종마다 가장 좋은 1마리를 남기고 나머지를 박사에게 (잠금·원정 중·특성 있는 개체 제외)
-## 목록 색: 원정 중 = 하늘색, 엔트리 = 연두색, 잠금 = 금색. 필터는 이후 추가.
+## 오른쪽 아래 버튼(M8): 경험사탕 S·M(왼쪽 클릭 1개, 오른쪽 클릭 = 다음 레벨까지), 박사에게 보내기
+## 제목 줄 "중복 보내기": 종마다 가장 좋은 1마리를 남기고 나머지를 박사에게 (즐겨찾기·원정 중·특성 있는 개체 제외)
+## 목록 색: 원정 중 = 하늘색, 엔트리 = 연두색, 즐겨찾기 = 금색 + 앞에 ★ (v0.71, 잠금 대신). 필터는 이후 추가.
 
 const SORTS := ["도감번호", "레벨", "포획일"]
 const LIST_WIDTH := 150
 const ENTRY_COLOR := Color(0.6, 0.95, 0.55)
 const SHINY_COLOR := Color(1.0, 0.85, 0.35)
+const FAVORITE_COLOR := Color(1, 0.85, 0.35)
 ## 전투 모습 칸 (v0.55)
 const SPRITE_BOX := 64
 ## 개체치 표시 색 (v0.55)
@@ -31,6 +32,8 @@ var _info: VBoxContainer
 var _name: RichTextLabel
 var _sprite: TextureRect
 var _level: Label
+## 이름·성별 오른쪽의 즐겨찾기 별 버튼 (v0.71). 켜면 금색, 끄면 흐린 회색
+var _fav: Button
 var _types: HBoxContainer
 var _status: HFlowContainer
 var _exp_bar: ProgressBar
@@ -43,7 +46,6 @@ var _actions: HBoxContainer
 var _candy_s: Button
 var _candy_m: Button
 var _send: Button
-var _lock: Button
 var _message: Label
 
 
@@ -99,7 +101,7 @@ func _build_content(box: VBoxContainer) -> void:
 	_message = Label.new()
 	_message.add_theme_color_override(&"font_color", Color(1, 0.85, 0.35))
 	# 긴 결과 문구("12마리를 보냈다! 경험사탕 M 3, 경험사탕 S 9")가 한 줄이면 오른쪽 칸을 넓혀 버튼까지
-	# 패널 밖으로 밀어냈다 → 칸 폭에 맞춰 줄바꿈 (v0.64)
+	# 패널 밖으로 밀어냈다 → 칸 폭에 맞춰 줄바꿈 (v0.66)
 	_message.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	_message.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_message.visible = false
@@ -113,8 +115,6 @@ func _build_content(box: VBoxContainer) -> void:
 	_send.text = "보내기"
 	_send.tooltip_text = "박사에게 보내고 경험사탕을 받는다"
 	_send.pressed.connect(_on_send)
-	_lock = _small_button(func(_e: InputEvent) -> void: pass)
-	_lock.pressed.connect(_on_lock)
 	var right := VBoxContainer.new()
 	right.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	right.add_theme_constant_override(&"separation", 3)
@@ -143,9 +143,23 @@ func _build_content(box: VBoxContainer) -> void:
 	side.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	side.add_theme_constant_override(&"separation", 1)
 	head.add_child(side)
+	var name_row := HBoxContainer.new()
+	name_row.add_theme_constant_override(&"separation", 3)
+	side.add_child(name_row)
 	_name = UiUtil.rich_label()
 	_name.autowrap_mode = TextServer.AUTOWRAP_OFF
-	side.add_child(_name)
+	_name.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN   # 글자 폭만큼 → 별이 성별 바로 오른쪽에
+	name_row.add_child(_name)
+	_fav = Button.new()
+	_fav.text = "★"
+	_fav.flat = true
+	_fav.focus_mode = Control.FOCUS_NONE
+	_fav.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	_fav.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
+	for st in [&"normal", &"hover", &"pressed", &"focus"]:
+		_fav.add_theme_stylebox_override(st, StyleBoxEmpty.new())
+	_fav.pressed.connect(_on_favorite)
+	name_row.add_child(_fav)
 	_level = Label.new()
 	side.add_child(_level)
 	_types = HBoxContainer.new()
@@ -205,7 +219,8 @@ func refresh() -> void:
 	for p in items:
 		var s := GameData.get_species(p.dex_id)
 		var label := s.name_ko if s else "No.%d" % p.dex_id
-		var idx := _list.add_item("%s Lv%d" % [label, p.level])
+		var fav: bool = p.get("favorite", false)
+		var idx := _list.add_item("%s%s Lv%d" % ["★" if fav else "", label, p.level])
 		if s:
 			if not _icon_cache.has(s.dex_id):
 				_icon_cache[s.dex_id] = UiUtil.pokemon_icon(s)
@@ -214,8 +229,8 @@ func refresh() -> void:
 			_list.set_item_custom_fg_color(idx, Color(0.6, 0.85, 1))
 		elif PlayerState.is_entry(p.uid):
 			_list.set_item_custom_fg_color(idx, ENTRY_COLOR)
-		elif p.get("locked", false):
-			_list.set_item_custom_fg_color(idx, Color(1, 0.85, 0.35))
+		elif fav:
+			_list.set_item_custom_fg_color(idx, FAVORITE_COLOR)
 		_uids.append(p.uid)
 		if p.uid == _selected_uid:
 			keep = idx
@@ -246,6 +261,7 @@ func _show_info(p: Dictionary) -> void:
 	var g := UiUtil.gender_bbcode(p.gender)
 	_name.text = "%s%s" % [s.name_ko if s else "?", (" " + g) if g != "" else ""]
 	_level.text = "Lv%d" % p.level
+	_update_favorite(p)
 	_sprite.texture = battle_portrait(s, p.gender == "female", p.get("shiny", false))
 	for c in _types.get_children():
 		_types.remove_child(c)
@@ -378,12 +394,34 @@ func _update_actions(p: Dictionary) -> void:
 		var item := GameData.get_item(pair[1])
 		var n := PlayerState.item_count(pair[1])
 		b.icon = item.load_icon() if item else null
-		b.text = str(n)
+		# 개수가 길어지면 버튼 줄이 패널 오른쪽을 뚫었다 → 개수는 아이콘 위에 겹쳐 그린다 (v0.66)
+		b.text = ""
+		b.icon_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		_candy_count_label(b).text = str(n)
 		b.disabled = busy or maxed or n <= 0
+		_candy_count_label(b).modulate.a = 0.5 if b.disabled else 1.0
 		b.tooltip_text = "%s 주기\n왼쪽 클릭: 1개\n오른쪽 클릭: 다음 레벨까지" % (item.name_ko if item else "")
 	_send.disabled = ProfessorManager.transfer_block_reason(p) != ""
-	_lock.text = "해제" if p.get("locked", false) else "잠금"
-	_lock.tooltip_text = "잠금하면 박사에게 보낼 수 없다"
+
+
+## 사탕 버튼 위에 겹치는 개수 글자(오른쪽 아래, 테두리). 처음 부를 때 만든다.
+func _candy_count_label(b: Button) -> Label:
+	var l := b.get_node_or_null(^"Count") as Label
+	if l:
+		return l
+	l = Label.new()
+	l.name = "Count"
+	l.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	l.offset_right = -2
+	l.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+	l.vertical_alignment = VERTICAL_ALIGNMENT_BOTTOM
+	l.add_theme_constant_override(&"outline_size", 3)
+	l.add_theme_color_override(&"font_outline_color", Color(0.08, 0.09, 0.13))
+	l.add_theme_constant_override(&"line_spacing", 0)
+	l.clip_text = true
+	l.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	b.add_child(l)
+	return l
 
 
 ## 사탕 버튼: 왼쪽 클릭 1개, 오른쪽 클릭 = 다음 레벨까지 필요한 만큼
@@ -428,7 +466,7 @@ func _on_bulk_transfer() -> void:
 		return
 	var c := ProfessorManager.preview_rewards(uids)
 	confirm_requested.emit("중복 보내기",
-		"같은 종이 여러 마리면 가장 좋은 1마리만 남기고\n%d마리를 박사에게 보냅니다.\n(잠금·원정 중·특성 있는 포켓몬은 남김)\n받는 것: %s" % [uids.size(), _candy_text(c)],
+		"같은 종이 여러 마리면 가장 좋은 1마리만 남기고\n%d마리를 박사에게 보냅니다.\n(즐겨찾기·원정 중·특성 있는 포켓몬은 남김)\n받는 것: %s" % [uids.size(), _candy_text(c)],
 		"보내기", func() -> void:
 			var r := ProfessorManager.transfer(uids)
 			if not uids.has(_selected_uid):
@@ -439,10 +477,20 @@ func _on_bulk_transfer() -> void:
 			_show_message(("%d마리를 보냈다! " % r.count + _candy_text(r.rewards)) if r.ok else r.reason))
 
 
-func _on_lock() -> void:
+func _on_favorite() -> void:
 	var p := PlayerState.find_pokemon(_selected_uid)
 	if not p.is_empty():
-		ProfessorManager.set_locked(p.uid, not p.get("locked", false))
+		ProfessorManager.set_favorite(p.uid, not p.get("favorite", false))
+
+
+## 별 버튼 모양: 즐겨찾기면 금색, 아니면 흐린 회색 (마우스를 올리면 조금 밝게)
+func _update_favorite(p: Dictionary) -> void:
+	var on: bool = p.get("favorite", false)
+	var base := FAVORITE_COLOR if on else Color(0.55, 0.57, 0.65, 0.7)
+	_fav.add_theme_color_override(&"font_color", base)
+	_fav.add_theme_color_override(&"font_hover_color", base.lightened(0.25))
+	_fav.add_theme_color_override(&"font_pressed_color", base)
+	_fav.tooltip_text = "즐겨찾기 해제" if on else "즐겨찾기 (파티·원정 목록 맨 위, 박사에게 보낼 수 없음)"
 
 
 func _candy_text(c: Dictionary) -> String:

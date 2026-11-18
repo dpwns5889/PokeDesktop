@@ -13,7 +13,7 @@ SRC = 'scripts/data/field_maps.gd'
 OUT = 'Assets/Generated/preview_field_maps.png'
 BASE9 = {'p': 6, 'w': 15, 'h': 24}
 ROCK, BUSH = 33, 34
-# 여러 칸 오브젝트: 글자 → (첫 칸 번호, 가로, 세로) (v0.64, field_map.gd 와 같게)
+# 여러 칸 오브젝트: 글자 → (첫 칸 번호, 가로, 세로) (v0.69, field_map.gd 와 같게)
 TREE = 35
 BOULDER = TREE + 3 * 4
 SMALL_TREE = BOULDER + 2 * 2

@@ -9,7 +9,7 @@ Assets/Sprites/reference/ 의 게임 화면(확대·흐림·원근이 있어 그
       Assets/Generated/preview_field.png      (검토용: 지역별 타일 줄)
       Assets/Generated/preview_field_maps.png (검토용: 모든 지역 들판, tools/preview_field_maps.py)
 
-칸 번호 (v0.64)
+칸 번호 (v0.70)
   0 땅  1 땅(풀결)  2 땅(얼룩)  3 장식
   4 풀숲 윗줄  5 풀숲
   6~14  길 9칸   (왼위 위 오위 / 왼 가운데 오 / 왼아래 아래 오아래)
@@ -24,7 +24,7 @@ Assets/Sprites/reference/ 의 게임 화면(확대·흐림·원근이 있어 그
          잘려 있어, 한 그루 나무 그림에서 삐져나온 잎 가장자리를 옆 땅 칸에 그린다
   99    풀 덤불 (Tileset1 덤불을 작게 다듬음, 지나갈 수 있음 — 34 덤불은 Object 열매 덤불에서 열매를 지운 것, 못 지나감)
 
-v0.64: Assets/Sprites/tilemap/Tileset1.png 와 Object.png 가 있으면 모든 칸을 그 두 장에서 잘라 쓴다 (아래 TILESETS).
+v0.69: Assets/Sprites/tilemap/Tileset1.png 와 Object.png 가 있으면 모든 칸을 그 두 장에서 잘라 쓴다 (아래 TILESETS).
 없으면 코드로 그린 그림.
 """
 import math
@@ -35,7 +35,7 @@ import sys
 from PIL import Image
 
 T = 16
-TREE_W, TREE_H = 3, 4   # 나무 한 그루 = 3×4칸 (v0.64 Object.png, scenes/main/field_map.gd 와 같게)
+TREE_W, TREE_H = 3, 4   # 나무 한 그루 = 3×4칸 (v0.69 Object.png, scenes/main/field_map.gd 와 같게)
 ROCK_I, BUSH_I = 33, 34   # 돌·덤불 칸 (ROCK 은 아래 팔레트 이름)
 TREE = 35                                   # 35~46 나무 3×4
 BOULDER = TREE + TREE_W * TREE_H            # 47~50 큰 바위 2×2
@@ -533,7 +533,7 @@ def tree_small(p):
     return [img_canvas(small.crop((x * T, y * T, x * T + T, y * T + T))) for y in range(TREE_H) for x in range(TREE_W)]
 
 
-# ---------------------------------------------------------------- 타일 세트에서 자르기 (v0.64)
+# ---------------------------------------------------------------- 타일 세트에서 자르기 (v0.68)
 # Assets/Sprites/tilemap/Tileset1.png (땅·풀숲·꽃밭·길·물·용암·단·다리, 16×16 칸)와
 # Assets/Sprites/tilemap/Object.png (나무·바위·덤불·기계·상자, 16×16 칸) 두 장에서 잘라 쓴다.
 # 칸 좌표 = (세트, 열, 줄). 비어 있는(투명) 곳은 그 지역 땅 칸(0번) 위에 겹친다.
@@ -767,7 +767,7 @@ def trim_bush(im):
     return out
 
 
-# ---- 설산: 풀밭 타일을 눈 색으로 옮겨 같은 무늬·같은 느낌으로 (v0.64)
+# ---- 설산: 풀밭 타일을 눈 색으로 옮겨 같은 무늬·같은 느낌으로 (v0.70)
 def _lum(c):
     return (0.3 * c[0] + 0.59 * c[1] + 0.11 * c[2]) / 255.0
 
@@ -828,7 +828,7 @@ def snowcap(thr, greens_only=False):
     return f
 
 
-# ---- 실험실 바닥 (발전소, v0.64): Object.png 기계와 어울리는 밝은 회색 패널·금속 벽을 코드로 그린다
+# ---- 실험실 바닥 (발전소, v0.70): Object.png 기계와 어울리는 밝은 회색 패널·금속 벽을 코드로 그린다
 LAB_HI, LAB_SEAM, LAB_RIVET = (226, 230, 238), (146, 154, 170), (168, 176, 190)
 LAB_BASE = [(202, 208, 218), (198, 204, 214), (206, 212, 222)]
 
@@ -866,7 +866,7 @@ def _round_inside(x, y, x0, y0, x1, y1, r=2):
 
 
 def lab_floor9():
-    """발전소 길(p) 자리: 물처럼 보이던 청록 통로를 없애고 바닥 패널 그대로 (v0.64)"""
+    """발전소 길(p) 자리: 물처럼 보이던 청록 통로를 없애고 바닥 패널 그대로 (v0.70)"""
     out = Image.new('RGBA', (3 * T, 3 * T))
     for k in range(9):
         out.paste(lab_floor(0), ((k % 3) * T, (k // 3) * T))
@@ -895,7 +895,7 @@ def lab_platform9():
     return im
 
 
-# 지역별 칸 (v0.64). 키 = 칸 번호 묶음, 값 = 자를 위치
+# 지역별 칸 (v0.69). 키 = 칸 번호 묶음, 값 = 자를 위치
 #   'ground': [(세트, 열, 줄[, 'flip'|'flipv']) × 3]   'deco': (세트, 열, 줄)   'tall': (세트, 열, 줄) — 풀숲 두 칸 모두
 #   'path' / 'water' / 'ledge': 3×3칸 그림을 돌려주는 함수
 #   'fx': 땅·장식·길·물·단에 적용할 색 바꾸기,  'obj_fx': 오브젝트·꽃밭·다리에 적용할 색 바꾸기
@@ -951,7 +951,7 @@ TILESETS = {
         'bush': (O, 9, 0),                                  # 작은 돌 (화산엔 덤불이 없다)
         'stone_fx': darken(0.8, (22, 0, 0)),                # 붉게 그을린 돌
     },
-    # 설산 (v0.64): 풀밭·모래길·연못·언덕·나무를 눈 색으로 옮겨 다른 지역과 같은 무늬로
+    # 설산 (v0.70): 풀밭·모래길·연못·언덕·나무를 눈 색으로 옮겨 다른 지역과 같은 무늬로
     'snow_mountain': {
         'ground': [lambda c=c: recolor(cut(S, c, 0), snowify) for c in range(3)],
         'deco': lambda: recolor(cut(S, 0, 1), snowify),
@@ -969,7 +969,7 @@ TILESETS = {
         'bush_fx': snowcap(0.42, True),
         'water_rock_fx': None,
     },
-    # 발전소 = 실험실 (v0.64): 밝은 회색 패널 바닥 + 음영 없는 금속 벽, 기계·상자
+    # 발전소 = 실험실 (v0.70): 밝은 회색 패널 바닥 + 음영 없는 금속 벽, 기계·상자
     'power_plant': {
         'ground': [lambda v=v: lab_floor(v) for v in range(3)],
         'deco': lab_vent,
@@ -1124,7 +1124,7 @@ def main():
         prev.paste(im.resize((im.width * 2, im.height * 2), Image.NEAREST), (0, i * (T * 2 + 4)))
     save_retry(prev, PREVIEW)
     print('들판 타일 %d지역 → %s' % (len(sheets), OUT_DIR))
-    # 모든 지역 지형을 한 장에 (v0.64: 지형을 바꾸면 늘 함께 만든다)
+    # 모든 지역 지형을 한 장에 (v0.68: 지형을 바꾸면 늘 함께 만든다)
     sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
     sys.dont_write_bytecode = True   # tools/__pycache__ 를 만들지 않게
     import preview_field_maps

@@ -15,7 +15,7 @@ func test_version_matches_design_doc() -> void:
 	assert_str(m.get_string(1)).override_failure_message("project.godot 버전과 기획서 문서 버전이 다르다").is_equal(v)
 
 
-## v0.64: 왼쪽 아래 알림은 마지막 몇 초 동안 천천히 흐려지며 사라진다
+## v0.66: 왼쪽 아래 알림은 마지막 몇 초 동안 천천히 흐려지며 사라진다
 func test_notice_fades_out() -> void:
 	assert_float(Companion.notice_alpha(0.0)).is_equal(1.0)
 	assert_float(Companion.notice_alpha(Companion.NOTICE_SEC - Companion.NOTICE_FADE_SEC)).is_equal(1.0)

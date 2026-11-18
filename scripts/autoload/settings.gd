@@ -16,8 +16,31 @@ const DEFAULTS := {
 var _cfg := ConfigFile.new()
 
 
+## 프로젝트 이름을 PokeProject → PokeCompanion 으로 바꾸면서(v0.71) 사용자 폴더도
+## %APPDATA%/Godot/app_userdata/PokeCompanion 으로 바뀌었다. 새 폴더에 세이브·설정이 없으면 옛 폴더에서 복사한다.
+const OLD_USER_DIR_NAME := "PokeProject"
+const MIGRATE_FILES := ["save.json", "save.json.bak", "settings.cfg"]
+
+
 func _ready() -> void:
+	if DisplayServer.get_name() != "headless":   # 테스트는 실제 사용자 폴더를 건드리지 않는다
+		migrate_old_user_dir(OS.get_data_dir().path_join("Godot/app_userdata").path_join(OLD_USER_DIR_NAME), OS.get_user_data_dir())
 	load_settings()
+
+
+## 옛 사용자 폴더의 세이브·설정을 새 폴더로 복사 (새 폴더에 save.json·settings.cfg 가 하나도 없을 때만). 복사한 파일 수.
+static func migrate_old_user_dir(old_dir: String, new_dir: String) -> int:
+	if old_dir.simplify_path() == new_dir.simplify_path() or not DirAccess.dir_exists_absolute(old_dir):
+		return 0
+	if FileAccess.file_exists(new_dir.path_join("save.json")) or FileAccess.file_exists(new_dir.path_join("settings.cfg")):
+		return 0
+	DirAccess.make_dir_recursive_absolute(new_dir)
+	var n := 0
+	for f in MIGRATE_FILES:
+		var src := old_dir.path_join(f)
+		if FileAccess.file_exists(src) and DirAccess.copy_absolute(src, new_dir.path_join(f)) == OK:
+			n += 1
+	return n
 
 
 func load_settings() -> void:

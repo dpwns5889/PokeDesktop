@@ -5,7 +5,7 @@ extends GdUnitTestSuite
 const FONT_PATH := "res://Assets/Fonts/pokemon-dppt.ttf"
 ## 화면에 표시되는 문자열이 들어 있는 곳. (autoload 의 경고 메시지 등은 표시되지 않으므로 제외)
 const UI_DIRS := ["res://scenes", "res://scripts/ui"]
-## 화면에 보이지 않는 글자만 쓰는 파일 (field_map.gd = 맵 배치 글자 "=", "|" 등, v0.64)
+## 화면에 보이지 않는 글자만 쓰는 파일 (field_map.gd = 맵 배치 글자 "=", "|" 등, v0.68)
 const NON_UI_FILES := ["field_map.gd"]
 
 var _font: FontFile

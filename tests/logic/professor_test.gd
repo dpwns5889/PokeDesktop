@@ -36,12 +36,12 @@ func test_transfer_gives_level_based_candies() -> void:
 	assert_bool(PlayerState.is_caught(16)).is_true()
 
 
-func test_cannot_transfer_locked_or_busy() -> void:
+func test_cannot_transfer_favorite_or_busy() -> void:
 	var locked := _add(16, 5)
-	ProfessorManager.set_locked(locked, true)
+	ProfessorManager.set_favorite(locked, true)
 	var r := ProfessorManager.transfer([locked])
 	assert_bool(r.ok).is_false()
-	assert_str(r.reason).contains("잠금")
+	assert_str(r.reason).contains("즐겨찾기")
 	var party: Array = []
 	for i in 5:
 		party.append(_add(16, 30))
@@ -58,7 +58,7 @@ func test_duplicate_candidates_keep_best_and_skip_protected() -> void:
 	var dup1 := _add(16, 5)
 	var dup2 := _add(16, 3, ["swift"])        # 특성 있음 → 남김
 	var dup3 := _add(16, 4)
-	ProfessorManager.set_locked(dup3, true)   # 잠금 → 남김
+	ProfessorManager.set_favorite(dup3, true)   # 즐겨찾기 → 남김
 	var single := _add(25, 5)                 # 1마리뿐 → 남김
 	var c := ProfessorManager.duplicate_candidates(true)
 	assert_array(c).contains_exactly([dup1])
@@ -137,3 +137,18 @@ func test_duplicates_to_candies_to_level_100() -> void:
 		ProfessorManager.use_candy(keep, M, 10)
 	assert_int(PlayerState.find_pokemon(keep).level).is_equal(100)
 	assert_bool(ProfessorManager.use_candy(keep, M).ok).is_false()
+
+
+## v0.71: 잠금이 없어지고 즐겨찾기로 — 예전 세이브의 locked 는 favorite 로 옮겨진다
+func test_old_lock_becomes_favorite() -> void:
+	var uid := _add(16, 5)
+	var d := PlayerState.to_save_dict()
+	for p in d.pokemon:
+		p.erase("favorite")
+		p["locked"] = true
+	PlayerState.load_save_dict(d)
+	var p := PlayerState.find_pokemon(uid)
+	assert_bool(p.favorite).is_true()
+	assert_bool(p.has("locked")).is_false()
+	ProfessorManager.set_favorite(uid, false)
+	assert_bool(PlayerState.find_pokemon(uid).favorite).is_false()

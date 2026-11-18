@@ -1,7 +1,7 @@
 extends Node
 ## 박사에게 보내기(놓아주기 대신)와 경험사탕 사용. (기획서 4.8)
 ## - 보내면 개체가 사라지고 레벨에 비례한 경험사탕을 받는다(Formulas.transfer_candies).
-## - 원정 중이거나 잠금된 개체는 보낼 수 없다. 원정 중인 개체는 사탕도 줄 수 없다.
+## - 원정 중이거나 즐겨찾기한 개체는 보낼 수 없다. 원정 중인 개체는 사탕도 줄 수 없다.
 ## 결과는 {ok: bool, reason: String, ...} (화면에 그대로 표시할 수 있는 한국어 문구).
 
 const CANDY_S := &"exp_candy_s"
@@ -16,8 +16,8 @@ func transfer_block_reason(inst: Dictionary) -> String:
 		return "없는 포켓몬입니다."
 	if PlayerState.is_busy(inst.uid):
 		return "원정 중인 포켓몬은 보낼 수 없습니다."
-	if inst.get("locked", false):
-		return "잠금된 포켓몬은 보낼 수 없습니다."
+	if inst.get("favorite", false):
+		return "즐겨찾기한 포켓몬은 보낼 수 없습니다."
 	if PlayerState.is_entry(inst.uid):
 		return "엔트리 포켓몬은 보낼 수 없습니다. 파티에서 먼저 빼세요."
 	return ""
@@ -61,7 +61,7 @@ func transfer(uids: Array) -> Dictionary:
 
 
 ## 일괄 보내기 대상: 종마다 가장 좋은 1마리(레벨 높은 순, 특성 많은 순)를 남기고 나머지.
-## 잠금·원정 중·엔트리 개체는 제외. keep_traits = true 면 특성이 있는 개체도 남긴다.
+## 즐겨찾기·원정 중·엔트리 개체는 제외. keep_traits = true 면 특성이 있는 개체도 남긴다.
 func duplicate_candidates(keep_traits: bool = true) -> Array[String]:
 	var by_species := {}
 	for p in PlayerState.pokemon:
@@ -85,11 +85,12 @@ func duplicate_candidates(keep_traits: bool = true) -> Array[String]:
 	return out
 
 
-func set_locked(uid: String, locked: bool) -> void:
+## 즐겨찾기 (v0.71, 잠금을 대신함). 즐겨찾기한 개체는 보낼 수 없고, 파티·원정 목록 맨 위에 온다.
+func set_favorite(uid: String, favorite: bool) -> void:
 	var p := PlayerState.find_pokemon(uid)
 	if p.is_empty():
 		return
-	p.locked = locked
+	p.favorite = favorite
 	PlayerState.changed.emit()
 
 

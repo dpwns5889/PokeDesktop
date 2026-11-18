@@ -4,7 +4,7 @@ extends Node2D
 ## - HGSS 오버월드 걷기 시트(64×128, 행: 아래·위·왼쪽·오른쪽, 열: 2프레임)를 쓴다 (PokemonSprites.overworld_walk_sheet).
 ## - 위치(position) = 발 위치. 발은 언제나 bounds 안에 머문다 → 그림이 창 밖으로 나가지 않는다.
 ## - 행동: 잠깐 쉬기(가끔 고개만 돌림) → 네 방향 중 하나로 조금 걷기 → 쉬기 … 를 반복.
-## - v0.64: 들판 타일(16px)에 맞춰 **칸 단위로** 걷는다. 발은 언제나 칸 안의 같은 자리(cell_foot)에 서고,
+## - v0.67: 들판 타일(16px)에 맞춰 **칸 단위로** 걷는다. 발은 언제나 칸 안의 같은 자리(cell_foot)에 서고,
 ##   한 번에 1~WALK_TILES_MAX 칸을 곧게 걸어 칸 위에서 멈춘다(이동 거리 = 칸 크기의 정수배).
 ##   쉬는 중에도 제자리 걸음 2프레임을 천천히 번갈아 HGSS 데리고 다니기처럼 보이게 한다.
 ## - 지켜보기(watch): 인카운터·전투 중에는 멈춰서 지정한 곳(바닥 발판)을 바라본다.
@@ -20,20 +20,20 @@ const IDLE_FRAME_SEC := 0.45
 ## 쉬는 시간 (초)
 const IDLE_MIN := 1.5
 const IDLE_MAX := 5.0
-## 칸 크기(들판 타일과 같음)와 칸 안의 발 자리, 한 번에 걷는 최대 칸 수 (v0.64)
+## 칸 크기(들판 타일과 같음)와 칸 안의 발 자리, 한 번에 걷는 최대 칸 수 (v0.67)
 const GRID := 16
 const FOOT_IN_CELL := Vector2(8, 13)
 const WALK_TILES_MAX := 4
 ## 쉬고 난 뒤 걷지 않고 고개만 돌릴 확률
 const TURN_ONLY_CHANCE := 0.3
-## 발밑 그림자: 픽셀 타원 줄 [y, x 시작, x 끝(포함)] (v0.64, 이전 반투명 22% 매끈한 타원은 잘 안 보였다)
+## 발밑 그림자: 픽셀 타원 줄 [y, x 시작, x 끝(포함)] (v0.67, 이전 반투명 22% 매끈한 타원은 잘 안 보였다)
 const SHADOW_ROWS := [[-2, -3, 2], [-1, -5, 4], [0, -6, 5], [1, -5, 4]]
 const SHADOW_COLOR := Color(0, 0, 0, 0.32)
 const DIR_VEC := {Dir.DOWN: Vector2.DOWN, Dir.UP: Vector2.UP, Dir.LEFT: Vector2.LEFT, Dir.RIGHT: Vector2.RIGHT}
 
 ## 발 위치가 머무는 영역 (부모 좌표)
 var bounds := Rect2()
-## 칸 격자의 원점 (부모 좌표) = 들판 타일맵의 위치 (v0.64)
+## 칸 격자의 원점 (부모 좌표) = 들판 타일맵의 위치 (v0.67)
 var grid_origin := Vector2(0, 18)
 ## 못 지나가는 곳인가 (발 위치 → bool, v0.48 들판 타일맵). 비어 있으면 bounds 만 지킨다.
 var blocked := Callable()
@@ -187,7 +187,7 @@ func _next_move() -> void:
 	_wait = rng.randf_range(0.5, 1.5)   # 구석이라 갈 곳이 없으면 잠깐 뒤 다시
 
 
-## 발 위치가 들어 있는 칸 / 칸의 발 자리 (v0.64)
+## 발 위치가 들어 있는 칸 / 칸의 발 자리 (v0.67)
 func cell_of(p: Vector2) -> Vector2i:
 	return Vector2i(((p - grid_origin) / GRID).floor())
 

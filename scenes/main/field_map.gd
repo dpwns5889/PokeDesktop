@@ -2,7 +2,7 @@ class_name FieldMap
 extends TileMapLayer
 ## 메인 화면 왼쪽 들판 타일맵 (기획서 6.1, v0.48).
 ## 배치는 FieldMaps(scripts/data/field_maps.gd), 그림은 Assets/Generated/field/<지역>.png (tools/make_field_tiles.py —
-## v0.64부터 Assets/Sprites/tilemap 의 Tileset1.png(땅·길·물·단·꽃밭·다리)와 Object.png(나무·바위·덤불·기계)에서 잘라 쓴다).
+## v0.69부터 Assets/Sprites/tilemap 의 Tileset1.png(땅·길·물·단·꽃밭·다리)와 Object.png(나무·바위·덤불·기계)에서 잘라 쓴다).
 ## 지역이 바뀌면 그 지역의 그림·배치로 다시 깐다. 걸어다니는 엔트리는 is_blocked 로 물·단과 모든 오브젝트를 피한다.
 ## 칸 번호 (타일 그림의 가로 순서)
 ##   0~2 땅, 3 장식, 4 풀숲 윗줄, 5 풀숲, 6~14 길 9칸, 15~23 물 9칸, 24~32 단 9칸, 33 돌, 34 덤불,
@@ -15,7 +15,7 @@ extends TileMapLayer
 const TILE := 16
 const ROCK := 33
 const BUSH := 34
-## 여러 칸 오브젝트: 글자 → [첫 칸 번호, 가로 칸, 세로 칸] (v0.64)
+## 여러 칸 오브젝트: 글자 → [첫 칸 번호, 가로 칸, 세로 칸] (v0.69)
 const TREE := 35
 const BOULDER := TREE + 3 * 4
 const SMALL_TREE := BOULDER + 2 * 2
@@ -43,10 +43,10 @@ const CLUSTER_SIDE := CLUSTER + 4 * 4
 ## 풀 덤불 v (Tileset1 덤불을 작게, 지나갈 수 있음). 덤불 b 는 Object 열매 덤불에서 열매를 지운 것(못 지나감)
 const LEAF_BUSH := CLUSTER_SIDE + 4 * 2
 const COLUMNS := LEAF_BUSH + 1
-## 물 가장자리를 고를 때 물과 이어진 것으로 보는 글자 (다리·물 위 돌 아래도 물, v0.64)
+## 물 가장자리를 고를 때 물과 이어진 것으로 보는 글자 (다리·물 위 돌 아래도 물, v0.69)
 const WATERY := ["w", "=", "|", "q", "Q"]
 const SHEET := "res://Assets/Generated/field/%s.png"
-## 못 지나가는 글자: 물·단 + 모든 물체 (나무 군락·한 그루 나무·돌·덤불·큰 바위·작은 나무·기계·상자·물 위 돌, v0.64)
+## 못 지나가는 글자: 물·단 + 모든 물체 (나무 군락·한 그루 나무·돌·덤불·큰 바위·작은 나무·기계·상자·물 위 돌, v0.69)
 const BLOCKED := ["w", "h", "T", "Y", "o", "b", "O", "i", "m", "c", "q", "Q"]
 const BASE9 := {"p": 6, "w": 15, "h": 24}
 
@@ -167,7 +167,7 @@ static func tile_index(rows: Array, x: int, y: int) -> int:
 	return 0
 
 
-## 나무 군락(T) 칸 번호 (v0.64). 가로: 이어진 T 줄의 시작부터 0, 1, 2, 1, 2 … (두 칸 = 한 그루, 마지막 그루 오른쪽은 3).
+## 나무 군락(T) 칸 번호 (v0.70). 가로: 이어진 T 줄의 시작부터 0, 1, 2, 1, 2 … (두 칸 = 한 그루, 마지막 그루 오른쪽은 3).
 ## 세로: 아래 끝이 밑동(3), 그 위로 몸통(2) → 꼭대기(1) → 뒤 나무와 겹친 부분(0) 을 되풀이 — 짙은 숲은 위로 쌓여 이어진다.
 static func _cluster_index(rows: Array, x: int, y: int) -> int:
 	var s := x

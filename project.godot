@@ -10,13 +10,13 @@ config_version=5
 
 [application]
 
-config/name="PokeProject"
-config/version="0.64"
+config/name="PokeCompanion"
+config/version="0.71"
 run/main_scene="res://scenes/main/companion.tscn"
 config/features=PackedStringArray("4.7", "GL Compatibility")
 run/max_fps=30
 run/low_processor_mode=true
-config/icon="res://icon.svg"
+config/icon="uid://c5iftjno2ymmt"
 
 [autoload]
 

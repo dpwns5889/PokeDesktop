@@ -284,7 +284,7 @@ func _refresh_party() -> void:
 		title += "\n추천: " + UiUtil.types_bbcode(x.recommended_types, ", ")
 	_party_title.text = title
 	var keep := _selected_party()
-	# 원정 중이 아닌 개체를 이 원정지 기준 전투력 순으로
+	# 원정 중이 아닌 개체를 즐겨찾기 먼저(v0.71), 그 안에서 이 원정지 기준 전투력 순으로
 	var avail: Array[Dictionary] = []
 	for p in PlayerState.pokemon:
 		if not PlayerState.is_busy(p.uid) and not PlayerState.is_entry(p.uid):   # 엔트리는 원정 불가 (4.13)
@@ -292,13 +292,18 @@ func _refresh_party() -> void:
 	var powers := {}
 	for p in avail:
 		powers[p.uid] = ExpeditionLogic.pokemon_power(p, x)
-	avail.sort_custom(func(a, b): return powers[a.uid] > powers[b.uid])
+	avail.sort_custom(func(a, b):
+		var fa: bool = a.get("favorite", false)
+		var fb: bool = b.get("favorite", false)
+		if fa != fb:
+			return fa
+		return powers[a.uid] > powers[b.uid])
 	_party_list.clear()
 	_party_uids.clear()
 	for p in avail:
 		var s := GameData.get_species(p.dex_id)
 		var trait_mark := "*" if p.get("traits", []).size() > 0 else ""
-		var idx := _party_list.add_item("%s Lv%d  %d%s" % [s.name_ko if s else "?", p.level, roundi(powers[p.uid]), trait_mark],
+		var idx := _party_list.add_item("%s%s Lv%d  %d%s" % ["★" if p.get("favorite", false) else "", s.name_ko if s else "?", p.level, roundi(powers[p.uid]), trait_mark],
 			UiUtil.pokemon_icon(s) if s else null)
 		_party_uids.append(p.uid)
 		if keep.has(p.uid):

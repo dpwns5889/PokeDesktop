@@ -25,7 +25,7 @@ extends Node
 ## 볼륨은 설정 sfx_volume, 인카운터 소리는 encounter_sound 로 끌 수 있다.
 ##
 ## BGM (M11): Assets/Audio/BGM 의 곡을 이어서 재생하는 플레이리스트.
-## v0.64: 순서는 무작위. 모든 곡이 한 번씩 끝나면 다시 섞되, 최근에 재생한 RECENT_KEEP 곡은 새 순서의 앞 RECENT_KEEP 자리에 오지 않는다.
+## v0.65: 순서는 무작위. 모든 곡이 한 번씩 끝나면 다시 섞되, 최근에 재생한 RECENT_KEEP 곡은 새 순서의 앞 RECENT_KEEP 자리에 오지 않는다.
 ## 곡이 끝나기 BGM_FADE_SEC 전에 다음 곡이 교차 페이드로 시작한다. 지역과는 관계없다.
 ## 버스: Master ← SFX(효과음), BGM(배경음). BGM 볼륨은 설정 bgm_volume (0이면 끔).
 ## 효과음이 나는 동안(버튼 클릭·공격음 제외) BGM 은 일시정지했다가, 효과음이 모두 끝나면 이어서 재생한다 (v0.31).
@@ -55,7 +55,7 @@ const SOUNDS := {
 const BGM_DIR := "res://Assets/Audio/BGM/"
 const BGM_EXTS := ["ogg", "mp3", "wav"]
 const BGM_FADE_SEC := 3.0
-## 다시 섞을 때 새 순서의 앞에 오지 않게 할 최근 곡 수 (v0.64)
+## 다시 섞을 때 새 순서의 앞에 오지 않게 할 최근 곡 수 (v0.65)
 const RECENT_KEEP := 5
 ## BGM 을 멈추지 않는 효과음
 ## 포획 연출의 짧은 소리(던지기·열림·떨어짐·흔들림·착)도 멈추지 않는다 — 4초 남짓한 연출 동안 BGM 이 뚝뚝 끊기지 않게 (v0.54).
@@ -73,7 +73,7 @@ var _bgm_tweens: Array[Tween] = []
 ## 플레이리스트 (파일 경로, 이름 순)와 지금 곡 번호. -1 = 재생 안 함
 var _playlist: Array[String] = []
 var _track := -1
-## 이번 바퀴의 재생 순서(_playlist 번호)와 그 안의 위치, 최근에 재생한 곡(마지막이 지금 곡) (v0.64)
+## 이번 바퀴의 재생 순서(_playlist 번호)와 그 안의 위치, 최근에 재생한 곡(마지막이 지금 곡) (v0.65)
 var _order: Array[int] = []
 var _pos := -1
 var _recent: Array[int] = []
@@ -245,7 +245,7 @@ func play_order() -> Array[int]:
 
 
 ## 곡 n개를 무작위로 섞은 순서. recent(최근 재생 곡 번호)는 앞 RECENT_KEEP 자리에 오지 않는다
-## (최근이 아닌 곡이 모자라면 그만큼만 앞에 둔다). (v0.64)
+## (최근이 아닌 곡이 모자라면 그만큼만 앞에 둔다). (v0.65)
 static func shuffle_round(n: int, recent: Array[int], r: RandomNumberGenerator) -> Array[int]:
 	var fresh: Array[int] = []
 	var rest: Array[int] = []

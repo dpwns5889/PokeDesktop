@@ -90,13 +90,13 @@ func test_fallback_icon_without_sheet() -> void:
 	add_child(w)
 	var icon := UiUtil.pokemon_icon(_species(25))
 	w.setup(null, icon, AREA, Vector2(0, 0))
-	# 영역 안의 가장 가까운 칸 발 자리로 당겨짐 (v0.64: 칸 x 1 = 16+8, 칸 y 2 = 18+32+13)
+	# 영역 안의 가장 가까운 칸 발 자리로 당겨짐 (v0.67: 칸 x 1 = 16+8, 칸 y 2 = 18+32+13)
 	assert_vector(w.foot_position()).is_equal(Vector2(24, 63))
 	assert_bool(AREA.has_point(w.foot_position())).is_true()
 	w.step(1.0)
 
 
-## v0.64: 들판 칸(16px)에 맞춰 칸 단위로 걷는다 — 멈춰 있을 때 발은 언제나 칸의 발 자리, 한 번에 칸 크기의 정수배만큼
+## v0.67: 들판 칸(16px)에 맞춰 칸 단위로 걷는다 — 멈춰 있을 때 발은 언제나 칸의 발 자리, 한 번에 칸 크기의 정수배만큼
 func test_walks_tile_by_tile() -> void:
 	for seed_value in [1, 2, 3]:
 		var w := _walker(25, seed_value)
