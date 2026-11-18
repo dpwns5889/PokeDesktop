@@ -5,6 +5,8 @@ extends GdUnitTestSuite
 const FONT_PATH := "res://Assets/Fonts/pokemon-dppt.ttf"
 ## 화면에 표시되는 문자열이 들어 있는 곳. (autoload 의 경고 메시지 등은 표시되지 않으므로 제외)
 const UI_DIRS := ["res://scenes", "res://scripts/ui"]
+## 화면에 보이지 않는 글자만 쓰는 파일 (field_map.gd = 맵 배치 글자 "=", "|" 등, v0.64)
+const NON_UI_FILES := ["field_map.gd"]
 
 var _font: FontFile
 var _bbcode_tag := RegEx.create_from_string("\\[/?[a-z_]+[^\\]]*\\]")
@@ -48,6 +50,8 @@ func _collect_ui_strings(dir: String, out: Array[String]) -> void:
 	for file in DirAccess.get_files_at(dir):
 		var is_scene := file.ends_with(".tscn")
 		if not (is_scene or file.ends_with(".gd")):
+			continue
+		if NON_UI_FILES.has(file):
 			continue
 		for line in FileAccess.get_file_as_string(dir.path_join(file)).split("\n"):
 			var l := line.strip_edges()

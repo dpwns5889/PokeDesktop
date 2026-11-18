@@ -4,6 +4,8 @@ extends Node2D
 ## - HGSS 오버월드 걷기 시트(64×128, 행: 아래·위·왼쪽·오른쪽, 열: 2프레임)를 쓴다 (PokemonSprites.overworld_walk_sheet).
 ## - 위치(position) = 발 위치. 발은 언제나 bounds 안에 머문다 → 그림이 창 밖으로 나가지 않는다.
 ## - 행동: 잠깐 쉬기(가끔 고개만 돌림) → 네 방향 중 하나로 조금 걷기 → 쉬기 … 를 반복.
+## - v0.64: 들판 타일(16px)에 맞춰 **칸 단위로** 걷는다. 발은 언제나 칸 안의 같은 자리(cell_foot)에 서고,
+##   한 번에 1~WALK_TILES_MAX 칸을 곧게 걸어 칸 위에서 멈춘다(이동 거리 = 칸 크기의 정수배).
 ##   쉬는 중에도 제자리 걸음 2프레임을 천천히 번갈아 HGSS 데리고 다니기처럼 보이게 한다.
 ## - 지켜보기(watch): 인카운터·전투 중에는 멈춰서 지정한 곳(바닥 발판)을 바라본다.
 ## - 마우스 입력은 받지 않는다(Node2D) → 과녁 클릭·창 드래그를 막지 않는다.
@@ -18,17 +20,21 @@ const IDLE_FRAME_SEC := 0.45
 ## 쉬는 시간 (초)
 const IDLE_MIN := 1.5
 const IDLE_MAX := 5.0
-## 한 번에 걷는 거리 (px)
-const WALK_MIN := 16.0
-const WALK_MAX := 72.0
+## 칸 크기(들판 타일과 같음)와 칸 안의 발 자리, 한 번에 걷는 최대 칸 수 (v0.64)
+const GRID := 16
+const FOOT_IN_CELL := Vector2(8, 13)
+const WALK_TILES_MAX := 4
 ## 쉬고 난 뒤 걷지 않고 고개만 돌릴 확률
 const TURN_ONLY_CHANCE := 0.3
-## 발밑 그림자 (반지름 px)
-const SHADOW_RADIUS := Vector2(7, 2.5)
+## 발밑 그림자: 픽셀 타원 줄 [y, x 시작, x 끝(포함)] (v0.64, 이전 반투명 22% 매끈한 타원은 잘 안 보였다)
+const SHADOW_ROWS := [[-2, -3, 2], [-1, -5, 4], [0, -6, 5], [1, -5, 4]]
+const SHADOW_COLOR := Color(0, 0, 0, 0.32)
 const DIR_VEC := {Dir.DOWN: Vector2.DOWN, Dir.UP: Vector2.UP, Dir.LEFT: Vector2.LEFT, Dir.RIGHT: Vector2.RIGHT}
 
 ## 발 위치가 머무는 영역 (부모 좌표)
 var bounds := Rect2()
+## 칸 격자의 원점 (부모 좌표) = 들판 타일맵의 위치 (v0.64)
+var grid_origin := Vector2(0, 18)
 ## 못 지나가는 곳인가 (발 위치 → bool, v0.48 들판 타일맵). 비어 있으면 bounds 만 지킨다.
 var blocked := Callable()
 ## 이 걷는 포켓몬이 누구인지 (개체 uid) / 그림이 바뀌었는지 판단하는 키 (종·성별)
@@ -45,19 +51,16 @@ var _wait := 0.0
 var _anim_t := 0.0
 var _frame := 0
 var _sprite: Sprite2D
-var _shadow: Polygon2D
+var _shadow: Node2D
 ## 걷기 시트가 없어 아이콘 한 장으로 대신하는 중
 var _single := false
 
 
 func _init() -> void:
-	_shadow = Polygon2D.new()
-	_shadow.color = Color(0, 0, 0, 0.22)
-	var pts := PackedVector2Array()
-	for i in 12:
-		var a := TAU * i / 12.0
-		pts.append(Vector2(cos(a) * SHADOW_RADIUS.x, sin(a) * SHADOW_RADIUS.y))
-	_shadow.polygon = pts
+	_shadow = Node2D.new()
+	_shadow.draw.connect(func() -> void:
+		for r in SHADOW_ROWS:
+			_shadow.draw_rect(Rect2(r[1], r[0], r[2] - r[1] + 1, 1), SHADOW_COLOR))
 	add_child(_shadow)
 	_sprite = Sprite2D.new()
 	_sprite.centered = false
@@ -68,7 +71,7 @@ func _init() -> void:
 func setup(sheet: Texture2D, fallback: Texture2D, area: Rect2, start: Vector2) -> void:
 	bounds = area
 	set_look(sheet, fallback)
-	_pos = _clamp(start)
+	_pos = cell_foot(_nearest_cell(start))
 	_target = _pos
 	_wait = rng.randf_range(0.3, IDLE_MAX)
 	_apply()
@@ -169,31 +172,42 @@ func _next_move() -> void:
 		return
 	for _try in 4:
 		var d := rng.randi_range(0, 3)
-		var goal := _clamp(_pos + DIR_VEC[d] * rng.randf_range(WALK_MIN, WALK_MAX))
-		goal = _clear_until(goal)
-		if goal.distance_to(_pos) >= 4.0:
+		var here := cell_of(_pos)
+		var goal := here
+		for _n in rng.randi_range(1, WALK_TILES_MAX):   # 한 칸씩 보며 막히기 전 칸까지
+			var next := goal + Vector2i(DIR_VEC[d])
+			if not cell_ok(next):
+				break
+			goal = next
+		if goal != here:
 			dir = d
-			_target = goal
+			_target = cell_foot(goal)
 			walking = true
 			return
 	_wait = rng.randf_range(0.5, 1.5)   # 구석이라 갈 곳이 없으면 잠깐 뒤 다시
 
 
-## 지금 위치에서 goal 쪽으로 막히기 직전까지 (2px 간격으로 몸 폭 양 끝과 가운데를 본다)
-func _clear_until(goal: Vector2) -> Vector2:
-	if not blocked.is_valid():
-		return goal
-	var dist := _pos.distance_to(goal)
-	var step := (goal - _pos).normalized()
-	var last := _pos
-	var t := 0.0
-	while t < dist:
-		t = minf(t + 2.0, dist)   # 마지막에는 도착 지점 자체도 본다
-		var p := _pos + step * t
-		if is_blocked_at(p):
-			return last
-		last = p
-	return goal
+## 발 위치가 들어 있는 칸 / 칸의 발 자리 (v0.64)
+func cell_of(p: Vector2) -> Vector2i:
+	return Vector2i(((p - grid_origin) / GRID).floor())
+
+
+func cell_foot(c: Vector2i) -> Vector2:
+	return grid_origin + Vector2(c * GRID) + FOOT_IN_CELL
+
+
+## 이 칸에 설 수 있는가: 발 자리가 영역 안이고 막히지 않음
+func cell_ok(c: Vector2i) -> bool:
+	var f := cell_foot(c)
+	return bounds.grow(0.01).has_point(f) and not is_blocked_at(f)
+
+
+## p 에서 가장 가까운, 영역 안의 칸
+func _nearest_cell(p: Vector2) -> Vector2i:
+	var c := cell_of(p)
+	var lo := cell_of(bounds.position - FOOT_IN_CELL + Vector2(GRID - 1, GRID - 1))
+	var hi := cell_of(bounds.end - FOOT_IN_CELL)
+	return Vector2i(clampi(c.x, lo.x, hi.x), clampi(c.y, lo.y, hi.y))
 
 
 ## 몸 폭(발 좌우 5px)과 가운데 중 하나라도 막힌 곳에 닿는가
@@ -211,17 +225,14 @@ func relocate_if_blocked() -> void:
 	if not is_blocked_at(_pos):
 		return
 	for _try in 200:
-		var p := Vector2(rng.randf_range(bounds.position.x, bounds.end.x), rng.randf_range(bounds.position.y, bounds.end.y))
-		if not is_blocked_at(p):
-			_pos = p
-			_target = p
+		var c := _nearest_cell(Vector2(rng.randf_range(bounds.position.x, bounds.end.x), rng.randf_range(bounds.position.y, bounds.end.y)))
+		if cell_ok(c):
+			_pos = cell_foot(c)
+			_target = _pos
 			walking = false
 			_apply()
 			return
 
-
-func _clamp(p: Vector2) -> Vector2:
-	return Vector2(clampf(p.x, bounds.position.x, bounds.end.x), clampf(p.y, bounds.position.y, bounds.end.y))
 
 
 func _apply() -> void:

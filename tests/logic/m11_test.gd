@@ -123,22 +123,49 @@ func test_playlist_lists_bgm_folder_in_name_order() -> void:
 	assert_array(names).is_equal(sorted)
 
 
-func test_playlist_advances_and_wraps() -> void:
+func test_playlist_plays_each_track_once_per_round_in_random_order() -> void:
 	var n := AudioManager.playlist().size()
 	if n == 0:
 		return
 	AudioManager.start_playlist()
-	assert_int(AudioManager.current_track()).is_equal(0)
-	assert_str(AudioManager.current_bgm()).is_equal(AudioManager.playlist()[0])
+	var played: Array[int] = [AudioManager.current_track()]
+	assert_str(AudioManager.current_bgm()).is_equal(AudioManager.playlist()[played[0]])
 	for i in n - 1:
 		AudioManager.next_track()
-	assert_int(AudioManager.current_track()).is_equal(n - 1)
-	AudioManager.next_track()   # 마지막 다음은 첫 곡 (반복)
-	assert_int(AudioManager.current_track()).is_equal(0)
+		played.append(AudioManager.current_track())
+	# 한 바퀴에 모든 곡이 한 번씩
+	var sorted := played.duplicate()
+	sorted.sort()
+	assert_array(sorted).is_equal(range(n))
+	# 다음 바퀴: 최근 5곡은 앞 5자리에 오지 않는다
+	var recent := played.slice(maxi(0, n - AudioManager.RECENT_KEEP))
+	var front: Array[int] = []
+	for i in mini(AudioManager.RECENT_KEEP, n - recent.size()):
+		AudioManager.next_track()
+		front.append(AudioManager.current_track())
+	for t in front:
+		assert_bool(recent.has(t)).override_failure_message("최근 곡 %d 이 앞에 나옴" % t).is_false()
 	# 곡은 한 번씩만 재생(반복은 플레이리스트가 맡음)
-	var stream: AudioStream = load(AudioManager.playlist()[0])
+	var stream: AudioStream = load(AudioManager.current_bgm())
 	if stream is AudioStreamMP3 or stream is AudioStreamOggVorbis:
 		assert_bool(AudioManager._bgm[AudioManager._bgm_index].stream.loop).is_false()
+
+
+func test_shuffle_round_keeps_recent_out_of_front() -> void:
+	var r := RandomNumberGenerator.new()
+	for seed in 50:
+		r.seed = seed
+		var recent: Array[int] = [3, 7, 9, 12, 14]
+		var order := AudioManager.shuffle_round(15, recent, r)
+		var sorted := order.duplicate()
+		sorted.sort()
+		assert_array(sorted).is_equal(range(15))
+		for i in 5:
+			assert_bool(recent.has(order[i])).is_false()
+	# 곡이 적으면 최근이 아닌 곡만큼만 앞에 둔다
+	r.seed = 1
+	var small := AudioManager.shuffle_round(6, [0, 1, 2, 3, 4] as Array[int], r)
+	assert_int(small[0]).is_equal(5)
 
 
 func test_new_sound_effects_loaded() -> void:
@@ -187,11 +214,12 @@ func test_track_end_moves_to_next_track() -> void:
 	if n < 2:
 		return
 	AudioManager.start_playlist()
+	var first := AudioManager.current_track()
 	var cur: AudioStreamPlayer = AudioManager._bgm[AudioManager._bgm_index]
 	cur.seek(cur.stream.get_length() - 1.0)   # 끝나기 1초 전 → 다음 곡이 교차 페이드로 시작
 	await get_tree().process_frame
 	await get_tree().process_frame
-	assert_int(AudioManager.current_track()).is_equal(1)
+	assert_int(AudioManager.current_track()).is_not_equal(first)
 	assert_int(AudioManager._bgm.filter(func(p: AudioStreamPlayer) -> bool: return p.playing).size()).is_equal(2)
 
 

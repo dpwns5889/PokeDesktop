@@ -48,6 +48,10 @@ func _run() -> int:
 				extra_sheets[e.sheet] = img
 			src = extra_sheets[e.sheet]
 		var cut := src.get_region(Rect2i(r[0], r[1], r[2], r[3]))
+		# "fit": 큰 그림(예: 48×48 보관함 확장)을 아이콘 크기로 부드럽게 줄인다 (v0.64)
+		if e.has("fit"):
+			var f := int(e.fit)
+			cut.resize(f, f, Image.INTERPOLATE_LANCZOS)
 		if not own_sheet:
 			for y in cut.get_height():
 				for x in cut.get_width():

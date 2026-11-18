@@ -5,17 +5,27 @@ Assets/Sprites/reference/ 의 게임 화면(확대·흐림·원근이 있어 그
 원근 보정: 비스듬히 보이던 절벽·단은 "윗면 + 한 칸 앞면"으로 단순화한다.
 
 실행: python tools/make_field_tiles.py   (프로젝트 루트에서)
-결과: Assets/Generated/field/<region_id>.png  (816×16, 칸 51개 — 칸 번호는 FieldTiles 와 같음)
+결과: Assets/Generated/field/<region_id>.png  (1600×16, 칸 100개 — 칸 번호는 FieldMap 과 같음)
       Assets/Generated/preview_field.png      (검토용: 지역별 타일 줄)
+      Assets/Generated/preview_field_maps.png (검토용: 모든 지역 들판, tools/preview_field_maps.py)
 
-칸 번호 (v0.49)
-  0 땅  1 땅(풀결)  2 땅(얼룩)  3 장식(꽃·자갈·눈)
+칸 번호 (v0.64)
+  0 땅  1 땅(풀결)  2 땅(얼룩)  3 장식
   4 풀숲 윗줄  5 풀숲
   6~14  길 9칸   (왼위 위 오위 / 왼 가운데 오 / 왼아래 아래 오아래)
   15~23 물 9칸
-  24~32 단(바위 단) 9칸 — 아래 줄은 앞면(세로 줄무늬)
-  33 돌  34 덤불(풀 지역) / 수정(동굴 지역)
-  35~50 나무 64×64 = 4×4칸 (위 줄부터 왼→오)
+  24~32 단(언덕) 9칸
+  33 돌  34 덤불
+  35~46 나무 3×4  47~50 큰 바위 2×2  51~52 작은 나무 1×2  53~58 기계 3×2  59 상자 (위 줄부터 왼→오)
+  60~62 가로 다리  63~65 세로 다리  66~69 꽃밭 4종  70 물 위 회색 돌  71~74 물 위 회색 큰 바위 2×2
+  75~90 나무 군락 4×4 (열 0 = 첫 그루 왼쪽, 1 = 오른쪽 + 다음 그루 경계, 2 = 다음 그루 왼쪽, 3 = 마지막 그루 오른쪽 /
+         줄 0 = 뒤 나무와 겹친 윗부분, 1 = 꼭대기, 2 = 몸통, 3 = 밑동)
+  91~98 군락 옆 칸 (줄 r: 91 + 2r = 군락 왼쪽 옆 땅, 92 + 2r = 오른쪽 옆 땅) — 군락 그림은 양 끝 나무가 칸 경계에서
+         잘려 있어, 한 그루 나무 그림에서 삐져나온 잎 가장자리를 옆 땅 칸에 그린다
+  99    풀 덤불 (Tileset1 덤불을 작게 다듬음, 지나갈 수 있음 — 34 덤불은 Object 열매 덤불에서 열매를 지운 것, 못 지나감)
+
+v0.64: Assets/Sprites/tilemap/Tileset1.png 와 Object.png 가 있으면 모든 칸을 그 두 장에서 잘라 쓴다 (아래 TILESETS).
+없으면 코드로 그린 그림.
 """
 import math
 import os
@@ -25,7 +35,23 @@ import sys
 from PIL import Image
 
 T = 16
-COLS = 51
+TREE_W, TREE_H = 3, 4   # 나무 한 그루 = 3×4칸 (v0.64 Object.png, scenes/main/field_map.gd 와 같게)
+ROCK_I, BUSH_I = 33, 34   # 돌·덤불 칸 (ROCK 은 아래 팔레트 이름)
+TREE = 35                                   # 35~46 나무 3×4
+BOULDER = TREE + TREE_W * TREE_H            # 47~50 큰 바위 2×2
+SMALL_TREE = BOULDER + 2 * 2                # 51~52 작은 나무 1×2
+MACHINE = SMALL_TREE + 1 * 2                # 53~58 기계 3×2
+CRATE = MACHINE + 3 * 2                     # 59 상자
+BRIDGE_H = CRATE + 1                        # 60~62 가로 다리, 63~65 세로 다리, 66~69 꽃밭 4종
+BRIDGE_V = BRIDGE_H + 3
+FLOWERS = BRIDGE_V + 3
+FLOWER_KINDS = 4
+WATER_ROCK = FLOWERS + FLOWER_KINDS          # 70 물 위 회색 돌, 71~74 물 위 회색 큰 바위 2×2
+WATER_BOULDER = WATER_ROCK + 1
+CLUSTER = WATER_BOULDER + 2 * 2            # 75~90 나무 군락 4×4 (여러 그루가 붙은 숲, Object.png 12~15줄)
+CLUSTER_SIDE = CLUSTER + 4 * 4             # 91~98 군락 양 끝 옆 칸 (줄마다 왼쪽 옆·오른쪽 옆)
+LEAF_BUSH = CLUSTER_SIDE + 4 * 2           # 99 풀 덤불 (지나갈 수 있음)
+COLS = LEAF_BUSH + 1
 OUT_DIR = 'Assets/Generated/field'
 PREVIEW = 'Assets/Generated/preview_field.png'
 
@@ -498,6 +524,559 @@ def bush_or_crystal(p):
 
 # ---------------------------------------------------------------- 묶기
 
+def tree_small(p):
+    """타일 세트가 없을 때의 나무: 코드로 그린 64×64 나무를 TREE_W×TREE_H 칸으로 줄인다."""
+    big = Image.new('RGBA', (64, 64))
+    for i, t in enumerate(tree(p)):
+        big.paste(t.to_image(), ((i % 4) * T, (i // 4) * T))
+    small = big.resize((TREE_W * T, TREE_H * T), Image.NEAREST)
+    return [img_canvas(small.crop((x * T, y * T, x * T + T, y * T + T))) for y in range(TREE_H) for x in range(TREE_W)]
+
+
+# ---------------------------------------------------------------- 타일 세트에서 자르기 (v0.64)
+# Assets/Sprites/tilemap/Tileset1.png (땅·풀숲·꽃밭·길·물·용암·단·다리, 16×16 칸)와
+# Assets/Sprites/tilemap/Object.png (나무·바위·덤불·기계·상자, 16×16 칸) 두 장에서 잘라 쓴다.
+# 칸 좌표 = (세트, 열, 줄). 비어 있는(투명) 곳은 그 지역 땅 칸(0번) 위에 겹친다.
+# 세트 파일이 없으면(공개 저장소 등) 그 칸은 위의 코드로 그린 그림을 그대로 쓴다.
+
+SETS_DIR = 'Assets/Sprites/tilemap'
+S, O = 'Tileset1', 'Object'
+_sets = {}
+
+
+def tileset(name):
+    if name not in _sets:
+        path = os.path.join(SETS_DIR, name + '.png')
+        _sets[name] = Image.open(path).convert('RGBA') if os.path.exists(path) else None
+    return _sets[name]
+
+
+def img_canvas(im):
+    c = Canvas(im.width, im.height)
+    px = im.load()
+    for y in range(im.height):
+        for x in range(im.width):
+            c.px[y][x] = tuple(px[x, y])
+    return c
+
+
+def cut(name, col, row, w=1, h=1):
+    """세트의 (col, row) 칸부터 w×h 칸을 잘라 Image 로. 세트가 없으면 None."""
+    s = tileset(name)
+    if s is None:
+        return None
+    return s.crop((col * T, row * T, (col + w) * T, (row + h) * T))
+
+
+def split(im, w, h):
+    return [im.crop((x * T, y * T, x * T + T, y * T + T)) for y in range(h) for x in range(w)]
+
+
+def over(base, im):
+    """base(Canvas, 땅) 위에 im(Image) 을 겹친 새 Canvas"""
+    out = base.to_image()
+    out.alpha_composite(im)
+    return img_canvas(out)
+
+
+def recolor(im, fn):
+    out = im.copy()
+    px = out.load()
+    for y in range(out.height):
+        for x in range(out.width):
+            c = px[x, y]
+            if c[3]:
+                px[x, y] = fn(c)
+    return out
+
+
+def darken(k, tint=(0, 0, 0)):
+    return lambda c: tuple(max(0, min(255, int(c[i] * k + tint[i]))) for i in range(3)) + (c[3],)
+
+
+def frost(c):
+    """눈 덮인 색: 초록 잎은 하얗게(밝을수록 더), 줄기는 그대로"""
+    r, g, b, a = c
+    if g > r and g >= b:
+        light = (r + g + b) / 765.0
+        t = 0.45 + 0.45 * light
+        return (int(r + (236 - r) * t), int(g + (244 - g) * t), int(b + (252 - b) * t), a)
+    return c
+
+
+def gray(k=1.0, tint=(0, 0, 0)):
+    """밝기만 남긴 회색 (k 배, tint 더하기) — 흙 언덕을 바위 단으로"""
+    def f(c):
+        lum = (0.3 * c[0] + 0.59 * c[1] + 0.11 * c[2]) * k
+        return tuple(max(0, min(255, int(lum + tint[i]))) for i in range(3)) + (c[3],)
+    return f
+
+
+def purple(c):
+    """유령탑: 밝기만 남겨 보랏빛으로"""
+    lum = 0.3 * c[0] + 0.59 * c[1] + 0.11 * c[2]
+    return (min(255, int(lum * 0.78 + 18)), min(255, int(lum * 0.62 + 8)), min(255, int(lum * 0.95 + 34)), c[3])
+
+
+def icy(c):
+    """동굴 물을 옅은 얼음물로"""
+    return (min(255, int(c[0] * 0.6 + 90)), min(255, int(c[1] * 0.6 + 110)), min(255, int(c[2] * 0.5 + 130)), c[3])
+
+
+def no_grass(im):
+    """흙 언덕(Tileset1 24~26열)의 모서리 풀 바탕을 지운다 → 어느 지역 땅 위에나 얹을 수 있게"""
+    out = im.copy()
+    px = out.load()
+    for y in range(out.height):
+        for x in range(out.width):
+            r, g, b, a = px[x, y]
+            if a and g > r + 12 and g > b:
+                px[x, y] = (0, 0, 0, 0)
+    return out
+
+
+def pond9():
+    """풀밭 연못 9칸: Tileset1 10~12열 0~2줄 (오른쪽 위 모서리가 비어 있어 왼쪽 위를 좌우로 뒤집어 쓴다)"""
+    if tileset(S) is None:
+        return None
+    tl = cut(S, 10, 0)
+    parts = [tl, cut(S, 11, 0), tl.transpose(Image.FLIP_LEFT_RIGHT),
+             cut(S, 10, 1), cut(S, 11, 1), cut(S, 12, 1),
+             cut(S, 10, 2), cut(S, 11, 2), cut(S, 12, 2)]
+    out = Image.new('RGBA', (3 * T, 3 * T))
+    for k, im in enumerate(parts):
+        out.paste(im, ((k % 3) * T, (k // 3) * T))
+    return out
+
+
+def nine(name, col, row):
+    return cut(name, col, row, 3, 3)
+
+
+def no_bg(im):
+    """풀 바탕이 깔린 칸(새 덤불 (2,2))에서 가장자리와 이어진 풀밭 색(0~2,0 칸의 색)을 지운다"""
+    pal = set()
+    for c in range(3):
+        g = cut(S, c, 0)
+        pal |= {g.getpixel((x, y)) for x in range(T) for y in range(T)}
+    out = im.copy()
+    px = out.load()
+    w, h = out.size
+    stack = [(x, y) for x in range(w) for y in (0, h - 1)] + [(x, y) for y in range(h) for x in (0, w - 1)]
+    seen = set()
+    while stack:
+        x, y = stack.pop()
+        if (x, y) in seen or not (0 <= x < w and 0 <= y < h):
+            continue
+        seen.add((x, y))
+        if px[x, y] in pal:
+            px[x, y] = (0, 0, 0, 0)
+            stack += [(x + 1, y), (x - 1, y), (x, y + 1), (x, y - 1)]
+    return out
+
+
+def cluster_block(kind):
+    """나무 군락 4×4칸. dark = Object (0~3, 12~15) 짙은 숲 그대로,
+    light = Object (5~8, 13~15) 둥근 나무 줄 3줄 — 맨 윗줄(뒤 나무와 겹친 부분)이 없어 꼭대기 줄을 한 번 더."""
+    if kind == 'dark':
+        return cut(O, 0, 12, 4, 4)
+    out = Image.new('RGBA', (4 * T, 4 * T))
+    out.paste(cut(O, 5, 13, 4, 1), (0, 0))
+    out.paste(cut(O, 5, 13, 4, 3), (0, T))
+    return out
+
+
+# 군락 한 그루(2칸 = 32px)와 같은 그림인 한 그루 나무(3×4칸 = 48px): 나무 그림 (8, y0) 부터가 군락 2칸과 겹친다.
+# 그 왼쪽 8px·오른쪽 8px 이 군락 끝에서 잘린 잎 가장자리.
+CLUSTER_TREE = {'light': ((O, 1, 0), 9), 'dark': ((O, 4, 0), 10)}
+
+
+def cluster_sides(kind):
+    """군락 옆 칸 8장 (줄 0~3 × 왼쪽 옆·오른쪽 옆). 왼쪽 옆 칸은 칸 오른쪽 끝에, 오른쪽 옆 칸은 왼쪽 끝에 잎 가장자리."""
+    spec, y0 = CLUSTER_TREE[kind]
+    tree = _one(spec, 3, 4)
+    if tree is None:
+        return None
+    # 위아래로 여유를 둔 나무 그림 (y = 16 + 나무 y)
+    tall = Image.new('RGBA', (3 * T, 6 * T))
+    tall.paste(tree, (0, T))
+
+    def band(ty):   # 나무 y = ty 부터 16줄
+        return tall.crop((0, T + ty, 3 * T, 2 * T + ty))
+    rows = [None, band(y0), band(y0 + T), band(y0 + 2 * T)]
+    if kind == 'light':
+        rows[0] = rows[1]   # 군락 그림도 맨 윗줄 = 꼭대기 줄
+    else:
+        # 겹친 줄 = 위 나무 몸통 아래쪽 위에 앞(아래) 나무 꼭대기
+        r0 = band(y0 + T).copy()
+        r0.alpha_composite(band(y0 - T))
+        rows[0] = r0
+    out = []
+    for im in rows:
+        left = Image.new('RGBA', (T, T))
+        left.paste(im.crop((0, 0, 8, T)), (8, 0))
+        right = Image.new('RGBA', (T, T))
+        right.paste(im.crop((5 * 8, 0, 6 * 8, T)), (0, 0))
+        out += [left, right]
+    return out
+
+
+def no_berry(im):
+    """Object 열매 덤불: 노란 열매 픽셀을 둘레 잎 색(가장 흔한 이웃 색)으로 채운다"""
+    out = im.copy()
+    px = out.load()
+    w, h = out.size
+
+    def berry(c):
+        return c[3] and c[0] > 120 and c[2] < 60
+
+    todo = [(x, y) for y in range(h) for x in range(w) if berry(px[x, y])]
+    while todo:
+        rest = []
+        fills = {}
+        for (x, y) in todo:
+            near = [px[x + dx, y + dy] for dx in (-1, 0, 1) for dy in (-1, 0, 1)
+                    if (dx or dy) and 0 <= x + dx < w and 0 <= y + dy < h]
+            near = [c for c in near if c[3] and not berry(c)]
+            if near:
+                fills[(x, y)] = max(set(near), key=near.count)
+            else:
+                rest.append((x, y))
+        for k, c in fills.items():
+            px[k] = c
+        if len(rest) == len(todo):
+            break
+        todo = rest
+    return out
+
+
+def trim_bush(im):
+    """Tileset1 덤불(칸을 거의 채움)의 바깥 잎을 지워 작고 둥글게: 타원 밖을 지우고 새 가장자리에 가장 어두운 색 테"""
+    out = im.copy()
+    px = out.load()
+    cols = [px[x, y] for y in range(T) for x in range(T) if px[x, y][3]]
+    dark = min(cols, key=lambda c: c[0] + c[1] + c[2]) if cols else (0, 0, 0, 255)
+    for y in range(T):
+        for x in range(T):
+            if ((x + 0.5 - 8) / 7.2) ** 2 + ((y + 0.5 - 8.8) / 6.9) ** 2 > 1.0:
+                px[x, y] = (0, 0, 0, 0)
+    keep = {(x, y) for y in range(T) for x in range(T) if px[x, y][3]}
+    for (x, y) in keep:
+        if any((x + dx, y + dy) not in keep for dx, dy in ((1, 0), (-1, 0), (0, 1), (0, -1))):
+            px[x, y] = dark
+    return out
+
+
+# ---- 설산: 풀밭 타일을 눈 색으로 옮겨 같은 무늬·같은 느낌으로 (v0.64)
+def _lum(c):
+    return (0.3 * c[0] + 0.59 * c[1] + 0.11 * c[2]) / 255.0
+
+
+def _shift(base, d, k=300, cool=(0.85, 0.92, 1.0)):
+    return tuple(max(0, min(255, int(base[i] + d * k * cool[i]))) for i in range(3))
+
+
+_ref = {}
+
+
+def _ref_lum(key):
+    """기준 밝기: 풀밭 바탕 / 모래길 가운데 / 연못 물 가운데"""
+    if key not in _ref:
+        spot = {'grass': (S, 0, 0), 'sand': (S, 4, 1), 'water': (S, 11, 1)}[key]
+        _ref[key] = _lum(cut(*spot).getpixel((8, 8)))
+    return _ref[key]
+
+
+SNOW = (236, 242, 250)
+TRODDEN = (204, 214, 230)
+ICE = (176, 216, 238)
+BANK = (214, 224, 238)
+
+
+def snowify(c):
+    """땅 무늬: 풀색 → 눈, 모래·흙 → 다져진 눈길(옅은 잿빛 파랑), 물 → 얼음물. 밝기 차이(풀결·얼룩)는 그대로 살린다"""
+    r, g, b, a = c
+    L = _lum(c)
+    if g > r + 8 and g >= b:
+        return _shift(SNOW, L - _ref_lum('grass')) + (a,)
+    if b > r + 20 and b >= g:
+        return _shift(ICE, L - _ref_lum('water'), 220) + (a,)
+    return _shift(TRODDEN, L - _ref_lum('sand'), 260) + (a,)
+
+
+def snow_bank(c):
+    """연못 흙 둑 → 눈 둑, 물 → 얼음물"""
+    r, g, b, a = c
+    if b > r + 20 and b >= g:
+        return _shift(ICE, _lum(c) - _ref_lum('water'), 220) + (a,)
+    return _shift(BANK, _lum(c) - 0.5, 180) + (a,)
+
+
+def snowcap(thr, greens_only=False):
+    """물체에 눈 덮기: 밝은(빛 받는 윗면) 픽셀은 눈, 어두운 픽셀은 차가운 색. greens_only 면 잎만(줄기 그대로)"""
+    def f(c):
+        r, g, b, a = c
+        green = g > r + 4 and g >= b
+        if greens_only and not green:
+            return c
+        L = _lum(c)
+        if L >= thr:
+            return _shift(SNOW, (L - thr) * 0.5 - 0.02, 300) + (a,)
+        if green:
+            return (int(r * 0.55 + 18), int(g * 0.62 + 30), int(b * 0.7 + 44), a)
+        return (int(L * 150 + 24), int(L * 165 + 34), int(L * 190 + 52), a)
+    return f
+
+
+# ---- 실험실 바닥 (발전소, v0.64): Object.png 기계와 어울리는 밝은 회색 패널·금속 벽을 코드로 그린다
+LAB_HI, LAB_SEAM, LAB_RIVET = (226, 230, 238), (146, 154, 170), (168, 176, 190)
+LAB_BASE = [(202, 208, 218), (198, 204, 214), (206, 212, 222)]
+
+
+def lab_floor(v):
+    im = Image.new('RGBA', (T, T), LAB_BASE[v] + (255,))
+    px = im.load()
+    for i in range(T):
+        px[i, 0] = px[0, i] = LAB_HI + (255,)
+        px[i, T - 1] = px[T - 1, i] = LAB_SEAM + (255,)
+    for x, y in ((2, 2), (13, 2), (2, 13), (13, 13)):
+        px[x, y] = LAB_RIVET + (255,)
+    if v == 2:   # 옅은 긁힘
+        for x, y in ((6, 9), (7, 9), (8, 10), (9, 10)):
+            px[x, y] = (188, 194, 206, 255)
+    return im
+
+
+def lab_vent():
+    im = lab_floor(0)
+    px = im.load()
+    for y in range(5, 11):
+        for x in range(4, 12):
+            px[x, y] = (92, 100, 116, 255) if y in (5, 10) or x in (4, 11) else ((120, 128, 144, 255) if y % 2 == 0 else (74, 80, 96, 255))
+    return im
+
+
+def _round_inside(x, y, x0, y0, x1, y1, r=2):
+    """(x, y)가 모서리를 r 만큼 깎은 사각형 안인가"""
+    if not (x0 <= x <= x1 and y0 <= y <= y1):
+        return False
+    dx = max(x0 + r - x, x - (x1 - r), 0)
+    dy = max(y0 + r - y, y - (y1 - r), 0)
+    return dx + dy <= r
+
+
+def lab_floor9():
+    """발전소 길(p) 자리: 물처럼 보이던 청록 통로를 없애고 바닥 패널 그대로 (v0.64)"""
+    out = Image.new('RGBA', (3 * T, 3 * T))
+    for k in range(9):
+        out.paste(lab_floor(0), ((k % 3) * T, (k // 3) * T))
+    return out
+
+
+def lab_platform9():
+    """금속 벽(단 h): 회청색 철판(16px 이음매·리벳) + 짙은 테. 음영 없음 — 앞면 띠·윗줄 밝은 테를 그리지 않는다"""
+    W = 3 * T
+    im = Image.new('RGBA', (W, W))
+    px = im.load()
+    for y in range(W):
+        for x in range(W):
+            if not _round_inside(x, y, 1, 1, W - 2, W - 2, 1):
+                continue
+            if not _round_inside(x, y, 2, 2, W - 3, W - 3, 1):
+                px[x, y] = (58, 64, 78, 255)
+            else:
+                lx, ly = x % T, y % T
+                c = (150, 158, 174)
+                if lx in (0, T - 1) or ly in (0, T - 1):
+                    c = (138, 146, 162)
+                if (lx, ly) in ((3, 3), (12, 3), (3, 12), (12, 12)):
+                    c = (116, 124, 140)
+                px[x, y] = c + (255,)
+    return im
+
+
+# 지역별 칸 (v0.64). 키 = 칸 번호 묶음, 값 = 자를 위치
+#   'ground': [(세트, 열, 줄[, 'flip'|'flipv']) × 3]   'deco': (세트, 열, 줄)   'tall': (세트, 열, 줄) — 풀숲 두 칸 모두
+#   'path' / 'water' / 'ledge': 3×3칸 그림을 돌려주는 함수
+#   'fx': 땅·장식·길·물·단에 적용할 색 바꾸기,  'obj_fx': 오브젝트·꽃밭·다리에 적용할 색 바꾸기
+#   오브젝트(Object.png, 모두 못 지나감): 'tree' 3×4, 'boulder' 2×2, 'small_tree' 1×2, 'rock' 1칸, 'bush' 1칸
+#   'stone_fx': 땅 위 돌(갈색 작은 돌·큰 바위, 돌인 덤불)의 색 바꾸기 — 회색 돌은 물 위(water_rock·water_boulder)에만
+COMMON = {
+    'tall': (S, 1, 2),
+    'path': lambda: nine(S, 3, 0),                          # 모래길 (풀 테두리)
+    'water': pond9,                                         # 흙 둑 연못
+    'ledge': lambda: no_grass(nine(S, 24, 0)),              # 흙 언덕
+    'flowers': [(S, 0, 3), (S, 1, 3), (S, 0, 4), (S, 1, 4)],
+    'bridge_h': (S, 28, 0),
+    'bridge_v': (S, 31, 0),
+    'tree': (O, 1, 0),                                      # 한 그루 나무 Y (밝은 활엽수)
+    'cluster': 'light',                                     # 여러 그루 나무 T (둥근 나무 줄)
+    'boulder': (O, 7, 0),                                   # 갈색 큰 바위 (땅 위 돌은 모두 갈색 돌 — 지역마다 stone_fx 로 색만 바꿈)
+    'small_tree': (O, 0, 0),
+    'rock': (O, 9, 0),                                      # 갈색 작은 돌
+    'bush': (O, 0, 2, 'noberry'),                           # 덤불 b = Object 열매 덤불에서 열매를 지운 것 (못 지나감)
+    'leaf_bush': (S, 2, 1, 'nobg', 'trim'),                 # 풀 덤불 v = Tileset1 덤불의 바깥 잎을 지워 작게 (지나갈 수 있음)
+    'machine': (O, 0, 5),                                   # 발전소 기계 3대
+    'crate': (O, 3, 6),
+    'water_rock': (O, 9, 2),                                # 회색 돌·큰 바위 = 물결 테두리 → 물 위에만
+    'water_boulder': (O, 7, 2),
+}
+GRASS_SET = {
+    'ground': [(S, 0, 0), (S, 1, 0), (S, 2, 0)],
+    'deco': (S, 1, 1),                                      # 흰 꽃
+}
+CAVE_SET = {
+    'ground': [(S, 0, 5), (S, 1, 5), (S, 0, 6)],
+    'deco': (S, 1, 6),
+    'path': lambda: nine(S, 3, 5),                          # 짙은 돌바닥
+    'water': lambda: nine(S, 7, 5),                         # 동굴 물웅덩이
+    'ledge': lambda: recolor(no_grass(nine(S, 24, 0)), gray(0.78)),   # 흙 언덕을 잿빛 바위 언덕으로
+    'tree': (O, 4, 0),
+    'bush': (O, 9, 0),                                      # 작은 돌 (동굴엔 덤불이 없다)
+    'stone_fx': gray(0.9, (0, 6, 12)),                      # 갈색 돌을 푸른 잿빛으로
+}
+
+TILESETS = {
+    'grassland': GRASS_SET,
+    'forest': dict(GRASS_SET, deco=(S, 0, 1), tree=(O, 4, 0), cluster='dark'),   # 클로버, 짙은 나무·짙은 숲
+    'waterside': GRASS_SET,
+    'cave': CAVE_SET,
+    'deep_cave': dict(CAVE_SET, fx=darken(0.62, (0, 2, 10)), obj_fx=darken(0.75, (0, 2, 10))),   # 어둡게
+    'volcano': {
+        'ground': [(S, 10, 10), (S, 10, 10, 'flip'), (S, 10, 10, 'flipv')],   # 붉은 흙바닥
+        'deco': (S, 10, 10, 'flip', 'flipv'),
+        'path': lambda: nine(S, 6, 9),                      # 잿빛 돌바닥
+        'water': lambda: nine(S, 10, 5),                    # 용암
+        'ledge': lambda: recolor(no_grass(nine(S, 24, 0)), darken(0.72, (10, 0, 0))),
+        'bush': (O, 9, 0),                                  # 작은 돌 (화산엔 덤불이 없다)
+        'stone_fx': darken(0.8, (22, 0, 0)),                # 붉게 그을린 돌
+    },
+    # 설산 (v0.64): 풀밭·모래길·연못·언덕·나무를 눈 색으로 옮겨 다른 지역과 같은 무늬로
+    'snow_mountain': {
+        'ground': [lambda c=c: recolor(cut(S, c, 0), snowify) for c in range(3)],
+        'deco': lambda: recolor(cut(S, 0, 1), snowify),
+        'tall_fx': snowify,
+        'path': lambda: recolor(nine(S, 3, 0), snowify),     # 다져진 눈길
+        'water': lambda: recolor(pond9(), snow_bank),       # 눈 둑 얼음 연못
+        'ledge': lambda: recolor(no_grass(nine(S, 24, 0)), snowcap(0.5)),   # 눈 덮인 바위 언덕
+        'tree': (O, 4, 0),
+        'tree_fx': snowcap(0.36, True),
+        'cluster': 'dark',
+        'cluster_fx': snowcap(0.36, True),
+        'small_tree': (O, 9, 4),                            # 침엽수
+        'small_tree_fx': snowcap(0.3, True),
+        'stone_fx': snowcap(0.5),                           # 눈 덮인 돌
+        'bush_fx': snowcap(0.42, True),
+        'water_rock_fx': None,
+    },
+    # 발전소 = 실험실 (v0.64): 밝은 회색 패널 바닥 + 음영 없는 금속 벽, 기계·상자
+    'power_plant': {
+        'ground': [lambda v=v: lab_floor(v) for v in range(3)],
+        'deco': lab_vent,
+        'path': lab_floor9,                                 # 청록 통로 없음 (물처럼 보였다)
+        'ledge': lab_platform9,
+        'stone_fx': gray(0.95, (6, 8, 14)),                 # 쇳빛 돌
+        'bush': (O, 3, 6),                                  # 상자
+    },
+    # 유령탑: 짙은 돌바닥·잿빛 길·바위 언덕을 보랏빛으로
+    'ghost_tower': {
+        'ground': [(S, 4, 6), (S, 4, 6, 'flip'), (S, 4, 6, 'flipv')],
+        'deco': (S, 1, 6),
+        'path': lambda: nine(S, 6, 9),
+        'ledge': lambda: no_grass(nine(S, 24, 0)),
+        'fx': purple,
+        'bush': (O, 9, 0),                                  # 작은 돌 (보랏빛은 obj_fx)
+        'obj_fx': purple,
+    },
+}
+
+
+def _one(spec, w=1, h=1):
+    """(세트, 열, 줄[, 'flip'|'flipv'|'nobg'|'noberry'|'trim' …]) 또는 그림을 돌려주는 함수"""
+    if callable(spec):
+        return spec()
+    im = cut(spec[0], spec[1], spec[2], w, h)
+    if im is not None:
+        for f in spec[3:]:
+            if f == 'nobg':
+                im = no_bg(im)
+            elif f == 'noberry':
+                im = no_berry(im)
+            elif f == 'trim':
+                im = trim_bush(im)
+            else:
+                im = im.transpose(Image.FLIP_LEFT_RIGHT if f == 'flip' else Image.FLIP_TOP_BOTTOM)
+    return im
+
+
+def apply_tileset(region, tiles):
+    """코드로 그린 tiles(COLS개) 중 세트로 바꿀 수 있는 칸을 바꾼다"""
+    if tileset(S) is None or tileset(O) is None:
+        return tiles
+    spec = dict(COMMON, **TILESETS.get(region, {}))
+    fx = spec.get('fx')
+    obj_fx = spec.get('obj_fx')
+
+    def fix(im, extra=None, f=fx):
+        if im is None:
+            return None
+        if extra:
+            im = recolor(im, extra)
+        return recolor(im, f) if f else im
+
+    def obj(im, extra=None):
+        return fix(im, extra, obj_fx)
+
+    tiles = list(tiles)
+    for i, g in enumerate(spec['ground']):
+        tiles[i] = img_canvas(fix(_one(g)))
+    base = tiles[0]
+
+    def put(i, im, under=None):
+        if im is not None:
+            tiles[i] = over(under or base, im)
+    put(3, fix(_one(spec['deco'])))
+    put(4, fix(_one(spec['tall']), spec.get('tall_fx')))
+    put(5, fix(_one(spec['tall']), spec.get('tall_fx')))
+    for key, first in (('path', 6), ('water', 15), ('ledge', 24)):
+        im = spec[key]()
+        if im is not None:
+            for k, part in enumerate(split(fix(im), 3, 3)):
+                put(first + k, part)
+    stone_fx = spec.get('stone_fx')
+    put(ROCK_I, obj(_one(spec['rock']), stone_fx))
+    bush_is_stone = spec['bush'][0] == O and spec['bush'][1:3] == spec['rock'][1:3]
+    put(BUSH_I, obj(_one(spec['bush']), stone_fx if bush_is_stone else spec.get('bush_fx')))
+    put(LEAF_BUSH, obj(_one(spec['leaf_bush']), spec.get('bush_fx')))
+    put(CRATE, obj(_one(spec['crate'])))
+    spec['boulder_fx'] = stone_fx
+    for key, first, w, h in (('tree', TREE, 3, 4), ('boulder', BOULDER, 2, 2), ('small_tree', SMALL_TREE, 1, 2),
+                             ('machine', MACHINE, 3, 2)):
+        im = _one(spec[key], w, h)
+        if im is not None:
+            for k, part in enumerate(split(obj(im, spec.get(key + '_fx')), w, h)):
+                put(first + k, part)
+    # 다리는 물 가운데 칸 위에
+    water_mid = tiles[19]
+    for key, first, w, h in (('bridge_h', BRIDGE_H, 3, 1), ('bridge_v', BRIDGE_V, 1, 3)):
+        im = _one(spec[key], w, h)
+        for k, part in enumerate(split(obj(im), w, h)):
+            put(first + k, part, water_mid)
+    for k, f in enumerate(spec['flowers']):
+        put(FLOWERS + k, obj(_one(f)))
+    # 나무 군락 (여러 그루가 붙은 숲)
+    for k, part in enumerate(split(obj(cluster_block(spec['cluster']), spec.get('cluster_fx')), 4, 4)):
+        put(CLUSTER + k, part)
+    # 군락 양 끝 옆 칸: 잘린 잎 가장자리 (군락과 같은 색 바꾸기)
+    for k, part in enumerate(cluster_sides(spec['cluster']) or []):
+        put(CLUSTER_SIDE + k, obj(part, spec.get('cluster_fx')))
+    # 회색 돌·큰 바위는 물 가운데 칸 위에 (물결 테두리가 물에 잠긴 돌처럼 보이게)
+    put(WATER_ROCK, obj(_one(spec['water_rock'])), water_mid)
+    for k, part in enumerate(split(obj(_one(spec['water_boulder'], 2, 2)), 2, 2)):
+        put(WATER_BOULDER + k, part, water_mid)
+    return tiles
+
+
 def build(region):
     p = Pal(THEMES[region])
     tiles = [ground(p, 0), ground(p, 1), ground(p, 2), deco(p), tall_grass(p, True), tall_grass(p, False)]
@@ -505,7 +1084,14 @@ def build(region):
     tiles += patch9(p, 'water')
     tiles += patch9(p, 'ledge')
     tiles += [rock(p), bush_or_crystal(p)]
-    tiles += tree(p)
+    # 세트가 없을 때: 나무 = 코드로 그린 나무를 3×4칸으로, 나머지 오브젝트는 돌·덤불, 다리(길 가운데)·꽃밭(장식)
+    tiles += tree_small(p)
+    tiles += [tiles[ROCK_I]] * 4 + [tiles[BUSH_I]] * 2 + [tiles[ROCK_I]] * 6 + [tiles[ROCK_I]]
+    tiles += [tiles[10]] * 6 + [tiles[3]] * FLOWER_KINDS
+    tiles += [tiles[ROCK_I]] * 5
+    tiles += [tiles[TREE + 4]] * 16
+    tiles += [tiles[0]] * 8 + [tiles[BUSH_I]]
+    tiles = apply_tileset(region, tiles)
     assert len(tiles) == COLS, len(tiles)
     sheet = Canvas(T * COLS, T)
     for i, t in enumerate(tiles):
@@ -513,18 +1099,36 @@ def build(region):
     return sheet.to_image()
 
 
+def save_retry(im, path, tries=20):
+    """열려 있는 Godot 편집기가 다시 가져오는 중이면 파일이 잠깐 잠긴다 → 조금 기다렸다 다시"""
+    import time
+    for i in range(tries):
+        try:
+            im.save(path)
+            return
+        except OSError:
+            if i == tries - 1:
+                raise
+            time.sleep(0.3)
+
+
 def main():
     os.makedirs(OUT_DIR, exist_ok=True)
     sheets = {}
     for region in THEMES:
         im = build(region)
-        im.save(os.path.join(OUT_DIR, region + '.png'))
+        save_retry(im, os.path.join(OUT_DIR, region + '.png'))
         sheets[region] = im
     prev = Image.new('RGBA', (T * COLS * 2, T * 2 * len(sheets) + 4 * len(sheets)), (40, 40, 48, 255))
     for i, (region, im) in enumerate(sheets.items()):
         prev.paste(im.resize((im.width * 2, im.height * 2), Image.NEAREST), (0, i * (T * 2 + 4)))
-    prev.save(PREVIEW)
+    save_retry(prev, PREVIEW)
     print('들판 타일 %d지역 → %s' % (len(sheets), OUT_DIR))
+    # 모든 지역 지형을 한 장에 (v0.64: 지형을 바꾸면 늘 함께 만든다)
+    sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+    sys.dont_write_bytecode = True   # tools/__pycache__ 를 만들지 않게
+    import preview_field_maps
+    preview_field_maps.main()
 
 
 if __name__ == '__main__':

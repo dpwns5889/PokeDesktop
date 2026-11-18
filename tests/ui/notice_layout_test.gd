@@ -32,3 +32,25 @@ func test_shop_mode_buttons() -> void:
 	p._sell_tab.button_pressed = true
 	assert_bool(p._buy_tab.button_pressed).is_false()
 	assert_bool(p._selling()).is_true()
+
+
+## v0.64: 팔면 "팔았다" 문구 없이 구매와 같은 소리 (문구가 판매 버튼을 밀어내 잘리게 했다)
+func test_sell_plays_buy_sound_without_message() -> void:
+	var snap := PlayerState.to_save_dict()
+	PlayerState.reset()
+	PlayerState.add_item(&"great_ball", 3)
+	var p = auto_free(ShopPanel.new())
+	add_child(p)
+	p.open_panel()
+	p._sell_tab.button_pressed = true
+	p._list.select(p._ids.find(&"great_ball"))
+	p._update_order()
+	var snd: AudioStreamPlayer = AudioManager._players[&"buy_item"]
+	snd.stop()
+	p._on_order()
+	assert_int(PlayerState.item_count(&"great_ball")).is_equal(2)
+	assert_str(p._message.text).is_empty()
+	assert_bool(p._message.visible).is_false()
+	assert_bool(snd.playing).is_true()
+	snd.stop()
+	PlayerState.load_save_dict(snap)

@@ -3,6 +3,8 @@ extends OverlayPanel
 ## 왼쪽 = 소지금·구매/판매·상품 목록 / 오른쪽 = 고른 상품 설명, 개수, 합계, 구매/판매 버튼, 결과 문구
 
 const STORAGE_ROW := &"__storage__"
+## 보관함 확장 그림 (v0.64, tools/import_icons.gd 가 Assets/Sprites/ExpandBag.png 를 24px 로 줄여 만든다)
+const STORAGE_ICON := "res://Assets/Generated/icons/expand_storage.png"
 const LIST_WIDTH := 150
 
 var _money: Label
@@ -15,6 +17,8 @@ var _ids: Array[StringName] = []
 var _icon: TextureRect
 var _name: Label
 var _desc: Label
+## 가격(판매가): 개수 칸 오른쪽, 합계 바로 위 줄 (v0.64)
+var _price: Label
 var _qty_row: HBoxContainer
 var _qty: SpinBox
 var _total: Label
@@ -83,18 +87,26 @@ func _build_content(box: VBoxContainer) -> void:
 	_desc.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	_desc.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	right.add_child(_desc)
+	# 개수 칸 | 오른쪽에 가격(위)·합계(아래) 두 줄 — 줄을 하나 더 쓰지 않아 구매 버튼이 밀려나지 않게 (v0.64)
 	_qty_row = HBoxContainer.new()
 	right.add_child(_qty_row)
 	_qty = SpinBox.new()
 	_qty.min_value = 1
 	_qty.max_value = 99
 	_qty.value = 1
+	_qty.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	_qty.value_changed.connect(func(_v: float) -> void: _update_order())
 	_qty_row.add_child(_qty)
+	var sums := VBoxContainer.new()
+	sums.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	sums.add_theme_constant_override(&"separation", -2)
+	_qty_row.add_child(sums)
+	_price = Label.new()
+	_price.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+	sums.add_child(_price)
 	_total = Label.new()
-	_total.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_total.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
-	_qty_row.add_child(_total)
+	sums.add_child(_total)
 	_button = Button.new()
 	_button.focus_mode = Control.FOCUS_NONE
 	_button.pressed.connect(_on_order)
@@ -134,7 +146,7 @@ func refresh() -> void:
 			_list.add_item(item.name_ko, item.load_icon())
 			_ids.append(item.id)
 	if not _selling():
-		_list.add_item("보관함 확장")
+		_list.add_item("보관함 확장", _storage_icon())
 		_ids.append(STORAGE_ROW)
 	var i := _ids.find(keep)
 	if i < 0 and _ids.size() > 0:
@@ -162,9 +174,9 @@ func _update_order() -> void:
 		_button.disabled = true
 		return
 	if id == STORAGE_ROW:
-		_icon.texture = null
+		_icon.texture = _storage_icon()
 		_name.text = "보관함 확장"
-		_qty_row.visible = false
+		_qty_row.visible = false   # 개수가 없어 합계도 없다 → 가격은 설명 끝에
 		if ShopManager.can_expand_storage():
 			_desc.text = "보관함이 %d칸 늘어난다.\n지금 %d칸 → %d칸\n가격 %s" % [ShopManager.STORAGE_EXPANSION_SLOTS,
 				PlayerState.storage_capacity, PlayerState.storage_capacity + ShopManager.STORAGE_EXPANSION_SLOTS,
@@ -177,7 +189,8 @@ func _update_order() -> void:
 	_icon.texture = item.load_icon()
 	_name.text = item.name_ko
 	var price := item.sell_price if _selling() else item.buy_price
-	_desc.text = "%s\n%s %s" % [item.description, "판매가" if _selling() else "가격", ShopManager.format_money(price)]
+	_desc.text = item.description
+	_price.text = "%s %s" % ["판매가" if _selling() else "가격", ShopManager.format_money(price)]   # 합계 바로 위 (v0.64)
 	_qty_row.visible = true
 	_qty.max_value = maxi(1, PlayerState.item_count(id)) if _selling() else 99
 	_total.text = "합계 %s" % ShopManager.format_money(price * int(_qty.value))
@@ -191,7 +204,9 @@ func _on_order() -> void:
 	if _selling():
 		result = ShopManager.sell(id, qty)
 		if result.ok:
-			_message.text = "%s %d개를 팔았다." % [GameData.get_item(id).name_ko, qty]
+			# v0.64: "팔았다" 문구는 판매 버튼을 밀어내 잘리게 해서 없앴다 → 구매와 같은 소리로 알린다
+			_message.text = ""
+			AudioManager.play(&"buy_item")
 	elif id == STORAGE_ROW:
 		result = ShopManager.expand_storage()
 		if result.ok:
@@ -204,3 +219,8 @@ func _on_order() -> void:
 		_message.text = result.reason
 	_qty.value = 1
 	refresh()
+
+
+## 보관함 확장 그림 (없으면 null — 그림 없이 글자만)
+static func _storage_icon() -> Texture2D:
+	return load(STORAGE_ICON) if ResourceLoader.exists(STORAGE_ICON) else null

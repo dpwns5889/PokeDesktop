@@ -33,6 +33,8 @@ const WIDTH := 320.0
 const BATTLE_COLUMN := Rect2(320, 0, 128, 200)
 ## 전투 칸 테두리 두께 (v0.47, 버튼 줄 색)
 const BATTLE_FRAME_PX := 2
+## 버전 표시 글자색: 잘 안 보이게 흐린 흰색 (v0.64)
+const VERSION_COLOR := Color(1, 1, 1, 0.3)
 ## 엔트리 상자 접기/펴기 화살표 탭 (v0.47, v0.59): 상자 왼쪽에 붙은 작은 탭. 접으면 상자가 왼쪽 UI 오른쪽 끝 밖으로 들어간다.
 const ENTRY_TAB_SIZE := Vector2(9, 34)
 const ENTRY_SLIDE_SEC := 0.18
@@ -63,6 +65,9 @@ const NOTICE_BOTTOM := 179.0
 const NOTICE_HEIGHT := 68.0
 const NOTICE_MAX_LINES := 4
 const NOTICE_SEC := 10.0
+## 사라지기 전 흐려지는 시간 (v0.64)
+const NOTICE_FADE_SEC := 3.0
+const NOTICE_OUTLINE := Color(0.1, 0.13, 0.2)
 ## 엔트리는 오버월드 앞모습(32×32, 걷기 2프레임)으로 표시 (v0.28). 없으면 메뉴 아이콘.
 const ENTRY_ICON := 32
 const ENTRY_ANIM_SEC := 0.45
@@ -110,6 +115,8 @@ var _entry_clip: Control
 var _notice: RichTextLabel
 var _notices: Array[Dictionary] = []
 var _notice_seq := 0
+## 알림 줄 나이를 올리고 흐리게 다시 그리는 타이머 (줄이 있을 때만 돈다, v0.64)
+var _notice_timer: Timer
 var _entry_icons: HBoxContainer
 var _buff_box: PanelContainer
 var _buff_list: VBoxContainer
@@ -125,6 +132,8 @@ var _field: ColorRect
 var _field_map: FieldMap
 ## 전투 칸 배경 (v0.53): 지역의 하늘색(위) → 땅색(아래) 세로 그라데이션
 var _battle_bg: TextureRect
+## 전투 칸 오른쪽 아래 버전 표시 (v0.64)
+var _version_label: Label
 ## 걸어다니는 엔트리 (OverworldWalker, 발 높이 순으로 겹침 정렬)
 var _walkers: Node2D
 ## 버프 목록 내용 (바뀔 때만 다시 그림)
@@ -157,6 +166,7 @@ func _ready() -> void:
 	_build_ground_plate()
 	_build_shadow()
 	_build_battle_frame()
+	_build_version_label()
 	_capture = CaptureAnim.new()
 	add_child(_capture)
 	move_child(_capture, _pokemon.get_index() + 1)   # 포켓몬 위, 과녁·테두리 아래
@@ -508,6 +518,25 @@ func _set_battle_bg(top: Color, bottom: Color) -> void:
 	g.set_color(1, bottom)
 
 
+## 지금 버전 문자열 "v0.64" (project.godot 의 application/config/version, 기획서 문서 버전과 같게 둔다)
+static func version_text() -> String:
+	return "v" + str(ProjectSettings.get_setting("application/config/version", "?"))
+
+
+## 전투 칸 오른쪽 아래 구석의 흐린 버전 표시 (v0.64). 테두리 바로 안쪽, 테두리 아래에 그린다.
+func _build_version_label() -> void:
+	_version_label = Label.new()
+	_version_label.name = "VersionLabel"
+	_version_label.text = version_text()
+	_version_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+	_version_label.size = Vector2(BATTLE_COLUMN.size.x - BATTLE_FRAME_PX * 2 - 2, 16)
+	_version_label.position = BATTLE_COLUMN.position + Vector2(BATTLE_FRAME_PX, BATTLE_COLUMN.size.y - BATTLE_FRAME_PX - 16)
+	_version_label.add_theme_color_override(&"font_color", VERSION_COLOR)
+	_version_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	add_child(_version_label)
+	move_child(_version_label, _battle_frame.get_index())
+
+
 ## 오른쪽 전투 칸 테두리 (v0.47, 2px, 버튼 줄 색): 칸이 창 끝에 붕 떠 보이지 않게 액자처럼 두른다.
 ## 과녁·포켓몬 위, 패널 아래에 그린다 (v0.46 의 1px 구분선을 대신함).
 func _build_battle_frame() -> void:
@@ -674,23 +703,35 @@ func _on_player_leveled_up(new_level: int) -> void:
 	_update_hud()
 
 
-## 왼쪽 아래 알림 한 줄 추가 (v0.59). 최대 NOTICE_MAX_LINES 줄, 각 줄은 NOTICE_SEC 뒤 사라진다.
+## 왼쪽 아래 알림 한 줄 추가 (v0.59). 최대 NOTICE_MAX_LINES 줄.
+## 각 줄은 (NOTICE_SEC - NOTICE_FADE_SEC)초 동안 그대로 보이다가 NOTICE_FADE_SEC 동안 천천히 흐려져 사라진다 (v0.64).
 func _push_notice(line: String) -> void:
 	_notice_seq += 1
-	var id := _notice_seq
-	_notices.append({"id": id, "text": line})
+	_notices.append({"id": _notice_seq, "text": line, "age": 0.0})
 	while _notices.size() > NOTICE_MAX_LINES:
 		_notices.pop_front()
 	_render_notices()
-	get_tree().create_timer(NOTICE_SEC).timeout.connect(_expire_notice.bind(id))
+	if _notice_timer and _notice_timer.is_stopped():
+		_notice_timer.start()
 
 
-func _expire_notice(id: int) -> void:
-	for i in _notices.size():
-		if _notices[i].id == id:
-			_notices.remove_at(i)
-			break
+## 나이(초)에 따른 줄의 불투명도: 처음엔 1, 마지막 NOTICE_FADE_SEC 동안 0까지 (v0.64)
+static func notice_alpha(age: float) -> float:
+	return clampf((NOTICE_SEC - age) / NOTICE_FADE_SEC, 0.0, 1.0)
+
+
+func _tick_notices() -> void:
+	var dt := _notice_timer.wait_time
+	for n in _notices:
+		n.age = float(n.age) + dt
+	var alive: Array[Dictionary] = []
+	for n in _notices:
+		if float(n.age) < NOTICE_SEC:
+			alive.append(n)
+	_notices = alive
 	_render_notices()
+	if _notices.is_empty():
+		_notice_timer.stop()
 
 
 func _clear_notices() -> void:
@@ -698,9 +739,17 @@ func _clear_notices() -> void:
 	_render_notices()
 
 
+## 줄마다 글자·외곽선의 알파를 나이에 맞춰 낮춘다
 func _render_notices() -> void:
-	if _notice:
-		_notice.text = "\n".join(PackedStringArray(_notices.map(func(n: Dictionary) -> String: return n.text)))
+	if _notice == null:
+		return
+	var lines: PackedStringArray = []
+	for n in _notices:
+		var a := notice_alpha(float(n.age))
+		var text := String(n.text).replace(char(91), "[lb]")   # 여는 대괄호를 BBCode 로 해석하지 않게
+		lines.append("[color=#%s][outline_color=#%s]%s[/outline_color][/color]" % [
+			Color(1, 1, 1, a).to_html(true), Color(NOTICE_OUTLINE, a).to_html(true), text])
+	_notice.text = "\n".join(lines)
 
 
 # ---------------------------------------------------------------- HUD
@@ -772,9 +821,13 @@ func _build_entry_widgets() -> void:
 	_notice.size = Vector2(WIDTH - NOTICE_LEFT * 2, NOTICE_HEIGHT)
 	_notice.add_theme_color_override(&"default_color", Color(1, 1, 1))
 	_notice.add_theme_constant_override(&"outline_size", 4)
-	_notice.add_theme_color_override(&"font_outline_color", Color(0.1, 0.13, 0.2))
+	_notice.add_theme_color_override(&"font_outline_color", NOTICE_OUTLINE)
 	add_child(_notice)
 	move_child(_notice, _entry_clip.get_index())
+	_notice_timer = Timer.new()
+	_notice_timer.wait_time = 0.1
+	_notice_timer.timeout.connect(_tick_notices)
+	add_child(_notice_timer)
 
 	_buff_box = PanelContainer.new()
 	_buff_box.add_theme_stylebox_override(&"panel", _overlay_style())
@@ -846,6 +899,7 @@ func _refresh_walkers(entries: Array[Dictionary]) -> void:
 			w.look_key = key
 			w.rng.randomize()
 			w.blocked = _field_blocked
+			w.grid_origin = _field_map.position if _field_map else Vector2(0, 18)   # 들판 칸에 맞춰 걷기 (v0.64)
 			var start := Vector2(w.rng.randf_range(WALK_AREA.position.x, WALK_AREA.end.x),
 				w.rng.randf_range(WALK_AREA.position.y, WALK_AREA.end.y))
 			w.setup(sheet, icon, WALK_AREA, start)

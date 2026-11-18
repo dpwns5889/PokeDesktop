@@ -24,7 +24,8 @@ extends Node
 ## 소리마다 플레이어가 따로 있어서 서로 다른 소리는 겹쳐 나고, 같은 소리는 처음부터 다시 난다.
 ## 볼륨은 설정 sfx_volume, 인카운터 소리는 encounter_sound 로 끌 수 있다.
 ##
-## BGM (M11): Assets/Audio/BGM 의 곡을 파일 이름 순서로 이어서 재생하는 플레이리스트. 마지막 곡 다음은 첫 곡(반복).
+## BGM (M11): Assets/Audio/BGM 의 곡을 이어서 재생하는 플레이리스트.
+## v0.64: 순서는 무작위. 모든 곡이 한 번씩 끝나면 다시 섞되, 최근에 재생한 RECENT_KEEP 곡은 새 순서의 앞 RECENT_KEEP 자리에 오지 않는다.
 ## 곡이 끝나기 BGM_FADE_SEC 전에 다음 곡이 교차 페이드로 시작한다. 지역과는 관계없다.
 ## 버스: Master ← SFX(효과음), BGM(배경음). BGM 볼륨은 설정 bgm_volume (0이면 끔).
 ## 효과음이 나는 동안(버튼 클릭·공격음 제외) BGM 은 일시정지했다가, 효과음이 모두 끝나면 이어서 재생한다 (v0.31).
@@ -54,6 +55,8 @@ const SOUNDS := {
 const BGM_DIR := "res://Assets/Audio/BGM/"
 const BGM_EXTS := ["ogg", "mp3", "wav"]
 const BGM_FADE_SEC := 3.0
+## 다시 섞을 때 새 순서의 앞에 오지 않게 할 최근 곡 수 (v0.64)
+const RECENT_KEEP := 5
 ## BGM 을 멈추지 않는 효과음
 ## 포획 연출의 짧은 소리(던지기·열림·떨어짐·흔들림·착)도 멈추지 않는다 — 4초 남짓한 연출 동안 BGM 이 뚝뚝 끊기지 않게 (v0.54).
 ## 연출 끝의 포획 효과음(pokemon_catch)은 그대로 BGM 을 멈춘다.
@@ -70,12 +73,18 @@ var _bgm_tweens: Array[Tween] = []
 ## 플레이리스트 (파일 경로, 이름 순)와 지금 곡 번호. -1 = 재생 안 함
 var _playlist: Array[String] = []
 var _track := -1
+## 이번 바퀴의 재생 순서(_playlist 번호)와 그 안의 위치, 최근에 재생한 곡(마지막이 지금 곡) (v0.64)
+var _order: Array[int] = []
+var _pos := -1
+var _recent: Array[int] = []
+var rng := RandomNumberGenerator.new()
 var _advancing := false
 ## 효과음 때문에 BGM 이 일시정지 중인가
 var _bgm_paused := false
 
 
 func _ready() -> void:
+	rng.randomize()
 	_ensure_bus(SFX_BUS)
 	_ensure_bus(BGM_BUS)
 	for i in 2:
@@ -210,22 +219,61 @@ func current_bgm() -> String:
 	return _bgm_path
 
 
-## 플레이리스트 처음부터 (곡이 없으면 아무것도 안 함)
+## 플레이리스트를 새로 섞어 처음부터 (곡이 없으면 아무것도 안 함)
 func start_playlist() -> void:
 	if _playlist.is_empty():
 		return
-	_play_track(0)
+	_order = shuffle_round(_playlist.size(), _recent, rng)
+	_pos = 0
+	_play_track(_order[0])
 
 
-## 다음 곡으로 (마지막 곡 다음은 첫 곡)
+## 다음 곡으로. 이번 바퀴를 다 돌았으면 다시 섞는다 (최근 곡은 앞에 오지 않게)
 func next_track() -> void:
 	if _playlist.is_empty():
 		return
-	_play_track((_track + 1) % _playlist.size())
+	_pos += 1
+	if _pos >= _order.size():
+		_order = shuffle_round(_playlist.size(), _recent, rng)
+		_pos = 0
+	_play_track(_order[_pos])
+
+
+## 지금 바퀴의 재생 순서 (_playlist 번호, 테스트·확인용)
+func play_order() -> Array[int]:
+	return _order
+
+
+## 곡 n개를 무작위로 섞은 순서. recent(최근 재생 곡 번호)는 앞 RECENT_KEEP 자리에 오지 않는다
+## (최근이 아닌 곡이 모자라면 그만큼만 앞에 둔다). (v0.64)
+static func shuffle_round(n: int, recent: Array[int], r: RandomNumberGenerator) -> Array[int]:
+	var fresh: Array[int] = []
+	var rest: Array[int] = []
+	for i in n:
+		(rest if recent.has(i) else fresh).append(i)
+	_shuffle(fresh, r)
+	var front_n := mini(RECENT_KEEP, fresh.size())
+	var order: Array[int] = fresh.slice(0, front_n)
+	rest.append_array(fresh.slice(front_n))
+	_shuffle(rest, r)
+	order.append_array(rest)
+	return order
+
+
+static func _shuffle(a: Array[int], r: RandomNumberGenerator) -> void:
+	for i in range(a.size() - 1, 0, -1):
+		var j := r.randi_range(0, i)
+		var t := a[i]
+		a[i] = a[j]
+		a[j] = t
 
 
 func _play_track(i: int) -> void:
 	_track = i
+	_recent.erase(i)
+	_recent.append(i)
+	while _recent.size() > RECENT_KEEP:
+		_recent.pop_front()
 	_crossfade_to(_playlist[i])
 
 
