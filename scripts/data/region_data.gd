@@ -20,6 +20,8 @@ extends Resource
 @export var encounter_interval: Vector2 = Vector2.ZERO
 ## 과녁 한 번에 차는 게이지 배율 (v0.63). 후반 지역일수록 작아 상위 볼·엔트리가 필요하게 (1.0 = 기본)
 @export var capture_fill: float = 1.0
+## 아이템 인카운터 등급 1~3 (v0.84): 높을수록 비싼 귀중품이 잘 나온다 (Formulas.ITEM_ENCOUNTER_TABLES)
+@export var item_tier: int = 1
 ## 전투 바닥 번호 (Assets/Generated/ui/ground.png 의 칸, tools/import_battle_ground.gd 참고) (v0.35)
 ## 0 풀밭 1 물 2 모래 3 흙길 4 얼음 5 진흙 6 바위 7 눈 8 어두운 바위
 @export var battle_ground: int = 0

@@ -53,6 +53,12 @@ var _exp_bar: ProgressBar
 var _exp_label: Label
 var _stat_labels: Dictionary = {}   # stat key -> RichTextLabel
 var _traits_box: VBoxContainer
+## 특성 상자 아래 "특성 캡슐"·"깜빡열매" 버튼 (v0.79, 가진 것만)
+var _trait_items: HFlowContainer
+## 오른쪽 칸에 띄우는 고르기 목록 (캡슐·바꿀 특성·지울 부정 특성, v0.79)
+var _picker_scroll: ScrollContainer
+var _picker_box: VBoxContainer
+var _picker_open := false
 var _evo_box: HFlowContainer
 # 오른쪽 아래 버튼
 var _actions: HBoxContainer
@@ -60,6 +66,12 @@ var _candy_s: Button
 var _candy_m: Button
 var _send: Button
 var _message: Label
+
+
+## 다시 열면 지난번 결과 문구(보내기·중복 보내기 등)는 지운다 (v0.85, 상점과 같게)
+func open_panel() -> void:
+	_show_message("")
+	super()
 
 
 func _panel_title() -> String:
@@ -116,6 +128,15 @@ func _build_content(box: VBoxContainer) -> void:
 	_info_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
 	right_col.add_child(_info_scroll)
 	_build_filter(right_col)
+	_picker_scroll = ScrollContainer.new()
+	_picker_scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	_picker_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	_picker_scroll.visible = false
+	right_col.add_child(_picker_scroll)
+	_picker_box = VBoxContainer.new()
+	_picker_box.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_picker_box.add_theme_constant_override(&"separation", 2)
+	_picker_scroll.add_child(_picker_box)
 	_message = Label.new()
 	_message.add_theme_color_override(&"font_color", Color(1, 0.85, 0.35))
 	# 긴 결과 문구("12마리를 보냈다! 경험사탕 M 3, 경험사탕 S 9")가 한 줄이면 오른쪽 칸을 넓혀 버튼까지
@@ -222,6 +243,9 @@ func _build_content(box: VBoxContainer) -> void:
 	_traits_box = VBoxContainer.new()
 	_traits_box.add_theme_constant_override(&"separation", 2)
 	_info.add_child(_traits_box)
+	_trait_items = HFlowContainer.new()
+	_trait_items.add_theme_constant_override(&"h_separation", 2)
+	_info.add_child(_trait_items)
 
 
 func refresh() -> void:
@@ -275,7 +299,9 @@ func refresh() -> void:
 
 func _on_selected(index: int) -> void:
 	_selected_uid = _uids[index]
+	_picker_open = false
 	_filter_button.button_pressed = false   # 필터를 보다가 포켓몬을 고르면 정보로
+	_sync_filter_view()
 	_show_message("")
 	_show_info(PlayerState.find_pokemon(_selected_uid))
 
@@ -342,6 +368,7 @@ func _show_info(p: Dictionary) -> void:
 		var badge := TraitBadge.new()
 		badge.setup(td)
 		_traits_box.add_child(badge)
+	_update_trait_item_buttons(p)
 	_info_scroll.scroll_vertical = 0
 
 
@@ -409,7 +436,7 @@ func _small_button(on_input: Callable) -> Button:
 
 
 func _update_actions(p: Dictionary) -> void:
-	_actions.visible = not p.is_empty() and not _filter_button.button_pressed
+	_actions.visible = not p.is_empty() and not _filter_button.button_pressed and not _picker_open
 	if p.is_empty():
 		return
 	var busy := PlayerState.is_busy(p.uid)
@@ -475,13 +502,25 @@ func _on_send() -> void:
 	var s := GameData.get_species(p.dex_id)
 	var c := ProfessorManager.preview_rewards([p.uid])
 	var uid: String = p.uid
+	# 특성 캡슐 확률 (v0.79): "특성 캡슐을 얻을 수도 있다: 픽업 25%"
+	var odds := ProfessorManager.capsule_odds(p)
+	var odds_parts: PackedStringArray = []
+	for tid in odds:
+		odds_parts.append("%s %d%%" % [GameData.get_trait(tid).name_ko, roundi(odds[tid] * 100.0)])
+	var odds_line := ("\n특성 캡슐을 얻을 수도 있다: %s" % ", ".join(odds_parts)) if not odds.is_empty() else ""
 	confirm_requested.emit("박사에게 보내기",
-		"%s Lv%d을(를) 박사에게 보낼까요?\n받는 것: %s\n되돌릴 수 없습니다." % [s.name_ko if s else "?", p.level, _candy_text(c)],
+		"%s Lv%d을(를) 박사에게 보낼까요?\n받는 것: %s%s\n되돌릴 수 없습니다." % [s.name_ko if s else "?", p.level, _candy_text(c), odds_line],
 		"보내기", func() -> void:
 			var r := ProfessorManager.transfer([uid])
 			_selected_uid = ""
 			refresh()
-			_show_message(("보냈다! " + _candy_text(r.rewards)) if r.ok else r.reason))
+			if not r.ok:
+				_show_message(r.reason)
+				return
+			var got := "보냈다! " + _candy_text(r.rewards)
+			if r.capsule != &"":
+				got += "\n%s을(를) 얻었다!" % GameData.get_item(r.capsule).name_ko
+			_show_message(got))
 
 
 func _on_bulk_transfer() -> void:
@@ -559,12 +598,16 @@ func _update_evolution_buttons(p: Dictionary) -> void:
 
 
 func _evo_button(text: String, tip: String) -> Button:
+	return _evo_button_in(_evo_box, text, tip)
+
+
+func _evo_button_in(parent: Container, text: String, tip: String) -> Button:
 	var b := Button.new()
 	b.text = text
 	b.tooltip_text = tip
 	b.focus_mode = Control.FOCUS_NONE
 	b.add_theme_color_override(&"font_color", Color(1, 0.85, 0.35))
-	_evo_box.add_child(b)
+	parent.add_child(b)
 	return b
 
 
@@ -674,7 +717,140 @@ func _filter_toggle(text: String, color: Color, on_toggled: Callable) -> Button:
 
 ## 필터 버튼이 눌려 있으면 오른쪽 칸에 필터, 아니면 고른 포켓몬 정보
 func _sync_filter_view() -> void:
-	var on := _filter_button.button_pressed
+	var on := _filter_button.button_pressed and not _picker_open
 	_filter_scroll.visible = on
-	_info_scroll.visible = not on
-	_actions.visible = not on and _selected_uid != ""
+	_picker_scroll.visible = _picker_open
+	_info_scroll.visible = not on and not _picker_open
+	_actions.visible = _info_scroll.visible and _selected_uid != ""
+
+
+# ---------------------------------------------------------------- 특성 캡슐 · 깜빡열매 (v0.79)
+
+## 고른 포켓몬에 쓸 수 있는 것만 버튼으로: 캡슐을 하나라도 가졌으면 "특성 캡슐", 부정 특성이 있고 깜빡열매가 있으면 "깜빡열매"
+func _update_trait_item_buttons(p: Dictionary) -> void:
+	for c in _trait_items.get_children():
+		_trait_items.remove_child(c)
+		c.queue_free()
+	var capsules := _owned_capsules()
+	if not capsules.is_empty():
+		var b := _evo_button_in(_trait_items, "특성 캡슐", "가진 특성 캡슐을 골라 이 포켓몬에게 붙인다")
+		b.icon = capsules[0].load_icon()
+		b.pressed.connect(_pick_capsule)
+	var berry := GameData.get_item(ProfessorManager.FORGET_BERRY)
+	if berry and PlayerState.item_count(berry.id) > 0 and not ProfessorManager.negative_traits(p).is_empty():
+		var b2 := _evo_button_in(_trait_items, berry.name_ko, "부정 특성 하나를 잊게 한다 (%d개 있음)" % PlayerState.item_count(berry.id))
+		b2.icon = berry.load_icon()
+		b2.pressed.connect(_pick_forget)
+	_trait_items.visible = _trait_items.get_child_count() > 0
+
+
+func _owned_capsules() -> Array[ItemData]:
+	var out: Array[ItemData] = []
+	for it in GameData.all_items(GameData.CAPSULE_TEMPLATE):
+		if PlayerState.item_count(it.id) > 0:
+			out.append(it)
+	return out
+
+
+## 오른쪽 칸에 고르기 목록. options = [[글자, 툴팁, 못 고르는 이유("" = 가능), 고르면 부를 Callable], ...]
+func _show_picker(title: String, options: Array) -> void:
+	for c in _picker_box.get_children():
+		_picker_box.remove_child(c)
+		c.queue_free()
+	var head := Label.new()
+	head.text = title
+	head.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	head.add_theme_color_override(&"font_color", Color(1, 0.85, 0.35))
+	_picker_box.add_child(head)
+	for o in options:
+		var b := Button.new()
+		b.text = o[0]
+		b.tooltip_text = o[2] if o[2] != "" else o[1]
+		b.disabled = o[2] != ""
+		b.focus_mode = Control.FOCUS_NONE
+		b.alignment = HORIZONTAL_ALIGNMENT_LEFT
+		b.pressed.connect(o[3])
+		_picker_box.add_child(b)
+	var cancel := Button.new()
+	cancel.text = "취소"
+	cancel.focus_mode = Control.FOCUS_NONE
+	cancel.pressed.connect(_close_picker)
+	_picker_box.add_child(cancel)
+	_picker_open = true
+	_picker_scroll.scroll_vertical = 0
+	_sync_filter_view()
+
+
+func _close_picker() -> void:
+	_picker_open = false
+	_sync_filter_view()
+
+
+func _pick_capsule() -> void:
+	var p := PlayerState.find_pokemon(_selected_uid)
+	var options: Array = []
+	for it in _owned_capsules():
+		var tid: StringName = it.params.trait
+		var t := GameData.get_trait(tid)
+		var plan := ProfessorManager.capsule_plan(p, tid)
+		options.append(["%s x%d" % [t.name_ko, PlayerState.item_count(it.id)], t.description,
+			"" if plan.ok else plan.reason, _on_capsule_chosen.bind(it.id)])
+	_show_picker("붙일 특성 캡슐", options)
+
+
+func _on_capsule_chosen(item_id: StringName) -> void:
+	var p := PlayerState.find_pokemon(_selected_uid)
+	var tid: StringName = GameData.get_item(item_id).params.trait
+	var plan := ProfessorManager.capsule_plan(p, tid)
+	if not plan.ok:
+		_close_picker()
+		_show_message(plan.reason)
+		return
+	if not plan.choose:
+		_confirm_capsule(item_id, plan.replace)
+		return
+	# 특성이 3개: 바꿀 특성 고르기 (고정 특성은 못 바꿈)
+	var options: Array = []
+	for id in p.traits:
+		var t := GameData.get_trait(StringName(id))
+		if t and t.tier != &"legend":
+			options.append([t.name_ko, t.description, "", _confirm_capsule.bind(item_id, String(id))])
+	_show_picker("특성이 3개라 하나를 바꾼다. 바꿀 특성을 고르세요", options)
+
+
+func _confirm_capsule(item_id: StringName, replace: String) -> void:
+	_close_picker()
+	var p := PlayerState.find_pokemon(_selected_uid)
+	var s := GameData.get_species(p.dex_id)
+	var t := GameData.get_trait(GameData.get_item(item_id).params.trait)
+	var msg := "%s에게 %s 특성을 붙인다." % [s.name_ko if s else "?", t.name_ko]
+	if replace != "":
+		msg += "\n대신 %s 특성은 없어진다." % GameData.get_trait(StringName(replace)).name_ko
+	var uid: String = p.uid
+	confirm_requested.emit("특성 캡슐", msg, "붙이기", func() -> void:
+		var r := ProfessorManager.use_capsule(uid, item_id, replace)
+		_show_message(("%s 특성이 붙었다!" % t.name_ko) if r.ok else r.reason))
+
+
+func _pick_forget() -> void:
+	var p := PlayerState.find_pokemon(_selected_uid)
+	var negs := ProfessorManager.negative_traits(p)
+	if negs.size() == 1:
+		_confirm_forget(String(negs[0].id))
+		return
+	var options: Array = []
+	for t in negs:
+		options.append([t.name_ko, t.description, "", _confirm_forget.bind(String(t.id))])
+	_show_picker("잊게 할 부정 특성", options)
+
+
+func _confirm_forget(trait_id: String) -> void:
+	_close_picker()
+	var p := PlayerState.find_pokemon(_selected_uid)
+	var s := GameData.get_species(p.dex_id)
+	var t := GameData.get_trait(StringName(trait_id))
+	var uid: String = p.uid
+	confirm_requested.emit("깜빡열매", "%s에게 깜빡열매를 먹여\n%s 특성을 잊게 한다." % [s.name_ko if s else "?", t.name_ko], "먹이기",
+		func() -> void:
+			var r := ProfessorManager.use_forget_berry(uid, trait_id)
+			_show_message(("%s 특성을 잊었다!" % t.name_ko) if r.ok else r.reason))

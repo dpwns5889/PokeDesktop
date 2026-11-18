@@ -36,6 +36,7 @@ func _run(gen: int) -> int:
 			region.encounter_interval = Vector2(float(iv[0]), float(iv[1]))
 		region.battle_ground = int(r.get("battle_ground", 0))
 		region.capture_fill = float(r.get("capture_fill", 1.0))
+		region.item_tier = int(r.get("item_tier", 1))
 		region.sky_color = Color(r.sky)
 		region.ground_color = Color(r.ground)
 		var conds: Array[Dictionary] = []

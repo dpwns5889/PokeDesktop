@@ -16,3 +16,4 @@ params = {
 sources = Array[StringName]([&"shop", &"expedition"])
 buy_price = 1500
 sell_price = 500
+unlock_level = 15

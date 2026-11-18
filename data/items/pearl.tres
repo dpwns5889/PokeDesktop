@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/item_data.gd" id="1_jkfjq"]
+
+[resource]
+script = ExtResource("1_jkfjq")
+id = &"pearl"
+name_ko = "진주"
+description = "아름다운 진주. 상점에 팔면 500원."
+category = &"valuable"
+order = 31
+sources = Array[StringName]([&"encounter"])
+sell_price = 500

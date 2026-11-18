@@ -83,10 +83,14 @@ const TITLE_RIGHT := 312.0
 ## 도감 완성 알림 문구 (v0.77)
 const DEX_COMPLETE_TEXT := "관동 지방의 포켓몬 151종을 모두 잡았다!\n\n이제 색이 다른 포켓몬이 더 자주 나타난다. (1/512 → 1/128)\n도감에서 색이 다른 포켓몬 기록을 볼 수 있다."
 const CROWN_COLOR := Color(1.0, 0.82, 0.25)
+## 아이템 인카운터 아이콘 크기 (24px 아이콘 2배, v0.84)
+const FOUND_ICON_PX := 48.0
 enum DevMenu { ENCOUNTER, MONEY, RESET_SAVE }
 
 var _dev_menu: PopupMenu        # 개발용 우클릭 메뉴 (디버그 빌드만)
 var _crown: Control             # 도감 완성 왕관 (v0.77)
+## 아이템 인카운터에서 발판 위에 보여 주는 아이템 (v0.84, 아이콘 2배)
+var _found_icon: TextureRect
 var _panels: Dictionary = {}     # id -> OverlayPanel
 var _buttons: Dictionary = {}    # id -> Button
 var _open_id: StringName = &""
@@ -186,6 +190,7 @@ func _ready() -> void:
 
 	EventBus.encounter_started.connect(_on_encounter_started)
 	EventBus.encounter_appeared.connect(_on_encounter_appeared)
+	EventBus.item_found.connect(_on_item_found)
 	EventBus.battle_started.connect(func(_e: Dictionary, b: StringName) -> void:
 		_battle_ball = b
 		_close_panels()
@@ -312,7 +317,7 @@ func _style_bar_button(b: Button, normal: StyleBox, hover: StyleBox, pressed: St
 
 ## X 버튼: 화면 안 확인 창을 먼저 띄우고, 확인하면 종료 (M11)
 func _ask_quit() -> void:
-	_confirm.ask("종료", "진행 상황을 저장하고 게임을 종료할까요?", "종료", quit_game, true)   # v0.57 가운데 정렬, v0.59 문구
+	_confirm.ask("종료", "진행 상황을 저장하고 게임을 종료할까요?", "종료", quit_game)   # v0.57 가운데 정렬, v0.59 문구
 
 
 ## 색이 다른 포켓몬 등장 연출: 포켓몬 주변에 별 모양 반짝임이 퍼졌다 사라진다 (M11)
@@ -409,6 +414,8 @@ func _on_game_reset() -> void:
 func _show_idle() -> void:
 	if _capture:
 		_capture.clear()
+	if _found_icon:
+		_found_icon.hide()
 	_pokemon.hide()
 	_pokemon.stop()
 	_stop_bob()
@@ -494,6 +501,30 @@ func _build_ground_plate() -> void:
 	add_child(_ground_plate)
 	move_child(_ground_plate, _pokemon.get_index())   # 포켓몬 바로 뒤
 	_ground_plate.set_region(GameData.get_region(PlayerState.current_region))
+	_found_icon = TextureRect.new()
+	_found_icon.name = "FoundItem"
+	_found_icon.size = Vector2(FOUND_ICON_PX, FOUND_ICON_PX)
+	_found_icon.position = Vector2(BATTLE_GROUND_POS.x - FOUND_ICON_PX / 2.0, POKEMON_FEET_Y - FOUND_ICON_PX)
+	_found_icon.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	_found_icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	_found_icon.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	_found_icon.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_found_icon.visible = false
+	add_child(_found_icon)
+	move_child(_found_icon, _pokemon.get_index() + 1)
+
+
+## 아이템 인카운터 (v0.84): 발판 위에 아이템을 보여 주고 알린다. 얻는 것은 EncounterManager 가 했다
+func _on_item_found(id: StringName) -> void:
+	var item := GameData.get_item(id)
+	var item_name := item.name_ko if item else String(id)
+	_ground_plate.shaking = false
+	_emote.hide_bubble()
+	_found_icon.texture = item.load_icon() if item else null
+	_found_icon.show()
+	_title.text = "%s을(를) 발견했다!" % item_name
+	_push_notice("발견: %s" % item_name)
+	_update_hud()
 
 
 ## 나는 포켓몬 아래 발판에 드리우는 그림자 (반투명 타원, 포켓몬 바로 뒤)
@@ -733,6 +764,15 @@ func _on_encounter_fled(enc: Dictionary) -> void:
 
 func _on_player_leveled_up(new_level: int) -> void:
 	_push_notice("레벨 업! Lv%d" % new_level)
+	var capsule := GameData.capsule_template()
+	if capsule and new_level == capsule.unlock_level:   # v0.79
+		_push_notice("특성 캡슐 해금! (박사에게 한 마리씩 보내기)")
+	var new_items := PackedStringArray()   # v0.82: 이 레벨에 상점에 새로 나오는 아이템
+	for it in GameData.all_items():
+		if it.can_buy() and it.unlock_level == new_level:
+			new_items.append(it.name_ko)
+	if not new_items.is_empty():
+		_push_notice("상점에 새 아이템: %s" % ", ".join(new_items))
 	_update_hud()
 
 

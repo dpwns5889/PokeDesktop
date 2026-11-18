@@ -20,6 +20,8 @@ var _regions: Dictionary = {}       # StringName -> RegionData
 var _legendary_rules: Array[LegendaryRule] = []
 var _traits: Dictionary = {}        # StringName -> TraitData
 var _items: Dictionary = {}         # StringName -> ItemData
+const CAPSULE_TEMPLATE := &"trait_capsule"
+var _capsule_template: ItemData
 var _expeditions: Dictionary = {}   # StringName -> ExpeditionData
 var _trait_roll: TraitRollConfig
 
@@ -67,6 +69,20 @@ func reload() -> void:
 			_traits[t.id] = t
 		elif t is TraitRollConfig:
 			_trait_roll = t
+
+	# 특성 캡슐 (v0.79): 템플릿 아이템(trait_capsule) → 캡슐에 담길 수 있는 특성(일반·희귀)마다 아이템 하나.
+	# 가방·판매·저장은 보통 아이템처럼 다룬다 (id = trait_capsule_<특성>, 그림은 템플릿 것)
+	_capsule_template = _items.get(CAPSULE_TEMPLATE)
+	if _capsule_template:
+		_items.erase(CAPSULE_TEMPLATE)
+		for t: TraitData in _traits.values():
+			if is_capsule_trait(t):
+				var it: ItemData = _capsule_template.duplicate()
+				it.id = capsule_id(t.id)
+				it.name_ko = "%s (%s)" % [_capsule_template.name_ko, t.name_ko]
+				it.params = {&"trait": t.id}
+				it.icon_id = CAPSULE_TEMPLATE
+				_items[it.id] = it
 
 	_expeditions.clear()
 	for x in _load_all(EXPEDITIONS_DIR):
@@ -144,13 +160,28 @@ func get_item(id: StringName) -> ItemData:
 	return _items.get(id)
 
 
+## 특성 캡슐 (v0.79): 담길 수 있는 특성인가 (일반·희귀, 부정·고정 제외)
+func is_capsule_trait(t: TraitData) -> bool:
+	return t != null and t.weight > 0 and (t.tier == &"normal" or t.tier == &"rare")
+
+
+func capsule_id(trait_id: StringName) -> StringName:
+	return StringName("%s_%s" % [CAPSULE_TEMPLATE, trait_id])
+
+
+## 캡슐 공통 값(해금 레벨·판매가 등)
+func capsule_template() -> ItemData:
+	return _capsule_template
+
+
 ## order 순 아이템 목록. category 를 주면 그 분류만.
 func all_items(category: StringName = &"") -> Array[ItemData]:
 	var out: Array[ItemData] = []
 	for it in _items.values():
 		if category == &"" or it.category == category:
 			out.append(it)
-	out.sort_custom(func(a: ItemData, b: ItemData) -> bool: return a.order < b.order)
+	out.sort_custom(func(a: ItemData, b: ItemData) -> bool:
+		return a.order < b.order or (a.order == b.order and a.name_ko < b.name_ko))   # 특성 캡슐은 order 가 같아 이름 순
 	return out
 
 

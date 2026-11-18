@@ -10,11 +10,11 @@ const MAX_INTERVAL_MULT := 1.5
 
 ## 엔트리 개체들 → 합친 전투 효과
 ## {type_weights: {type: mult}, interval_mult, wild_level_add, fill_mult,
-##  after_items: [{chance, table}], per_level_currency, refund_ball, refund_chance, traits: [TraitData]}
+##  item_encounter_mult (픽업, v0.84), per_level_currency, refund_ball, refund_chance, traits: [TraitData]}
 static func collect(entries: Array) -> Dictionary:
 	var out := {
 		"type_weights": {}, "interval_mult": 1.0, "wild_level_add": 0, "fill_mult": 1.0,
-		"after_items": [], "per_level_currency": 0, "refund_ball": false, "refund_chance": 0.0, "traits": [],
+		"item_encounter_mult": 1.0, "per_level_currency": 0, "refund_ball": false, "refund_chance": 0.0, "traits": [],
 	}
 	var seen := {}
 	for inst in entries:
@@ -35,13 +35,13 @@ static func collect(entries: Array) -> Dictionary:
 						out.wild_level_add += int(e.value)
 					"battle_fill_mult":
 						out.fill_mult *= float(e.value)
-					"after_battle_item":
-						out.after_items.append({"chance": float(e.chance), "table": e.table})
+					"item_encounter_mult":   # 픽업 (v0.84: 전투 후 줍기 → 아이템 인카운터 확률)
+						out.item_encounter_mult *= float(e.value)
 					"after_battle_currency":
 						out.per_level_currency += int(e.per_level)
-					"refund_ball":   # 볼줍기 (v0.56: 포획 실패 때만 → 성공·실패 상관없이 확률로)
+					"refund_ball":   # 볼줍기 (v0.56: 성공·실패 상관없이 확률로, v0.81: 30% → 15%)
 						out.refund_ball = true
-						out.refund_chance = maxf(float(out.refund_chance), float(e.get("chance", 0.3)))
+						out.refund_chance = maxf(float(out.refund_chance), float(e.get("chance", 0.15)))
 	return out
 
 
@@ -62,18 +62,9 @@ static func boosted_level(level: int, add: int, level_cap: int) -> int:
 	return mini(level + add, maxi(level, mini(level_cap, Formulas.MAX_POKEMON_LEVEL)))
 
 
-## 전투 후 보상 (포획 성공·실패 모두). 반환 {items: {id: n}, currency: int}
-static func roll_after_battle(fx: Dictionary, wild_level: int, rng: RandomNumberGenerator) -> Dictionary:
-	var items := {}
-	for a in fx.get("after_items", []):
-		if rng.randf() < float(a.chance):
-			var table: Array = a.table
-			var weights: Array[int] = []
-			for row in table:
-				weights.append(int(row[1]))
-			var id := StringName(table[ExpeditionLogic._weighted_index(weights, rng)][0])
-			items[id] = int(items.get(id, 0)) + 1
-	return {"items": items, "currency": int(fx.get("per_level_currency", 0)) * wild_level}
+## 전투 후 꿀모으기 돈 (포획 성공·실패 모두)
+static func after_battle_currency(fx: Dictionary, wild_level: int) -> int:
+	return int(fx.get("per_level_currency", 0)) * wild_level
 
 
 ## 메인 화면 버프 목록용 짧은 문구 [{text, good}]
@@ -84,7 +75,7 @@ static func buff_lines(fx: Dictionary) -> Array[Dictionary]:
 		out.append({"text": "%s 출현+%d%%" % [GameData.type_name(t), roundi((float(tw[t]) - 1.0) * 100)], "good": true})
 	if int(fx.get("wild_level_add", 0)) > 0:
 		out.append({"text": "야생 Lv+%d" % int(fx.wild_level_add), "good": true})
-	if not Array(fx.get("after_items", [])).is_empty():
+	if float(fx.get("item_encounter_mult", 1.0)) > 1.0:
 		out.append({"text": "픽업", "good": true})
 	if int(fx.get("per_level_currency", 0)) > 0:
 		out.append({"text": "꿀모으기", "good": true})

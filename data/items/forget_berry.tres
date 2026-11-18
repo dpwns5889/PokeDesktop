@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/item_data.gd" id="1_c6u8p"]
+
+[resource]
+script = ExtResource("1_c6u8p")
+id = &"forget_berry"
+name_ko = "깜빡열매"
+description = "포켓몬의 부정 특성 하나를 잊게 한다. 보관함에서 쓴다."
+category = &"trait_tool"
+order = 28
+sources = Array[StringName]([&"shop"])
+buy_price = 5000
+sell_price = 1500
+unlock_level = 12

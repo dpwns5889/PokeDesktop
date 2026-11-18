@@ -46,6 +46,7 @@ func _build_content(box: VBoxContainer) -> void:
 	pad.add_theme_constant_override(&"margin_right", SIDE_PAD)
 	scroll.add_child(pad)
 	var inner := VBoxContainer.new()
+	inner.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	inner.add_theme_constant_override(&"separation", 1)
 	pad.add_child(inner)
 
@@ -57,6 +58,7 @@ func _build_content(box: VBoxContainer) -> void:
 	inner.add_child(_exp_label)
 	_none_label = Label.new()
 	_none_label.text = "레벨이 오른 포켓몬은 없다"
+	_none_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	inner.add_child(_none_label)
 	_mon_tiles = _flow()
 	inner.add_child(_mon_tiles)
@@ -75,12 +77,14 @@ func _build_content(box: VBoxContainer) -> void:
 func _section_label(text: String) -> Label:
 	var l := Label.new()
 	l.text = text
+	l.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER   # v0.80 팝업 규칙: 가운데
 	l.add_theme_color_override(&"font_color", GOLD)
 	return l
 
 
 func _flow() -> HFlowContainer:
 	var f := HFlowContainer.new()
+	f.alignment = FlowContainer.ALIGNMENT_CENTER
 	f.add_theme_constant_override(&"h_separation", 4)
 	f.add_theme_constant_override(&"v_separation", 4)
 	return f

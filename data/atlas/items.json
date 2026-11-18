@@ -20,6 +20,14 @@
 		"coin": { "sheet": "res://Assets/Sprites/Coin.png", "region": [0, 0, 16, 16] },
 		"expand_storage": { "sheet": "res://Assets/Sprites/ExpandBag.png", "region": [0, 0, 48, 48], "fit": 24 },
 		"big_nugget": { "sheet": "res://Assets/Sprites/Nuggets.png", "region": [111, 31, 18, 18] },
+		"trait_capsule": { "region": [294, 263, 22, 19], "_comment": "업그레이드 (v0.79)" },
+		"forget_berry": { "region": [120, 528, 22, 22], "_comment": "의문열매 = 열매 3번째 줄 6번째 (v0.79)" },
+		"pretty_feather": { "region": [330, 378, 14, 23], "_comment": "포켓볼 아래 줄 14번째 (v0.84)" },
+		"pearl": { "region": [67, 221, 24, 22], "_comment": "지닌 물건 4번째 줄 3번째 (v0.84)" },
+		"stardust_src": { "region": [160, 223, 24, 20], "_comment": "지닌 물건 4번째 줄 7번째" },
+		"stardust": { "recolor": "stardust_src", "hue_set": 0.72, "min_sat": 0.4, "gray_hue": 0.0, "_comment": "보라 가루 + 분홍빛 주머니 (v0.84)" },
+		"revive": { "region": [281, 23, 12, 17], "_comment": "기력의조각 — 별의조각 색바꿈 원본" },
+		"star_piece": { "recolor": "revive", "hue_set": 0.74, "min_sat": 0.4, "gray_hue": 0.0, "_comment": "기력의조각을 분홍·보랏빛으로 (v0.84)" },
 		"exp_candy_s": { "recolor": "rare_candy", "hue_shift": 0.42 },
 		"exp_candy_m": { "recolor": "rare_candy", "hue_shift": 0.55 }
 	}

@@ -76,7 +76,7 @@ func _build_content(box: VBoxContainer) -> void:
 	info.add_child(_traits)
 
 	var bottom := HBoxContainer.new()
-	bottom.alignment = BoxContainer.ALIGNMENT_END
+	bottom.alignment = BoxContainer.ALIGNMENT_CENTER   # v0.80 팝업 규칙: 가운데
 	box.add_child(bottom)
 	var ok := Button.new()
 	ok.text = "확인"

@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/item_data.gd" id="1_m07cw"]
+
+[resource]
+script = ExtResource("1_m07cw")
+id = &"pretty_feather"
+name_ko = "고운깃털"
+description = "고운 깃털. 상점에 팔면 200원."
+category = &"valuable"
+order = 30
+sources = Array[StringName]([&"encounter"])
+sell_price = 200

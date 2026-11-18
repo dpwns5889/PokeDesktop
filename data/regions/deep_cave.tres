@@ -127,6 +127,7 @@ encounters = Array[ExtResource("1_x163j")]([SubResource("Resource_i1vf5"), SubRe
 level_cap = 60
 encounter_interval = Vector2(360, 580)
 capture_fill = 0.65
+item_tier = 3
 battle_ground = 4
 unlock_conditions = Array[Dictionary]([{
 "type": "player_level",

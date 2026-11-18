@@ -6,9 +6,9 @@
 script = ExtResource("1_6fpk5")
 id = &"ball_fetch"
 name_ko = "볼줍기"
-description = "[전투] 전투가 끝나면 30% 확률로 쓴 볼을 돌려받는다(몬스터볼 제외)."
+description = "[전투] 전투가 끝나면 15% 확률로 쓴 볼을 돌려받는다(몬스터볼 제외)."
 trigger = &"battle"
 effects = Array[Dictionary]([{
-"chance": 0.3,
+"chance": 0.15,
 "kind": "refund_ball"
 }])

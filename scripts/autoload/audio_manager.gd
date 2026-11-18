@@ -7,7 +7,7 @@ extends Node
 ##   attack           Attack.mp3              전투 중 과녁을 맞혔을 때
 ##   buy_item         ItemBuy.ogg             상점에서 살 때 (v0.62 교체)
 ##   use_item         Use item.ogg            아이템을 쓸 때: 향로·특이한 향로·행복의 알·경험사탕 (v0.62)
-##   get_item         GetItem.mp3             아이템을 받을 때: 원정 보상, 박사에게 보내기 보상, 픽업
+##   get_item         GetItem.mp3             아이템을 받을 때: 원정 보상, 박사에게 보내기 보상, 아이템 인카운터(v0.84)
 ##   region_unlocked  NewRegionUnlocked.mp3   새 지역 해금
 ##   pokemon_evolved  PokemonEvolved.mp3      진화 완료
 ##   pokemon_levelup  PokemonLevelup.mp3      포켓몬 레벨업 (원정), 플레이어 레벨업 (M11: 같은 소리). 경험사탕으로 오르면 use_item 만 (v0.62)

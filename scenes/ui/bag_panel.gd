@@ -1,10 +1,11 @@
 extends OverlayPanel
 ## 가방 패널: 왼쪽 = 소지금·아이템 목록 / 오른쪽 = 고른 아이템 설명·사용 버튼. (기획서 4.11, 6.2)
-## 경험사탕·진화의 돌은 보관함에서 포켓몬을 골라 쓴다(버튼 → 보관함 패널).
+## 경험사탕·진화의 돌·특성 캡슐·깜빡열매(v0.79)는 보관함에서 포켓몬을 골라 쓴다(버튼 → 보관함 패널).
 ## 향로(v0.41): 타입을 고르고 "쓰기" → 30분 동안 그 타입이 잘 나온다. 특이한 향로는 바로 "쓰기".
 ## 행복의 알(v0.61): 바로 "쓰기" → 15분 동안 플레이어 경험치 ×1.5.
 
-const CATEGORY_NAMES := {&"ball": "볼", &"exp_candy": "경험사탕", &"evolution": "진화 도구", &"valuable": "귀중품", &"incense": "향로", &"boost": "도구"}
+const CATEGORY_NAMES := {&"ball": "볼", &"exp_candy": "경험사탕", &"evolution": "진화 도구", &"valuable": "귀중품", &"incense": "향로", &"boost": "도구",
+	&"trait_tool": "특성 도구", &"trait_capsule": "특성 캡슐"}
 const LIST_WIDTH := 150
 
 var _money: Label
@@ -130,7 +131,7 @@ func _show_detail() -> void:
 		&"exp_candy":
 			_action.text = "보관함에서 주기"
 			_action.disabled = false
-		&"evolution":
+		&"evolution", &"trait_tool", &"trait_capsule":
 			_action.text = "보관함에서 쓰기"
 			_action.disabled = false
 		&"incense":
@@ -208,5 +209,5 @@ func _on_action() -> void:
 	if item and item.is_ball():
 		PlayerState.select_ball(item.id)
 		refresh()
-	elif item and (item.category == &"exp_candy" or item.category == &"evolution"):
+	elif item and item.category in [&"exp_candy", &"evolution", &"trait_tool", &"trait_capsule"]:
 		open_requested.emit(&"storage")

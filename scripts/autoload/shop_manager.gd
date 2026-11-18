@@ -12,7 +12,7 @@ func buy(item_id: StringName, amount: int = 1) -> Dictionary:
 	var item := GameData.get_item(item_id)
 	if item == null or amount <= 0:
 		return _fail("살 수 없는 아이템입니다.")
-	if not item.can_buy():
+	if not item.is_on_sale(PlayerState.level):
 		return _fail("상점에서 팔지 않는 아이템입니다.")
 	var cost := item.buy_price * amount
 	if PlayerState.currency < cost:
@@ -35,6 +35,31 @@ func sell(item_id: StringName, amount: int = 1) -> Dictionary:
 	PlayerState.remove_item(item_id, amount)
 	PlayerState.add_currency(item.sell_price * amount)
 	return _ok()
+
+
+## 가진 귀중품(판매 전용) {id: 개수}와 판매 합계 (v0.84 "귀중품 모두 팔기")
+func valuables() -> Dictionary:
+	var items := {}
+	var total := 0
+	for it in GameData.all_items(&"valuable"):
+		var n := PlayerState.item_count(it.id)
+		if n > 0 and it.can_sell():
+			items[it.id] = n
+			total += it.sell_price * n
+	return {"items": items, "total": total}
+
+
+## 귀중품을 모두 판다. 반환 {ok, reason, count, money}
+func sell_all_valuables() -> Dictionary:
+	var v := valuables()
+	if v.items.is_empty():
+		return _fail("팔 귀중품이 없습니다.")
+	var count := 0
+	for id in v.items:
+		PlayerState.remove_item(id, v.items[id])
+		count += int(v.items[id])
+	PlayerState.add_currency(v.total)
+	return {"ok": true, "reason": "", "count": count, "money": v.total}
 
 
 ## 지금까지 확장한 횟수

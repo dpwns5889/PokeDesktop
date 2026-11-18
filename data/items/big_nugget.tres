@@ -6,8 +6,8 @@
 script = ExtResource("1_jo5av")
 id = &"big_nugget"
 name_ko = "큰 금구슬"
-description = "커다란 금구슬. 상점에 팔면 6,000원. 엔트리의 픽업 특성으로 아주 가끔 얻는다."
+description = "커다란 금구슬. 상점에 팔면 6,000원."
 category = &"valuable"
-order = 31
-sources = Array[StringName]([&"pickup"])
+order = 36
+sources = Array[StringName]([&"encounter"])
 sell_price = 6000

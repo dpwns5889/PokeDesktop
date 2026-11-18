@@ -107,3 +107,14 @@ static func roll_encounter(region: RegionData, player_level: int, rng: RandomNum
 		&"legendary": false,
 		&"difficulty_bonus": entry.difficulty_bonus,   # 출현 표의 추가 난이도 (v0.76)
 	}
+
+
+## 아이템 인카운터 (v0.84): 이번 인카운터가 아이템이면 그 id, 포켓몬이면 &"". mult = 픽업 등 확률 배율
+static func roll_item_encounter(region: RegionData, mult: float, rng: RandomNumberGenerator) -> StringName:
+	if rng.randf() >= Formulas.ITEM_ENCOUNTER_CHANCE * mult:
+		return &""
+	var table: Array = Formulas.ITEM_ENCOUNTER_TABLES.get(region.item_tier if region else 1, Formulas.ITEM_ENCOUNTER_TABLES[1])
+	var weights: Array[int] = []
+	for row in table:
+		weights.append(int(row[1]))
+	return StringName(table[ExpeditionLogic._weighted_index(weights, rng)][0])

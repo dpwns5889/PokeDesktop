@@ -5,23 +5,23 @@ const ConfirmPanel := preload("res://scenes/ui/confirm_panel.gd")
 const ShopPanel := preload("res://scenes/ui/shop_panel.gd")
 
 
-func test_notice_is_centered_but_confirm_is_not() -> void:
+## v0.80 팝업 규칙: 알림이든 확인 창이든 문구·버튼은 창 가운데
+func test_every_confirm_and_notice_is_centered() -> void:
 	var p: ConfirmPanel = auto_free(ConfirmPanel.new())
 	add_child(p)
 	p.notify("새 지역 해금", "새로운 지역이 해금되었다!\n숲")
+	_assert_centered(p)
+	assert_bool(p._cancel.visible).is_false()
+	p.ask("박사에게 보내기", "보낼까요?", "보내기", func() -> void: pass)
+	_assert_centered(p)
+	assert_bool(p._cancel.visible).is_true()
+	assert_bool(p._bottom_gap.visible).is_true()   # 버튼을 조금 위로 (v0.58)
+
+
+func _assert_centered(p: ConfirmPanel) -> void:
 	assert_int(p._message.horizontal_alignment).is_equal(HORIZONTAL_ALIGNMENT_CENTER)
 	assert_int(p._message.vertical_alignment).is_equal(VERTICAL_ALIGNMENT_CENTER)
 	assert_int(p._button_row.alignment).is_equal(BoxContainer.ALIGNMENT_CENTER)
-	# 게임 종료 확인 (v0.57): 가운데
-	p.ask("종료", "게임을 종료할까요?", "종료", func() -> void: pass, true)
-	assert_int(p._message.horizontal_alignment).is_equal(HORIZONTAL_ALIGNMENT_CENTER)
-	assert_int(p._button_row.alignment).is_equal(BoxContainer.ALIGNMENT_CENTER)
-	assert_bool(p._cancel.visible).is_true()
-	assert_bool(p._bottom_gap.visible).is_true()   # 버튼을 조금 위로 (v0.58)
-	# 그 밖의 확인 창: 왼쪽 위 문구 + 오른쪽 버튼
-	p.ask("박사에게 보내기", "보낼까요?", "보내기", func() -> void: pass)
-	assert_int(p._message.horizontal_alignment).is_equal(HORIZONTAL_ALIGNMENT_LEFT)
-	assert_int(p._button_row.alignment).is_equal(BoxContainer.ALIGNMENT_END)
 
 
 func test_shop_mode_buttons() -> void:
@@ -64,6 +64,10 @@ func test_storage_long_message_wraps() -> void:
 	p._show_message("12마리를 보냈다! 경험사탕 M 3, 경험사탕 S 9 — 아주 긴 결과 문구가 붙어도 칸을 넓히지 않는다")
 	assert_int(p._message.autowrap_mode).is_not_equal(TextServer.AUTOWRAP_OFF)
 	assert_float(p._message.get_combined_minimum_size().x).is_less(60.0)
+	# v0.85: 보관함을 다시 열면 지난 결과 문구는 사라진다
+	p.open_panel()
+	assert_bool(p._message.visible).is_false()
+	assert_str(p._message.text).is_empty()
 
 
 ## v0.71: 별 버튼으로 즐겨찾기 (v0.72: 정보 칸 오른쪽 끝에 붙여 2배 크기). 즐겨찾기한 포켓몬은 파티·원정 목록 맨 위

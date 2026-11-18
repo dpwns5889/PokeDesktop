@@ -12,6 +12,5 @@ order = 10
 params = {
 &"exp": 100.0
 }
-sources = Array[StringName]([&"shop", &"expedition", &"professor"])
-buy_price = 300
+sources = Array[StringName]([&"expedition", &"professor"])
 sell_price = 100

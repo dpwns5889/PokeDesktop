@@ -87,6 +87,15 @@ const ENCOUNTER_RESULT_SEC := 2.5         # 결과 표시
 ## 색이 다른 포켓몬 확률 (기획서 4.2, M11 확정). 전설도 같은 확률.
 const SHINY_CHANCE := 1.0 / 512.0
 
+## 아이템 인카운터 (v0.84): 인카운터가 포켓몬 대신 아이템일 확률 (픽업 특성이면 ×2)
+const ITEM_ENCOUNTER_CHANCE := 0.10
+## 지역 등급(RegionData.item_tier)별 [아이템, 가중치]. 평균 판매가 약 485 / 865 / 1,410원 (v0.84: 큰진주를 진주로 합침)
+const ITEM_ENCOUNTER_TABLES := {
+	1: [["pretty_feather", 40], ["pearl", 37], ["stardust", 20], ["nugget", 3]],
+	2: [["pretty_feather", 20], ["pearl", 40], ["stardust", 25], ["star_piece", 8], ["nugget", 6], ["big_nugget", 1]],
+	3: [["pretty_feather", 10], ["pearl", 35], ["stardust", 20], ["star_piece", 15], ["nugget", 15], ["big_nugget", 5]],
+}
+
 
 
 ## 다음 인카운터까지의 시간. 지역의 [최소, 최대] 범위에서 고르게 뽑는다. (기획서 4.2)

@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/item_data.gd" id="1_hwt38"]
+
+[resource]
+script = ExtResource("1_hwt38")
+id = &"trait_capsule"
+name_ko = "특성 캡슐"
+description = "담긴 특성을 포켓몬에게 붙인다. 보관함에서 쓴다."
+category = &"trait_capsule"
+order = 29
+sources = Array[StringName]([&"professor"])
+sell_price = 1000
+unlock_level = 12

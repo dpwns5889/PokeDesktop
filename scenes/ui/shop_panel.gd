@@ -24,6 +24,8 @@ var _qty: SpinBox
 var _total: Label
 var _button: Button
 var _message: Label
+## 제목 줄 "귀중품 모두 팔기" (v0.84)
+var _sell_all: Button
 
 
 func _panel_title() -> String:
@@ -33,6 +35,9 @@ func _panel_title() -> String:
 func _ready() -> void:
 	super()
 	PlayerState.changed.connect(_refresh_if_visible)
+	# 판매 화면에서 귀중품이 있을 때만 (v0.84)
+	_sell_all = add_header_button("귀중품 모두 팔기", _on_sell_all)
+	_sell_all.visible = false
 
 
 func open_panel() -> void:
@@ -133,6 +138,8 @@ func _selling() -> bool:
 
 func refresh() -> void:
 	_money.text = ShopManager.format_money(PlayerState.currency)
+	if _sell_all:
+		_sell_all.visible = _selling() and not ShopManager.valuables().items.is_empty()
 	var keep := _selected_id()
 	_list.clear()
 	_ids.clear()
@@ -142,7 +149,7 @@ func refresh() -> void:
 			if item.can_sell() and n > 0:
 				_list.add_item("%s x%d" % [item.name_ko, n], item.load_icon())
 				_ids.append(item.id)
-		elif item.can_buy():
+		elif item.is_on_sale(PlayerState.level):
 			_list.add_item(item.name_ko, item.load_icon())
 			_ids.append(item.id)
 	if not _selling():
@@ -203,20 +210,16 @@ func _on_order() -> void:
 	var result: Dictionary
 	if _selling():
 		result = ShopManager.sell(id, qty)
-		if result.ok:
-			# v0.66: "팔았다" 문구는 판매 버튼을 밀어내 잘리게 해서 없앴다 → 구매와 같은 소리로 알린다
-			_message.text = ""
+		if result.ok:   # v0.66: "팔았다" 문구 대신 구매와 같은 소리
 			AudioManager.play(&"buy_item")
 	elif id == STORAGE_ROW:
-		result = ShopManager.expand_storage()
+		result = ShopManager.expand_storage()   # 늘어난 칸 수는 설명에 바로 보인다
 		if result.ok:
-			_message.text = "보관함이 %d칸이 되었다." % PlayerState.storage_capacity
+			AudioManager.play(&"buy_item")
 	else:
-		result = ShopManager.buy(id, qty)
-		if result.ok:
-			_message.text = "%s %d개를 샀다." % [GameData.get_item(id).name_ko, qty]
-	if not result.ok:
-		_message.text = result.reason
+		result = ShopManager.buy(id, qty)   # 구매 효과음이 난다 (items_received)
+	# v0.78: 구매 성공 문구도 버튼을 아래로 밀어내서 없앴다. 실패 이유만 보인다
+	_message.text = "" if result.ok else result.reason
 	_qty.value = 1
 	refresh()
 
@@ -224,3 +227,18 @@ func _on_order() -> void:
 ## 보관함 확장 그림 (없으면 null — 그림 없이 글자만)
 static func _storage_icon() -> Texture2D:
 	return load(STORAGE_ICON) if ResourceLoader.exists(STORAGE_ICON) else null
+
+
+## 귀중품 모두 팔기: 무엇을 얼마에 파는지 확인 창 → 판다 (v0.84)
+func _on_sell_all() -> void:
+	var v := ShopManager.valuables()
+	if v.items.is_empty():
+		return
+	var parts: PackedStringArray = []
+	for id in v.items:
+		parts.append("%s %d" % [GameData.get_item(id).name_ko, v.items[id]])
+	confirm_requested.emit("귀중품 모두 팔기", "%s\n모두 팔아 %s을 받는다." % [", ".join(parts), ShopManager.format_money(v.total)], "팔기",
+		func() -> void:
+			if ShopManager.sell_all_valuables().ok:
+				AudioManager.play(&"buy_item")
+			refresh())

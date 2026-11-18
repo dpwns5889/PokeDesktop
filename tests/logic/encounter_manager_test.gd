@@ -147,3 +147,45 @@ func test_region_intervals() -> void:
 		assert_float(t).is_between(30.0, 120.0)
 	# 지역이 없으면 기본값
 	assert_that(Formulas.encounter_interval_range(null)).is_equal(Formulas.DEFAULT_ENCOUNTER_INTERVAL)
+
+
+## 아이템 인카운터 (v0.84): 흔들림 → 클릭 없이 아이템을 얻고 ITEM_SHOW_SEC 뒤 대기로
+func test_item_encounter_gives_item_without_click() -> void:
+	PlayerState.inventory = {}
+	var got := []
+	var cb := func(id: StringName) -> void: got.append(id)
+	EventBus.item_found.connect(cb)
+	var t := T0 + Formulas.MAX_ENCOUNTER_INTERVAL_SEC + 1.0
+	_m._deadline = t - 1.0
+	_m.current = {}
+	# 아이템이 나올 때까지 인카운터를 돌린다 (10%)
+	for i in 200:
+		_m._begin_encounter(t)
+		if _m.current.has(&"item"):
+			break
+		_m.state = Manager.State.WAITING
+	assert_bool(_m.current.has(&"item")).is_true()
+	assert_int(_m.state).is_equal(Manager.State.PREVIEW)
+	var id: StringName = _m.current[&"item"]
+	_m.tick(t + Formulas.ENCOUNTER_PREVIEW_SEC)
+	assert_int(_m.state).is_equal(Manager.State.RESULT)
+	assert_int(PlayerState.item_count(id)).is_equal(1)
+	assert_array(got).contains_exactly([id])
+	_m.tick(t + Formulas.ENCOUNTER_PREVIEW_SEC + Manager.ITEM_SHOW_SEC)
+	assert_int(_m.state).is_equal(Manager.State.WAITING)
+	EventBus.item_found.disconnect(cb)
+
+
+func test_item_encounter_rate_and_pickup_doubles_it() -> void:
+	var region := GameData.get_region(&"grassland")
+	var rng := RandomNumberGenerator.new()
+	rng.seed = 7
+	var normal := 0
+	var picked := 0
+	for i in 4000:
+		if EncounterLogic.roll_item_encounter(region, 1.0, rng) != &"":
+			normal += 1
+		if EncounterLogic.roll_item_encounter(region, 2.0, rng) != &"":
+			picked += 1
+	assert_int(normal).is_between(320, 480)   # 10%
+	assert_int(picked).is_between(680, 920)   # 20%

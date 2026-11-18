@@ -66,20 +66,12 @@ func test_boosted_level_respects_cap() -> void:
 	assert_int(BattleTraits.boosted_level(5, 0, 8)).is_equal(5)
 
 
-func test_after_battle_rolls() -> void:
+## 꿀모으기 = 야생 Lv × 2원, 픽업 = 아이템 인카운터 확률 ×2 (v0.84)
+func test_honey_money_and_pickup_mult() -> void:
 	var fx := BattleTraits.collect([_add(16, 10, ["pickup", "honey_gather"])])
-	var rng := RandomNumberGenerator.new()
-	rng.seed = 4
-	var found := 0
-	var money := 0
-	for i in 2000:
-		var r := BattleTraits.roll_after_battle(fx, 20, rng)
-		for id in r.items:
-			found += r.items[id]
-			assert_object(GameData.get_item(id)).override_failure_message(String(id)).is_not_null()
-		money += r.currency
-	assert_int(found).is_between(220, 380)   # 15%
-	assert_int(money).is_equal(2000 * 40)     # 야생 Lv20 × 2원
+	assert_int(BattleTraits.after_battle_currency(fx, 20)).is_equal(40)
+	assert_float(fx.item_encounter_mult).is_equal(2.0)
+	assert_float(BattleTraits.collect([_add(16, 10, [])]).item_encounter_mult).is_equal(1.0)
 
 
 func test_buff_lines() -> void:
@@ -119,12 +111,12 @@ func test_ball_fetch_and_honey_after_failed_battle() -> void:
 	assert_int(PlayerState.currency).is_equal(money + int(m.current[&"level"]) * 2)   # 꿀모으기
 
 
-## 볼줍기 (v0.56): 성공·실패 상관없이 30% 확률로 쓴 볼을 돌려받는다. 몬스터볼은 돌려받지 않는다.
-func test_ball_fetch_refunds_about_30_percent_on_any_result() -> void:
+## 볼줍기 (v0.56, v0.81 15%): 성공·실패 상관없이 15% 확률로 쓴 볼을 돌려받는다. 몬스터볼은 돌려받지 않는다.
+func test_ball_fetch_refunds_about_15_percent_on_any_result() -> void:
 	PlayerState.add_entry(_add(16, 10, ["ball_fetch"]).uid)
 	var fx := BattleTraits.collect(PlayerState.entry_pokemon())
 	assert_bool(fx.refund_ball).is_true()
-	assert_float(fx.refund_chance).is_equal_approx(0.3, 0.0001)
+	assert_float(fx.refund_chance).is_equal_approx(0.15, 0.0001)
 	var m := _manager()
 	m.rng.seed = 11
 	m.current = {&"level": 5}
@@ -135,8 +127,8 @@ func test_ball_fetch_refunds_about_30_percent_on_any_result() -> void:
 			m._battle_ball = &"great_ball"
 			m._apply_after_battle(success)
 			refunds[success] += PlayerState.item_count(&"great_ball") - before
-	assert_int(refunds[true]).is_between(60, 120)    # 300 × 30% ≈ 90
-	assert_int(refunds[false]).is_between(60, 120)
+	assert_int(refunds[true]).is_between(25, 70)    # 300 × 15% ≈ 45
+	assert_int(refunds[false]).is_between(25, 70)
 	# 몬스터볼은 돌려받지 않는다
 	var pb := PlayerState.item_count(PlayerState.INFINITE_BALL)
 	for i in 50:

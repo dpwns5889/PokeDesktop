@@ -17,9 +17,11 @@ func after_test() -> void:
 
 
 func test_v01_items_and_prices() -> void:
-	var ids := GameData.all_items().map(func(i: ItemData) -> String: return String(i.id))
+	var ids := GameData.all_items().filter(func(i: ItemData) -> bool: return i.category != GameData.CAPSULE_TEMPLATE) \
+		.map(func(i: ItemData) -> String: return String(i.id))   # 특성 캡슐(특성마다 하나, v0.79)은 trait_capsule_test
 	assert_array(ids).contains_exactly(["poke_ball", "great_ball", "ultra_ball", "exp_candy_s", "exp_candy_m",
-		"fire_stone", "water_stone", "thunder_stone", "leaf_stone", "moon_stone", "incense", "shiny_incense", "lucky_egg", "nugget", "big_nugget"])
+		"fire_stone", "water_stone", "thunder_stone", "leaf_stone", "moon_stone", "incense", "shiny_incense", "lucky_egg",
+		"forget_berry", "pretty_feather", "pearl", "stardust", "nugget", "star_piece", "big_nugget"])
 	# 금구슬: 판매 전용 (픽업 특성, v0.28)
 	var nugget := GameData.get_item(&"nugget")
 	assert_bool(nugget.can_buy()).is_false()
@@ -29,6 +31,8 @@ func test_v01_items_and_prices() -> void:
 	assert_int(great.sell_price).is_equal(250)
 	assert_float(great.catch_modifier()).is_equal(1.5)
 	assert_float(GameData.get_item(&"ultra_ball").catch_modifier()).is_equal(2.0)
+	# 경험사탕 S 는 v0.82부터 상점에서 안 팖 (원정·박사에게서만)
+	assert_bool(GameData.get_item(&"exp_candy_s").can_buy()).is_false()
 	# 원정 전용 = 상점에서 안 팖
 	assert_bool(GameData.get_item(&"ultra_ball").can_buy()).is_false()
 	assert_bool(GameData.get_item(&"exp_candy_m").can_buy()).is_false()
@@ -42,12 +46,43 @@ func test_v01_items_and_prices() -> void:
 		assert_bool(GameData.get_item(stone).can_buy()).override_failure_message(String(stone)).is_false()
 		assert_bool(GameData.get_item(stone).can_sell()).is_true()
 		assert_bool(rewards.has(String(stone))).override_failure_message(String(stone)).is_true()
-	# 큰 금구슬: 판매 전용 6,000원, 픽업으로 얻는다
+	# 큰 금구슬: 판매 전용 6,000원, 아이템 인카운터로 얻는다 (v0.84)
 	var big := GameData.get_item(&"big_nugget")
 	assert_bool(big.can_buy()).is_false()
 	assert_int(big.sell_price).is_equal(6000)
-	var pickup_items: Array = GameData.get_trait(&"pickup").effects[0].table.map(func(r): return r[0])
-	assert_array(pickup_items).contains(["nugget", "big_nugget"])
+
+
+## 아이템 인카운터 드롭표 (v0.84): 모든 아이템이 있고 판매 전용, 등급이 높을수록 평균 판매가가 높다
+func test_item_encounter_tables() -> void:
+	var avg := []
+	for tier in [1, 2, 3]:
+		var total := 0
+		var weight := 0
+		for row in Formulas.ITEM_ENCOUNTER_TABLES[tier]:
+			var it := GameData.get_item(StringName(row[0]))
+			assert_object(it).override_failure_message(String(row[0])).is_not_null()
+			assert_bool(it.can_buy()).is_false()
+			total += it.sell_price * int(row[1])
+			weight += int(row[1])
+		avg.append(float(total) / weight)
+	assert_bool(avg[0] < avg[1] and avg[1] < avg[2]).is_true()
+	for r in GameData.all_regions():
+		assert_int(r.item_tier).override_failure_message(String(r.id)).is_between(1, 3)
+
+
+func test_sell_all_valuables_sells_only_valuables() -> void:
+	var snap := PlayerState.to_save_dict()
+	PlayerState.reset()
+	PlayerState.add_item(&"pearl", 2)
+	PlayerState.add_item(&"big_nugget", 1)
+	PlayerState.add_item(&"great_ball", 3)
+	var before := PlayerState.currency
+	var r := ShopManager.sell_all_valuables()
+	assert_int(r.count).is_equal(3)
+	assert_int(PlayerState.currency - before).is_equal(500 * 2 + 6000)
+	assert_int(PlayerState.item_count(&"great_ball")).is_equal(3)
+	assert_bool(ShopManager.sell_all_valuables().ok).is_false()
+	PlayerState.load_save_dict(snap)
 
 
 func test_evolution_items_in_species_data_exist() -> void:

@@ -20,6 +20,7 @@ extends Node
 ##   받은 사탕은 아직 없는 종으로 진화할 수 있는 포켓몬에게 (필요한 경험치가 적은 순) 먼저 주고, 남으면 주력 10마리에게.
 ## - 진화: 레벨 진화는 모두 수락, 진화의 돌은 새 종이 나오면 사용(v0.42: 돌은 원정에서만 얻는다).
 ## - 상점: 슈퍼볼이 10개 미만이면 산다(소지금 3,000원은 남김). 보관함이 90% 차면 (돈이 되는 만큼) 확장.
+## - 아이템 인카운터(v0.84): 인카운터가 아이템이면 얻고 끝. 하루 끝에 귀중품을 모두 판다(--verbose 에 "아이템 N개 M원").
 
 const DEFAULT_SEEDS := 5
 ## 기획서 9.3 일차별 목표 [일차, 플레이어 Lv, 포획 종 수]
@@ -78,7 +79,7 @@ func _run(seed: int) -> Array:
 	now = 2_000_000_000.0
 	_next_send_try = 0.0
 	stats = {"encounters": 0, "reacted": 0, "caught": 0, "fled": 0, "legend": 0, "expeditions": 0, "transferred": 0,
-		"battles": 0, "won": 0, "full": 0, "diff_sum": 0.0}
+		"battles": 0, "won": 0, "full": 0, "diff_sum": 0.0, "items": 0, "item_money": 0}
 	var daily: Array = []
 	for day in range(1, days + 1):
 		_claim_expeditions()
@@ -91,14 +92,15 @@ func _run(seed: int) -> Array:
 			_claim_expeditions()
 			_send_expedition()
 			_handle_evolutions()
+		stats.item_money += int(ShopManager.sell_all_valuables().get("money", 0))   # v0.84: 귀중품은 하루 끝에 판다
 		_end_of_day()
 		var snap := _snapshot(day)
 		daily.append(snap)
 		if verbose:
-			print("seed %d day %2d: Lv%d 종%d 지역%d(%s) 돈%d 원정%d 포획%d 전설%d 보관%d/%d 가득%d 전투승률%d%% 평균난이도%.2f 최고Lv%d" % [seed, day, snap.level, snap.species,
+			print("seed %d day %2d: Lv%d 종%d 지역%d(%s) 돈%d 원정%d 포획%d 전설%d 보관%d/%d 가득%d 전투승률%d%% 평균난이도%.2f 최고Lv%d 아이템%d개 %d원" % [seed, day, snap.level, snap.species,
 				snap.regions, PlayerState.current_region, snap.money, stats.expeditions, stats.caught, stats.legend,
 				PlayerState.storage_count(), PlayerState.storage_capacity, stats.full,
-				int(100.0 * stats.won / maxi(1, stats.battles)), stats.diff_sum / maxi(1, stats.battles), snap.top_level])
+				int(100.0 * stats.won / maxi(1, stats.battles)), stats.diff_sum / maxi(1, stats.battles), snap.top_level, stats.items, stats.item_money])
 			stats.battles = 0
 			stats.won = 0
 			stats.full = 0
@@ -127,6 +129,12 @@ func _encounter() -> void:
 		_tidy_storage()
 	_choose_region()
 	var region := GameData.get_region(PlayerState.current_region)
+	# 아이템 인카운터 (v0.84): 반응과 상관없이 얻는다
+	var found := EncounterLogic.roll_item_encounter(region, float(EncounterManager.entry_traits().item_encounter_mult), rng)
+	if found != &"":
+		PlayerState.add_item(found, 1)
+		stats.items += 1
+		return
 	var enc := EncounterLogic.roll_encounter(region, PlayerState.level, rng, GameData.legendary_rules(), UnlockManager.evaluate)
 	if enc.is_empty():
 		return

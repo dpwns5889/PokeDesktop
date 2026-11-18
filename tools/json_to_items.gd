@@ -37,6 +37,7 @@ func _run() -> int:
 		item.buy_price = int(it.buy_price)
 		item.sell_price = int(it.sell_price)
 		item.infinite = bool(it.get("infinite", false))
+		item.unlock_level = int(it.get("unlock_level", 0))
 		var path := "%s/%s.tres" % [OUT_DIR, it.id]
 		if ResourceSaver.save(item, path) != OK:
 			push_error("저장 실패: " + path)

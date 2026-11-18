@@ -5,19 +5,24 @@ extends Node
 ##   WAITING ─타이머 만료→ PREVIEW(풀숲 흔들림, 소리) → APPEARED(90초) ─클릭→ BATTLE → RESULT → WAITING
 ##                                                      └─90초 초과→ RESULT(도망)
 ##   WAITING ⇄ PAUSED : 선택한 볼(몬스터볼 제외) 보유량이 0이면 정지, 생기면 남은 시간부터 재개
+##   아이템 인카운터 (v0.84): WAITING → PREVIEW(흔들림) → RESULT(아이템을 얻고 ITEM_SHOW_SEC 동안 보여 줌) → WAITING
+##     current = {item: id}. 클릭하지 않아도 얻는다.
 ##
 ## 시간은 프레임 누적이 아니라 시스템 시각(초)으로 비교한다. 테스트에서는 tick(now)를 직접 호출한다.
 ## 개발용: 실행 인자 `-- --fast-encounter` 를 주면 간격이 약 12초가 된다. `-- --shiny` 는 모든 야생이 색이 다른 포켓몬(디버그 빌드만, M11).
+## `-- --item-encounter` 는 모든 인카운터가 아이템(디버그 빌드만, v0.84).
 
 enum State { WAITING, PAUSED, PREVIEW, APPEARED, BATTLE, RESULT }
 
 const FAST_INTERVAL_SEC := 12.0
 const FAST_JITTER_SEC := 4.0
+## 아이템 인카운터에서 아이템을 보여 주는 시간
+const ITEM_SHOW_SEC := 2.0
 
 var state: State = State.WAITING
 ## 현재 인카운터 {dex_id, level, gender, shiny, region}. 없으면 빈 Dictionary.
 var current: Dictionary = {}
-## 마지막 결과: &"caught" / &"fled" / &""
+## 마지막 결과: &"caught" / &"fled" / &"item" / &""
 var last_result: StringName = &""
 ## begin_battle()이 거절된 이유: &"storage_full" / &"no_ball" / &""
 var block_reason: StringName = &""
@@ -25,6 +30,7 @@ var block_reason: StringName = &""
 var rng := RandomNumberGenerator.new()
 var fast_mode := false
 var force_shiny := false
+var force_item := false
 
 ## 이번 전투에 쓴 볼 (볼줍기 특성: 실패하면 돌려준다)
 var _battle_ball: StringName = &""
@@ -37,6 +43,7 @@ func _ready() -> void:
 	rng.randomize()
 	fast_mode = OS.get_cmdline_user_args().has("--fast-encounter")
 	force_shiny = OS.is_debug_build() and OS.get_cmdline_user_args().has("--shiny")
+	force_item = OS.is_debug_build() and OS.get_cmdline_user_args().has("--item-encounter")
 	EventBus.current_region_changed.connect(_on_region_changed)
 	start(_now())
 
@@ -69,7 +76,9 @@ func tick(now: float) -> void:
 				state = State.WAITING
 				EventBus.ball_shortage_changed.emit(false)
 		State.PREVIEW:
-			if now >= _deadline:
+			if now >= _deadline and current.has(&"item"):
+				_found_item(now)
+			elif now >= _deadline:
 				state = State.APPEARED
 				_deadline = now + Formulas.ENCOUNTER_APPEAR_SEC
 				PlayerState.mark_seen(current[&"dex_id"])
@@ -223,6 +232,15 @@ func _on_region_changed(_id: StringName) -> void:
 func _begin_encounter(now: float) -> void:
 	var region := GameData.get_region(PlayerState.current_region)
 	var fx := entry_traits()
+	# 아이템 인카운터 (v0.84): 포켓몬 대신 아이템 (픽업이면 확률 ×2)
+	var found := EncounterLogic.roll_item_encounter(region, 1000.0 if force_item else float(fx.item_encounter_mult), rng)
+	if found != &"":
+		current = {&"item": found}
+		state = State.PREVIEW
+		_deadline = now + Formulas.ENCOUNTER_PREVIEW_SEC
+		AudioManager.play(&"encounter")
+		EventBus.encounter_started.emit(current)
+		return
 	# 출현 타입 배율 = 엔트리 특성 × 향로 (v0.41), 색이 다른 확률 = 특이한 향로
 	var weights: Dictionary = fx.type_weights.duplicate()
 	var inc := PlayerState.incense_type_weights(int(now))
@@ -261,24 +279,29 @@ func _finish(now: float, success: bool) -> void:
 		_apply_after_battle(success)
 
 
-## 전투가 끝난 뒤 엔트리의 전투 특성: 픽업·꿀모으기·볼줍기(30% 확률, v0.56) — 성공·실패 모두 (기획서 4.6)
+## 아이템 인카운터: 아이템을 얻고 잠깐 보여 준 뒤 끝 (v0.84)
+func _found_item(now: float) -> void:
+	var id: StringName = current[&"item"]
+	PlayerState.add_item(id, 1)
+	state = State.RESULT
+	last_result = &"item"
+	_deadline = now + ITEM_SHOW_SEC
+	EventBus.items_received.emit({id: 1}, &"encounter")   # 아이템 획득 소리
+	EventBus.item_found.emit(id)
+
+
+## 전투가 끝난 뒤 엔트리의 전투 특성: 꿀모으기·볼줍기(15% 확률, v0.81) — 성공·실패 모두 (기획서 4.6)
 func _apply_after_battle(_success: bool) -> void:
 	var fx := entry_traits()
 	var lines := PackedStringArray()
-	var r := BattleTraits.roll_after_battle(fx, int(current.get(&"level", 1)), rng)
-	if not r.items.is_empty():
-		for id in r.items:
-			PlayerState.add_item(id, r.items[id])
-			var item := GameData.get_item(id)
-			lines.append("픽업: %s" % (item.name_ko if item else String(id)))
-		EventBus.items_received.emit(r.items, &"pickup")
-	if r.currency > 0:
-		PlayerState.add_currency(r.currency)
-		lines.append("꿀모으기 +%d원" % r.currency)
+	var money := BattleTraits.after_battle_currency(fx, int(current.get(&"level", 1)))
+	if money > 0:
+		PlayerState.add_currency(money)
+		lines.append("꿀모으기 +%d원" % money)
 	if fx.refund_ball and _battle_ball != &"" and _battle_ball != PlayerState.INFINITE_BALL 			and rng.randf() < float(fx.refund_chance):
 		PlayerState.add_item(_battle_ball, 1)
 		var ball := GameData.get_item(_battle_ball)
-		lines.append("볼줍기: %s 회수" % (ball.name_ko if ball else String(_battle_ball)))
+		lines.append("볼줍기 +%s" % (ball.name_ko if ball else String(_battle_ball)))   # v0.81: 꿀모으기 "+N원"과 같은 형식
 	_battle_ball = &""
 	if not lines.is_empty():
 		EventBus.battle_traits_triggered.emit(lines)

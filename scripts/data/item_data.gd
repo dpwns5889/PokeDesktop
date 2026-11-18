@@ -21,10 +21,14 @@ extends Resource
 @export var sell_price: int = 0
 ## 몬스터볼만 true
 @export var infinite: bool = false
+## 플레이어 레벨이 이 값 이상이어야 상점에서 살 수 있다 (0 = 처음부터, v0.79)
+@export var unlock_level: int = 0
+## 아이콘을 다른 아이템과 같이 쓸 때 그 id (특성 캡슐은 특성마다 아이템이 따로지만 그림은 하나, v0.79)
+@export var icon_id: StringName = &""
 
 
 func icon_path() -> String:
-	return "res://Assets/Generated/icons/%s.png" % id
+	return "res://Assets/Generated/icons/%s.png" % (icon_id if icon_id != &"" else id)
 
 
 func load_icon() -> Texture2D:
@@ -41,6 +45,11 @@ func catch_modifier() -> float:
 
 func can_buy() -> bool:
 	return buy_price > 0 and sources.has(&"shop")
+
+
+## 지금 상점에 보이는가 (해금 레벨, v0.79)
+func is_on_sale(player_level: int) -> bool:
+	return can_buy() and player_level >= unlock_level
 
 
 func can_sell() -> bool:
