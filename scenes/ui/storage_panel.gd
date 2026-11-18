@@ -98,6 +98,10 @@ func _build_content(box: VBoxContainer) -> void:
 	right_col.add_child(_info_scroll)
 	_message = Label.new()
 	_message.add_theme_color_override(&"font_color", Color(1, 0.85, 0.35))
+	# 긴 결과 문구("12마리를 보냈다! 경험사탕 M 3, 경험사탕 S 9")가 한 줄이면 오른쪽 칸을 넓혀 버튼까지
+	# 패널 밖으로 밀어냈다 → 칸 폭에 맞춰 줄바꿈 (v0.64)
+	_message.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_message.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_message.visible = false
 	right_col.add_child(_message)
 	_actions = HBoxContainer.new()

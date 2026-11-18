@@ -54,3 +54,13 @@ func test_sell_plays_buy_sound_without_message() -> void:
 	assert_bool(snd.playing).is_true()
 	snd.stop()
 	PlayerState.load_save_dict(snap)
+
+
+## v0.64: 보관함 "중복 보내기" 결과처럼 긴 문구도 줄바꿈되어 오른쪽 칸(버튼 줄)을 패널 밖으로 밀지 않는다
+func test_storage_long_message_wraps() -> void:
+	var SP := preload("res://scenes/ui/storage_panel.gd")
+	var p = auto_free(SP.new())
+	add_child(p)
+	p._show_message("12마리를 보냈다! 경험사탕 M 3, 경험사탕 S 9 — 아주 긴 결과 문구가 붙어도 칸을 넓히지 않는다")
+	assert_int(p._message.autowrap_mode).is_not_equal(TextServer.AUTOWRAP_OFF)
+	assert_float(p._message.get_combined_minimum_size().x).is_less(60.0)
