@@ -71,8 +71,12 @@ func _make_cell(s: PokemonSpecies) -> Control:
 	cell.mouse_filter = Control.MOUSE_FILTER_STOP
 	var tex := TextureRect.new()
 	tex.name = "Icon"
-	tex.position = Vector2(2, 2)
-	tex.size = Vector2(ICON, ICON)
+	# 칸 가운데 (v0.86: 이전에는 (2, 2)에 붙어 왼쪽 위로 치우쳤다)
+	tex.set_anchors_preset(Control.PRESET_CENTER)
+	tex.offset_left = -ICON / 2.0
+	tex.offset_top = -ICON / 2.0
+	tex.offset_right = ICON / 2.0
+	tex.offset_bottom = ICON / 2.0
 	tex.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	tex.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 	tex.mouse_filter = Control.MOUSE_FILTER_IGNORE
