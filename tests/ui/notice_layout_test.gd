@@ -66,7 +66,7 @@ func test_storage_long_message_wraps() -> void:
 	assert_float(p._message.get_combined_minimum_size().x).is_less(60.0)
 
 
-## v0.71: 이름·성별 바로 오른쪽 별 버튼으로 즐겨찾기. 즐겨찾기한 포켓몬은 파티·원정 목록 맨 위
+## v0.71: 별 버튼으로 즐겨찾기 (v0.72: 정보 칸 오른쪽 끝에 붙여 2배 크기). 즐겨찾기한 포켓몬은 파티·원정 목록 맨 위
 func test_favorite_star_and_list_order() -> void:
 	var snap := PlayerState.to_save_dict()
 	PlayerState.reset()
@@ -79,9 +79,11 @@ func test_favorite_star_and_list_order() -> void:
 	sp._on_selected(sp._uids.find(weak.uid))
 	await get_tree().process_frame
 	await get_tree().process_frame
-	assert_bool(sp._fav.get_parent() == sp._name.get_parent()).is_true()
-	assert_float(sp._fav.position.x).is_less(sp._name.position.x + sp._name.get_content_width() + 12.0)
-	assert_float(sp._fav.position.x).is_greater_equal(sp._name.position.x + sp._name.get_content_width())
+	var head: Control = sp._fav.get_parent()
+	assert_float(sp._fav.position.x + sp._fav.size.x).is_equal_approx(head.size.x, 0.5)   # 오른쪽 끝에 붙음
+	assert_float(sp._fav.position.x).is_greater(sp._name.global_position.x - head.global_position.x + sp._name.get_content_width())
+	assert_int(sp._fav.get_theme_font_size(&"font_size")).is_equal(32)   # 기본 16의 2배
+	assert_float(sp._fav.position.y).is_equal(0.0)   # 위에 붙음
 	sp._fav.pressed.emit()
 	assert_bool(PlayerState.find_pokemon(weak.uid).favorite).is_true()
 	# 파티: 레벨이 낮아도 즐겨찾기가 먼저
@@ -99,4 +101,23 @@ func test_favorite_star_and_list_order() -> void:
 	ep._refresh_party()
 	assert_str(ep._party_uids[0]).is_equal(weak.uid)
 	assert_str(ep._party_uids[1]).is_equal(strong.uid)
+	PlayerState.load_save_dict(snap)
+
+
+## v0.73: 보관함은 정렬 기준과 상관없이 파티(엔트리) 포켓몬이 맨 위, 파티 순서대로
+func test_storage_party_first() -> void:
+	var snap := PlayerState.to_save_dict()
+	PlayerState.reset()
+	var low := PlayerState.add_caught({&"dex_id": 150, &"level": 2, &"gender": &"male", &"region": &"grassland"})
+	var mid := PlayerState.add_caught({&"dex_id": 120, &"level": 5, &"gender": &"male", &"region": &"grassland"})
+	var top := PlayerState.add_caught({&"dex_id": 1, &"level": 50, &"gender": &"male", &"region": &"grassland"})
+	PlayerState.entries = [mid.uid, low.uid] as Array[String]
+	var SP := preload("res://scenes/ui/storage_panel.gd")
+	var sp = auto_free(SP.new())
+	add_child(sp)
+	sp.open_panel()
+	for sort in [0, 1, 2]:
+		sp._sort.select(sort)
+		sp.refresh()
+		assert_array(sp._uids).contains_exactly([mid.uid, low.uid, top.uid])
 	PlayerState.load_save_dict(snap)

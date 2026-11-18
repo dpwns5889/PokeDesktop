@@ -118,7 +118,7 @@ static func roll_wild_level(entry: EncounterEntry, level_scale: float, level_cap
 
 # ---------------------------------------------------------------- 인카운터 전투 (기획서 4.3)
 
-const CAPTURE_TIME_LIMIT_SEC := 12.0      # v0.55: 20초 → 12초
+const CAPTURE_TIME_LIMIT_SEC := 10.0      # v0.55: 20초 → 12초, v0.74: 12초 → 10초
 const CAPTURE_BASE_FILL := 0.12
 const CAPTURE_INNER_RATIO := 0.45        # 과녁 반지름 대비 '중심' 영역
 const CAPTURE_INNER_BONUS := 1.5         # 중심 명중 시 게이지 배율

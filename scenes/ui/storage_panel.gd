@@ -1,17 +1,19 @@
 extends OverlayPanel
 ## 보관함 패널. (기획서 4.7, 6.2)
 ## 왼쪽: 보유 포켓몬 목록(정렬, 아래까지 스크롤) / 오른쪽: 고른 포켓몬의 정보
-## 오른쪽 — 위: 전투 모습(64×64) + 옆에 이름·성별·즐겨찾기 별 / 레벨 / 타입 (v0.55, 별 v0.71)
+## 오른쪽 — 위: 전투 모습(64×64) + 옆에 이름·성별 / 레벨 / 타입, 오른쪽 위 끝에 2배 크기 즐겨찾기 별 (v0.55, 별 v0.71·위치 v0.72)
 ##   아래: 상태(원정 중·색이 다른·엔트리), 경험치, 능력치(개체치 표시: 최대 ★★, 높음 ★, 낮음 = 하늘색 값, v0.55), 특성 상자
 ## 오른쪽 아래 버튼(M8): 경험사탕 S·M(왼쪽 클릭 1개, 오른쪽 클릭 = 다음 레벨까지), 박사에게 보내기
 ## 제목 줄 "중복 보내기": 종마다 가장 좋은 1마리를 남기고 나머지를 박사에게 (즐겨찾기·원정 중·특성 있는 개체 제외)
-## 목록 색: 원정 중 = 하늘색, 엔트리 = 연두색, 즐겨찾기 = 금색 + 앞에 ★ (v0.71, 잠금 대신). 필터는 이후 추가.
+## 목록 순서: 파티(엔트리) 포켓몬이 정렬 기준과 상관없이 맨 위 (v0.73). 목록 색: 원정 중 = 하늘색, 엔트리 = 연두색, 즐겨찾기 = 금색 + 앞에 ★ (v0.71, 잠금 대신). 필터는 이후 추가.
 
 const SORTS := ["도감번호", "레벨", "포획일"]
 const LIST_WIDTH := 150
 const ENTRY_COLOR := Color(0.6, 0.95, 0.55)
 const SHINY_COLOR := Color(1.0, 0.85, 0.35)
 const FAVORITE_COLOR := Color(1, 0.85, 0.35)
+## 즐겨찾기 별 글자 크기: 기본 글자(16)의 2배 (v0.72)
+const FAVORITE_FONT_SIZE := 32
 ## 전투 모습 칸 (v0.55)
 const SPRITE_BOX := 64
 ## 개체치 표시 색 (v0.55)
@@ -32,7 +34,7 @@ var _info: VBoxContainer
 var _name: RichTextLabel
 var _sprite: TextureRect
 var _level: Label
-## 이름·성별 오른쪽의 즐겨찾기 별 버튼 (v0.71). 켜면 금색, 끄면 흐린 회색
+## 즐겨찾기 별 버튼 (v0.71, v0.72부터 정보 칸 오른쪽 위·2배 크기). 켜면 금색, 끄면 흐린 회색
 var _fav: Button
 var _types: HBoxContainer
 var _status: HFlowContainer
@@ -143,23 +145,26 @@ func _build_content(box: VBoxContainer) -> void:
 	side.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	side.add_theme_constant_override(&"separation", 1)
 	head.add_child(side)
-	var name_row := HBoxContainer.new()
-	name_row.add_theme_constant_override(&"separation", 3)
-	side.add_child(name_row)
 	_name = UiUtil.rich_label()
 	_name.autowrap_mode = TextServer.AUTOWRAP_OFF
-	_name.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN   # 글자 폭만큼 → 별이 성별 바로 오른쪽에
-	name_row.add_child(_name)
+	side.add_child(_name)
+	# 즐겨찾기 별: 정보 칸 오른쪽 위에 붙여 2배 크기로 (v0.72). 이름 줄 밖이라 레벨·타입 줄을 밀지 않는다
 	_fav = Button.new()
 	_fav.text = "★"
 	_fav.flat = true
 	_fav.focus_mode = Control.FOCUS_NONE
-	_fav.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	_fav.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
 	_fav.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
+	_fav.add_theme_font_size_override(&"font_size", FAVORITE_FONT_SIZE)
 	for st in [&"normal", &"hover", &"pressed", &"focus"]:
-		_fav.add_theme_stylebox_override(st, StyleBoxEmpty.new())
+		var empty := StyleBoxEmpty.new()
+		empty.content_margin_left = 0
+		empty.content_margin_right = 0
+		empty.content_margin_top = 0
+		empty.content_margin_bottom = 0
+		_fav.add_theme_stylebox_override(st, empty)
 	_fav.pressed.connect(_on_favorite)
-	name_row.add_child(_fav)
+	head.add_child(_fav)
 	_level = Label.new()
 	side.add_child(_level)
 	_types = HBoxContainer.new()
@@ -213,6 +218,13 @@ func refresh() -> void:
 		0: items.sort_custom(func(a, b): return a.dex_id < b.dex_id or (a.dex_id == b.dex_id and a.level > b.level))
 		1: items.sort_custom(func(a, b): return a.level > b.level or (a.level == b.level and a.dex_id < b.dex_id))
 		2: items.sort_custom(func(a, b): return a.caught_at > b.caught_at)
+	# 파티(엔트리)에 든 포켓몬은 정렬 기준과 상관없이 맨 위, 파티 순서대로 (v0.73)
+	var party: Array[Dictionary] = []
+	for u in PlayerState.entries:
+		var e := PlayerState.find_pokemon(u)
+		if not e.is_empty():
+			party.append(e)
+	items = party + items.filter(func(p: Dictionary) -> bool: return not PlayerState.is_entry(p.uid))
 	_list.clear()
 	_uids.clear()
 	var keep := -1

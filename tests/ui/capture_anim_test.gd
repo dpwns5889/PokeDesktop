@@ -47,3 +47,24 @@ func test_catch_stars_fly_out_from_ball() -> void:
 	# 하얀색에 가까운 연노란색
 	assert_float(S.COL_FILL.r).is_greater(0.95)
 	assert_float(S.COL_FILL.b).is_between(0.6, 0.95)
+
+
+## v0.73: 별은 무작위 방향으로 돈다. 돌린 모양도 빈틈 없이 원래와 비슷한 칸 수
+func test_catch_stars_spin_random_direction() -> void:
+	var S := CaptureAnim.CatchStars
+	var base := S.rotated_pixels(0.0)
+	assert_int(base.size()).is_equal(64)   # SHAPE 의 X 개수 그대로
+	for a in [0.4, 1.3, 2.7]:
+		var n := S.rotated_pixels(a).size()
+		assert_int(n).is_between(54, 76)
+	assert_bool(S.rotated_pixels(0.6) == base).is_false()
+	# 여러 번 만들면 시계·반시계가 모두 나온다
+	var signs := {}
+	for k in 20:
+		var st = auto_free(S.new())
+		add_child(st)
+		assert_int(st.spins.size()).is_equal(3)
+		for v in st.spins:
+			assert_float(absf(v)).is_between(S.SPIN_MIN, S.SPIN_MAX)
+			signs[signf(v)] = true
+	assert_int(signs.size()).is_equal(2)

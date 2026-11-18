@@ -160,6 +160,7 @@ static func total_sec() -> float:
 ## 잡힌 순간 볼에서 튀어 나와 날아가는 별 3개 (v0.51, v0.52). 위치 = 볼 꼭대기.
 ## 왼쪽 위·위·오른쪽 위로 튀어 나가며(처음 속도 VELOCITIES) 중력으로 조금씩 휘고, 날아가는 동안 서서히 사라진다.
 ## 하얀색에 가까운 연노란색, 테두리·밝은 점 없음 (v0.52). 정수 픽셀로 그림.
+## v0.73: 별마다 무작위 방향(시계/반시계)·속도로 돈다. 돌린 모양도 픽셀 격자에 맞춰 그린다(각 칸을 거꾸로 돌려 SHAPE 에서 고름).
 class CatchStars:
 	extends Node2D
 
@@ -168,6 +169,9 @@ class CatchStars:
 	const GRAVITY := 70.0            # px/초²
 	const VELOCITIES := [Vector2(-34, -52), Vector2(0, -66), Vector2(34, -52)]
 	const COL_FILL := Color(1.0, 0.98, 0.8)
+	## 도는 속도 범위 (라디안/초). 방향(부호)은 별마다 무작위 (v0.73)
+	const SPIN_MIN := 5.0
+	const SPIN_MAX := 10.0
 
 	## 11×11 다섯 꼭지 별 (v0.53: 7×7 의 1.5배)
 	const SHAPE := [
@@ -186,6 +190,26 @@ class CatchStars:
 	const HALF := 5
 
 	var _t := 0.0
+	## 별마다 도는 속도 (라디안/초, 음수 = 반시계). 비어 있으면 _ready 에서 무작위로 정한다
+	var spins: Array[float] = []
+
+	func _ready() -> void:
+		if spins.is_empty():
+			for i in VELOCITIES.size():
+				spins.append(randf_range(SPIN_MIN, SPIN_MAX) * (1.0 if randf() < 0.5 else -1.0))
+
+	## angle 만큼 돌린 별의 픽셀들 (중심 기준 정수 칸). 각 칸을 거꾸로 돌려 SHAPE 에서 골라 빈틈 없이
+	static func rotated_pixels(angle: float) -> Array[Vector2i]:
+		var out: Array[Vector2i] = []
+		var r := HALF + 2
+		for y in range(-r, r + 1):
+			for x in range(-r, r + 1):
+				var src := Vector2(x, y).rotated(-angle).round() + Vector2(HALF, HALF)
+				var sx := int(src.x)
+				var sy := int(src.y)
+				if sy >= 0 and sy < SHAPE.size() and sx >= 0 and sx < SHAPE[sy].length() and SHAPE[sy][sx] == "X":
+					out.append(Vector2i(x, y))
+		return out
 
 	func _process(delta: float) -> void:
 		_t += delta
@@ -205,8 +229,6 @@ class CatchStars:
 		var col := Color(COL_FILL, a)
 		for i in VELOCITIES.size():
 			var c := star_pos(i, _t).round()
-			for y in SHAPE.size():
-				var row: String = SHAPE[y]
-				for x in row.length():
-					if row[x] == "X":
-						draw_rect(Rect2(c + Vector2(x - HALF, y - HALF), Vector2.ONE), col)
+			var angle: float = spins[i] * _t if i < spins.size() else 0.0
+			for p in rotated_pixels(angle):
+				draw_rect(Rect2(c + Vector2(p), Vector2.ONE), col)
