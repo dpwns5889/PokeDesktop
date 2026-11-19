@@ -445,7 +445,7 @@ func _on_region_unlocked(id: StringName) -> void:
 	if region:
 		# 레벨업 문구 뒤에 붙도록 한 박자 늦게 (해금 판정이 레벨업 처리보다 먼저 실행됨)
 		_push_notice.call_deferred("새 지역 해금: %s!" % region.name_ko)   # 효과음은 AudioManager
-		_unlock_names.append(region.name_ko)
+		_unlock_names.append(UiUtil.region_bbcode(region))   # 대표 타입 색 (v0.89)
 		_show_unlock_notice.call_deferred()
 
 
@@ -469,7 +469,7 @@ func _show_unlock_notice() -> void:
 		AudioManager.play(&"region_unlocked")
 		return
 	_confirm.notify("새 지역 해금", "새로운 지역이 해금되었다!\n%s\n\n지역 버튼에서 이동할 수 있다." % ", ".join(_unlock_names),
-		func() -> void: _unlock_names.clear())
+		func() -> void: _unlock_names.clear(), true)
 
 
 ## 지역을 바꾸면 다음 인카운터부터 적용. 대기 중이면 화면도 바로 바꾼다.
@@ -514,9 +514,11 @@ func _build_ground_plate() -> void:
 
 
 ## 아이템 인카운터 (v0.84): 발판 위에 아이템을 보여 주고 알린다. 얻는 것은 EncounterManager 가 했다
-func _on_item_found(id: StringName) -> void:
+func _on_item_found(id: StringName, count: int) -> void:
 	var item := GameData.get_item(id)
 	var item_name := item.name_ko if item else String(id)
+	if count > 1:
+		item_name += " ×%d" % count   # v0.88: 슈퍼볼 ×2
 	_ground_plate.shaking = false
 	_emote.hide_bubble()
 	_found_icon.texture = item.load_icon() if item else null

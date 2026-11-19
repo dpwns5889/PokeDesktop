@@ -89,11 +89,15 @@ const SHINY_CHANCE := 1.0 / 512.0
 
 ## 아이템 인카운터 (v0.84): 인카운터가 포켓몬 대신 아이템일 확률 (픽업 특성이면 ×2)
 const ITEM_ENCOUNTER_CHANCE := 0.10
-## 지역 등급(RegionData.item_tier)별 [아이템, 가중치]. 평균 판매가 약 485 / 865 / 1,410원 (v0.84: 큰진주를 진주로 합침)
+## 지역 등급(RegionData.item_tier)별 [아이템, 가중치, (최소 수량, 최대 수량)] — 수량을 안 적으면 1개. 가중치 총합 100.
+## 평균 판매가 환산 466 / 850 / 1,427원 (v0.88: 볼·경험사탕 추가, 기획서 4.2)
 const ITEM_ENCOUNTER_TABLES := {
-	1: [["pretty_feather", 40], ["pearl", 37], ["stardust", 20], ["nugget", 3]],
-	2: [["pretty_feather", 20], ["pearl", 40], ["stardust", 25], ["star_piece", 8], ["nugget", 6], ["big_nugget", 1]],
-	3: [["pretty_feather", 10], ["pearl", 35], ["stardust", 20], ["star_piece", 15], ["nugget", 15], ["big_nugget", 5]],
+	1: [["pretty_feather", 30], ["pearl", 30], ["stardust", 17], ["nugget", 3],
+		["great_ball", 10, 1, 3], ["exp_candy_s", 10]],
+	2: [["pretty_feather", 12], ["pearl", 32], ["stardust", 20], ["star_piece", 8], ["nugget", 6], ["big_nugget", 1],
+		["great_ball", 10, 1, 3], ["ultra_ball", 5], ["exp_candy_s", 6]],
+	3: [["pretty_feather", 5], ["pearl", 28], ["stardust", 15], ["star_piece", 15], ["nugget", 15], ["big_nugget", 5],
+		["great_ball", 5, 1, 3], ["ultra_ball", 7], ["exp_candy_m", 5]],
 }
 
 

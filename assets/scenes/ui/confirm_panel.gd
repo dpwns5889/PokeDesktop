@@ -5,6 +5,9 @@ extends OverlayPanel
 ## v0.80: 팝업 규칙(기획서 6.1) — 확인 창·알림 모두 문구와 버튼을 창 가운데에 모은다.
 
 var _message: Label
+## 색이 든 문구(BBCode)용. 문구는 [center] 로 가운데 정렬 (v0.89)
+var _rich: RichTextLabel
+var _rich_box: VBoxContainer
 var _ok: Button
 var _button_row: HBoxContainer
 ## 가운데 정렬일 때 버튼 아래 여백 → 버튼이 창 맨 아래보다 조금 위에 온다 (v0.58)
@@ -28,6 +31,15 @@ func _build_content(box: VBoxContainer) -> void:
 	_message.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_message.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	box.add_child(_message)
+	# 문구에 색을 넣을 때(BBCode, v0.89)는 Label 대신 이 줄을 쓴다. 세로 가운데는 VBox 정렬로 맞춘다
+	_rich_box = VBoxContainer.new()
+	_rich_box.alignment = BoxContainer.ALIGNMENT_CENTER
+	_rich_box.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	_rich_box.visible = false
+	box.add_child(_rich_box)
+	_rich = UiUtil.rich_label()
+	_rich.mouse_filter = Control.MOUSE_FILTER_PASS
+	_rich_box.add_child(_rich)
 	var row := HBoxContainer.new()
 	row.alignment = BoxContainer.ALIGNMENT_CENTER
 	_button_row = row
@@ -47,19 +59,23 @@ func _build_content(box: VBoxContainer) -> void:
 	box.add_child(_bottom_gap)
 
 
-func ask(title_text: String, message: String, ok_text: String, on_ok: Callable) -> void:
+## bbcode = true 면 message 를 BBCode 로 읽는다(색 넣기, v0.89). 이때 message 에 [ ] 가 있으면 태그로 읽히니 주의
+func ask(title_text: String, message: String, ok_text: String, on_ok: Callable, bbcode := false) -> void:
 	_set_notice(false)
 	_title_text = title_text
 	_title_label.text = title_text
-	_message.text = message
+	_message.visible = not bbcode
+	_rich_box.visible = bbcode
+	_message.text = "" if bbcode else message
+	_rich.text = "[center]%s[/center]" % message if bbcode else ""
 	_ok.text = ok_text
 	_on_ok = on_ok
 	open_panel()
 
 
 ## 알림: 확인 버튼만 있고 제목 줄의 "닫기"도 숨긴다 → 사용자가 확인을 눌러야만 on_ok 가 불린다.
-func notify(title_text: String, message: String, on_ok: Callable = Callable()) -> void:
-	ask(title_text, message, "확인", on_ok)
+func notify(title_text: String, message: String, on_ok: Callable = Callable(), bbcode := false) -> void:
+	ask(title_text, message, "확인", on_ok, bbcode)
 	_set_notice(true)
 
 

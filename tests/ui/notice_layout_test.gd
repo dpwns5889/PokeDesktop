@@ -18,6 +18,30 @@ func test_every_confirm_and_notice_is_centered() -> void:
 	assert_bool(p._bottom_gap.visible).is_true()   # 버튼을 조금 위로 (v0.58)
 
 
+## v0.89: 새 지역 해금 팝업의 지역 이름은 대표 타입(main_types 첫 번째) 색. 색 문구도 가운데에 모은다
+func test_region_name_is_colored_by_main_type() -> void:
+	var forest := GameData.get_region(&"forest")
+	var want := "[color=#%s]숲[/color]" % UiUtil.type_color(forest.main_types[0]).to_html(false)
+	assert_str(UiUtil.region_bbcode(forest)).is_equal(want)
+	assert_str(UiUtil.region_bbcode(GameData.get_region(&"volcano"))).contains(UiUtil.type_color(&"fire").to_html(false))
+	var typeless := RegionData.new()
+	typeless.name_ko = "이름뿐"
+	assert_str(UiUtil.region_bbcode(typeless)).is_equal("이름뿐")
+	var p: ConfirmPanel = auto_free(ConfirmPanel.new())
+	add_child(p)
+	var names := [UiUtil.region_bbcode(forest), UiUtil.region_bbcode(GameData.get_region(&"waterside"))]
+	p.notify("새 지역 해금", "새로운 지역이 해금되었다!\n%s" % ", ".join(names), Callable(), true)
+	assert_bool(p._rich_box.visible).is_true()
+	assert_bool(p._message.visible).is_false()
+	assert_int(p._rich_box.alignment).is_equal(BoxContainer.ALIGNMENT_CENTER)
+	assert_int(p._button_row.alignment).is_equal(BoxContainer.ALIGNMENT_CENTER)
+	assert_str(p._rich.text).starts_with("[center]").contains(want)
+	# 보통 문구는 Label 그대로
+	p.ask("확인", "보낼까요?", "보내기", func() -> void: pass)
+	assert_bool(p._message.visible).is_true()
+	assert_bool(p._rich_box.visible).is_false()
+
+
 func _assert_centered(p: ConfirmPanel) -> void:
 	assert_int(p._message.horizontal_alignment).is_equal(HORIZONTAL_ALIGNMENT_CENTER)
 	assert_int(p._message.vertical_alignment).is_equal(VERTICAL_ALIGNMENT_CENTER)

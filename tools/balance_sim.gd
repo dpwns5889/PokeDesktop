@@ -21,6 +21,7 @@ extends Node
 ## - 진화: 레벨 진화는 모두 수락, 진화의 돌은 새 종이 나오면 사용(v0.42: 돌은 원정에서만 얻는다).
 ## - 상점: 슈퍼볼이 10개 미만이면 산다(소지금 3,000원은 남김). 보관함이 90% 차면 (돈이 되는 만큼) 확장.
 ## - 아이템 인카운터(v0.84): 인카운터가 아이템이면 얻고 끝. 하루 끝에 귀중품을 모두 판다(--verbose 에 "아이템 N개 M원").
+## - 달콤한꿀(v0.87): 플레이어 Lv10부터 하루 시작에 돈이 있으면 --honey 개(기본 2개 = 1시간, 인카운터 간격 ×0.5)를 사서 쓴다. 0이면 안 쓴다.
 
 const DEFAULT_SEEDS := 5
 ## 기획서 9.3 일차별 목표 [일차, 플레이어 Lv, 포획 종 수]
@@ -31,6 +32,8 @@ const TOLERANCE := 0.15
 ## 원정에 진화 후보를 몇 마리 더 데려가는지 / 남은 사탕을 나눠 줄 주력 수
 const EXTRA_EVOLUTION_MEMBERS := 3
 const MAIN_TEAM := 10
+## 하루에 쓰는 달콤한꿀 개수 (--honey 로 바꿈)
+const DEFAULT_HONEY_PER_DAY := 2
 
 var rng := RandomNumberGenerator.new()
 var now := 0.0
@@ -38,6 +41,7 @@ var days := 14
 var hours := 5.0
 var react := 0.7
 var verbose := false
+var honey_per_day := DEFAULT_HONEY_PER_DAY
 var stats := {}
 var _party_sizes: Array[int] = []    # 자동 선택 인원 (진화 후보 제외), 모든 실행
 var missing_count := {}   # dex_id -> 못 잡은 실행 수
@@ -53,6 +57,7 @@ func _ready() -> void:
 			"--days": days = int(args[i + 1])
 			"--hours": hours = float(args[i + 1])
 			"--react": react = float(args[i + 1])
+			"--honey": honey_per_day = int(args[i + 1])
 			"--verbose": verbose = true
 	# 시뮬레이터가 실제 매니저의 실시간 처리와 섞이지 않게
 	EncounterManager.set_process(false)
@@ -79,13 +84,15 @@ func _run(seed: int) -> Array:
 	now = 2_000_000_000.0
 	_next_send_try = 0.0
 	stats = {"encounters": 0, "reacted": 0, "caught": 0, "fled": 0, "legend": 0, "expeditions": 0, "transferred": 0,
-		"battles": 0, "won": 0, "full": 0, "diff_sum": 0.0, "items": 0, "item_money": 0}
+		"battles": 0, "won": 0, "full": 0, "diff_sum": 0.0, "items": 0, "item_money": 0, "honey": 0}
 	var daily: Array = []
 	for day in range(1, days + 1):
 		_claim_expeditions()
 		var day_end := now + hours * 3600.0
+		_use_honey()
 		while true:
-			now += Formulas.roll_encounter_interval(rng, GameData.get_region(PlayerState.current_region))
+			now += Formulas.roll_encounter_interval(rng, GameData.get_region(PlayerState.current_region)) \
+				* PlayerState.interval_multiplier(int(now))   # 달콤한꿀 (v0.87)
 			if now >= day_end:
 				break
 			_encounter()
@@ -97,10 +104,10 @@ func _run(seed: int) -> Array:
 		var snap := _snapshot(day)
 		daily.append(snap)
 		if verbose:
-			print("seed %d day %2d: Lv%d 종%d 지역%d(%s) 돈%d 원정%d 포획%d 전설%d 보관%d/%d 가득%d 전투승률%d%% 평균난이도%.2f 최고Lv%d 아이템%d개 %d원" % [seed, day, snap.level, snap.species,
+			print("seed %d day %2d: Lv%d 종%d 지역%d(%s) 돈%d 원정%d 포획%d 전설%d 보관%d/%d 가득%d 전투승률%d%% 평균난이도%.2f 최고Lv%d 아이템%d개 %d원 꿀%d개" % [seed, day, snap.level, snap.species,
 				snap.regions, PlayerState.current_region, snap.money, stats.expeditions, stats.caught, stats.legend,
 				PlayerState.storage_count(), PlayerState.storage_capacity, stats.full,
-				int(100.0 * stats.won / maxi(1, stats.battles)), stats.diff_sum / maxi(1, stats.battles), snap.top_level, stats.items, stats.item_money])
+				int(100.0 * stats.won / maxi(1, stats.battles)), stats.diff_sum / maxi(1, stats.battles), snap.top_level, stats.items, stats.item_money, stats.honey])
 			stats.battles = 0
 			stats.won = 0
 			stats.full = 0
@@ -110,6 +117,15 @@ func _run(seed: int) -> Array:
 		if not PlayerState.is_caught(s.dex_id):
 			missing_count[s.dex_id] = missing_count.get(s.dex_id, 0) + 1
 	return daily
+
+
+## 하루 시작에 달콤한꿀을 사서 쓴다 (v0.87): 실제 상점 규칙(Lv10, 2,000원)을 따른다. 돈이 모자라면 못 산다
+func _use_honey() -> void:
+	for i in honey_per_day:
+		if not ShopManager.buy(&"sweet_honey").ok:
+			return
+		PlayerState.use_sweet_honey(int(now))
+		stats.honey += 1
 
 
 func _snapshot(day: int) -> Dictionary:
@@ -131,8 +147,8 @@ func _encounter() -> void:
 	var region := GameData.get_region(PlayerState.current_region)
 	# 아이템 인카운터 (v0.84): 반응과 상관없이 얻는다
 	var found := EncounterLogic.roll_item_encounter(region, float(EncounterManager.entry_traits().item_encounter_mult), rng)
-	if found != &"":
-		PlayerState.add_item(found, 1)
+	if not found.is_empty():
+		PlayerState.add_item(found[&"id"], int(found[&"count"]))
 		stats.items += 1
 		return
 	var enc := EncounterLogic.roll_encounter(region, PlayerState.level, rng, GameData.legendary_rules(), UnlockManager.evaluate)

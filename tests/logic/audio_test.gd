@@ -139,7 +139,7 @@ func test_v062_sound_files() -> void:
 func test_using_items_plays_use_item() -> void:
 	var p: AudioStreamPlayer = AudioManager._players[&"use_item"]
 	var now := 2_000_000_000
-	for id in [&"incense", &"shiny_incense", &"lucky_egg"]:
+	for id in [&"incense", &"shiny_incense", &"lucky_egg", &"sweet_honey"]:
 		PlayerState.add_item(id, 1)
 	PlayerState.add_item(&"exp_candy_s", 1)
 	var inst := PlayerState.add_caught({&"dex_id": 16, &"level": 5, &"gender": &"male", &"region": &"grassland"})
@@ -147,6 +147,7 @@ func test_using_items_plays_use_item() -> void:
 		func() -> void: PlayerState.use_incense(&"fire", now),
 		func() -> void: PlayerState.use_shiny_incense(now),
 		func() -> void: PlayerState.use_lucky_egg(now),
+		func() -> void: PlayerState.use_sweet_honey(now),
 		func() -> void: ProfessorManager.use_candy(inst.uid, &"exp_candy_s"),
 	]
 	for use in uses:

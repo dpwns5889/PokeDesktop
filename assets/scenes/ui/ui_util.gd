@@ -119,6 +119,13 @@ static func type_bbcode(t: StringName) -> String:
 	return "[color=#%s]%s[/color]" % [type_color(t).to_html(false), GameData.type_name(t)]
 
 
+## RichTextLabel 용: 지역 이름을 지역 대표 타입(main_types 첫 번째)의 색으로 (기획서 4.4, v0.89). 타입이 없으면 색 없이
+static func region_bbcode(region: RegionData) -> String:
+	if region.main_types.is_empty():
+		return region.name_ko
+	return "[color=#%s]%s[/color]" % [type_color(region.main_types[0]).to_html(false), region.name_ko]
+
+
 static func types_bbcode(types: Array, sep := " / ") -> String:
 	return sep.join(types.map(func(t) -> String: return type_bbcode(StringName(t))))
 

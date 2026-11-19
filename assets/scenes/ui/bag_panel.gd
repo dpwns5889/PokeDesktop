@@ -200,8 +200,9 @@ func _on_action() -> void:
 		if reason != "":
 			_desc.text = reason
 		return
-	if item and item.id == &"lucky_egg":
-		var reason := PlayerState.use_lucky_egg(int(Time.get_unix_time_from_system()))
+	if item and item.category == &"boost":
+		var now := Time.get_unix_time_from_system()
+		var reason := EncounterManager.use_sweet_honey(now) if item.id == &"sweet_honey" else PlayerState.use_lucky_egg(int(now))
 		refresh()
 		if reason != "":
 			_desc.text = reason

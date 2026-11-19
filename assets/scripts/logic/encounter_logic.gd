@@ -109,12 +109,15 @@ static func roll_encounter(region: RegionData, player_level: int, rng: RandomNum
 	}
 
 
-## 아이템 인카운터 (v0.84): 이번 인카운터가 아이템이면 그 id, 포켓몬이면 &"". mult = 픽업 등 확률 배율
-static func roll_item_encounter(region: RegionData, mult: float, rng: RandomNumberGenerator) -> StringName:
+## 아이템 인카운터 (v0.84): 이번 인카운터가 아이템이면 {id, count}, 포켓몬이면 빈 Dictionary. mult = 픽업 등 확률 배율
+## 수량은 표 행의 [최소, 최대]에서 고르게 (없으면 1개, v0.88)
+static func roll_item_encounter(region: RegionData, mult: float, rng: RandomNumberGenerator) -> Dictionary:
 	if rng.randf() >= Formulas.ITEM_ENCOUNTER_CHANCE * mult:
-		return &""
+		return {}
 	var table: Array = Formulas.ITEM_ENCOUNTER_TABLES.get(region.item_tier if region else 1, Formulas.ITEM_ENCOUNTER_TABLES[1])
 	var weights: Array[int] = []
-	for row in table:
-		weights.append(int(row[1]))
-	return StringName(table[ExpeditionLogic._weighted_index(weights, rng)][0])
+	for r in table:
+		weights.append(int(r[1]))
+	var row: Array = table[ExpeditionLogic._weighted_index(weights, rng)]
+	var count := rng.randi_range(int(row[2]), int(row[3])) if row.size() >= 4 else 1
+	return {&"id": StringName(row[0]), &"count": count}

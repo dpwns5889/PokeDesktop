@@ -153,7 +153,7 @@ func test_region_intervals() -> void:
 func test_item_encounter_gives_item_without_click() -> void:
 	PlayerState.inventory = {}
 	var got := []
-	var cb := func(id: StringName) -> void: got.append(id)
+	var cb := func(id: StringName, _count: int) -> void: got.append(id)
 	EventBus.item_found.connect(cb)
 	var t := T0 + Formulas.MAX_ENCOUNTER_INTERVAL_SEC + 1.0
 	_m._deadline = t - 1.0
@@ -169,7 +169,7 @@ func test_item_encounter_gives_item_without_click() -> void:
 	var id: StringName = _m.current[&"item"]
 	_m.tick(t + Formulas.ENCOUNTER_PREVIEW_SEC)
 	assert_int(_m.state).is_equal(Manager.State.RESULT)
-	assert_int(PlayerState.item_count(id)).is_equal(1)
+	assert_int(PlayerState.item_count(id)).is_equal(int(_m.current[&"count"]))
 	assert_array(got).contains_exactly([id])
 	_m.tick(t + Formulas.ENCOUNTER_PREVIEW_SEC + Manager.ITEM_SHOW_SEC)
 	assert_int(_m.state).is_equal(Manager.State.WAITING)
@@ -183,9 +183,9 @@ func test_item_encounter_rate_and_pickup_doubles_it() -> void:
 	var normal := 0
 	var picked := 0
 	for i in 4000:
-		if EncounterLogic.roll_item_encounter(region, 1.0, rng) != &"":
+		if not EncounterLogic.roll_item_encounter(region, 1.0, rng).is_empty():
 			normal += 1
-		if EncounterLogic.roll_item_encounter(region, 2.0, rng) != &"":
+		if not EncounterLogic.roll_item_encounter(region, 2.0, rng).is_empty():
 			picked += 1
 	assert_int(normal).is_between(320, 480)   # 10%
 	assert_int(picked).is_between(680, 920)   # 20%

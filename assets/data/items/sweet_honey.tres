@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Script" path="res://assets/scripts/data/item_data.gd" id="1_xv57s"]
+
+[resource]
+script = ExtResource("1_xv57s")
+id = &"sweet_honey"
+name_ko = "달콤한꿀"
+description = "30분 동안 포켓몬이 2배 자주 나타난다."
+category = &"boost"
+order = 27
+params = {
+&"duration_min": 30.0,
+&"interval_mult": 0.5
+}
+sources = Array[StringName]([&"shop"])
+buy_price = 2000
+sell_price = 600
+unlock_level = 10

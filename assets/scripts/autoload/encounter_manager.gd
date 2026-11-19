@@ -168,6 +168,9 @@ func active_buffs() -> Array[Dictionary]:
 	var el := PlayerState.item_seconds_left("lucky_egg", now)   # 행복의 알 (v0.61)
 	if el > 0:
 		out.append({"text": "행복의 알 %d분" % ceili(el / 60.0), "good": true})
+	var hl := PlayerState.item_seconds_left("sweet_honey", now)   # 달콤한꿀 (v0.87)
+	if hl > 0:
+		out.append({"text": "달콤한꿀 %d분" % ceili(hl / 60.0), "good": true})
 	return out
 
 
@@ -176,6 +179,22 @@ func finish_battle(success: bool) -> void:
 	if state != State.BATTLE:
 		return
 	_finish(_now(), success)
+
+
+## 달콤한꿀 사용 (기획서 4.11, v0.87): 가방이 부른다. 처음 켤 때만 남은 대기 시간을 ×0.5 (연장일 때는 다시 줄이지 않는다).
+## 반환: "" = 성공, 아니면 이유
+func use_sweet_honey(now: float) -> String:
+	var was_active := PlayerState.item_seconds_left("sweet_honey", int(now)) > 0
+	var reason := PlayerState.use_sweet_honey(int(now))
+	if reason != "" or was_active:
+		return reason
+	var mult := PlayerState.interval_multiplier(int(now))
+	match state:
+		State.WAITING:
+			_deadline = now + maxf(0.0, _deadline - now) * mult
+		State.PAUSED:
+			_paused_remaining *= mult
+	return ""
 
 
 ## 진행 중인 인카운터를 버리고 대기 상태로 (저장 초기화 등).
@@ -209,6 +228,7 @@ func _now() -> float:
 func _schedule_next(now: float) -> void:
 	var interval := Formulas.roll_encounter_interval(rng, GameData.get_region(PlayerState.current_region))
 	interval *= float(entry_traits().interval_mult)   # 악취 (4.6)
+	interval *= PlayerState.interval_multiplier(int(now))   # 달콤한꿀 (4.11, v0.87)
 	if fast_mode:
 		interval = FAST_INTERVAL_SEC + rng.randf_range(-FAST_JITTER_SEC, FAST_JITTER_SEC)
 	_deadline = now + interval
@@ -220,7 +240,8 @@ func _on_region_changed(_id: StringName) -> void:
 	if not _started or fast_mode:
 		return
 	var now := _now()
-	var limit := Formulas.encounter_interval_range(GameData.get_region(PlayerState.current_region)).y
+	var limit := Formulas.encounter_interval_range(GameData.get_region(PlayerState.current_region)).y \
+		* PlayerState.interval_multiplier(int(now))   # 달콤한꿀 (v0.87)
 	match state:
 		State.WAITING:
 			if _deadline - now > limit:
@@ -234,8 +255,8 @@ func _begin_encounter(now: float) -> void:
 	var fx := entry_traits()
 	# 아이템 인카운터 (v0.84): 포켓몬 대신 아이템 (픽업이면 확률 ×2)
 	var found := EncounterLogic.roll_item_encounter(region, 1000.0 if force_item else float(fx.item_encounter_mult), rng)
-	if found != &"":
-		current = {&"item": found}
+	if not found.is_empty():
+		current = {&"item": found[&"id"], &"count": found[&"count"]}
 		state = State.PREVIEW
 		_deadline = now + Formulas.ENCOUNTER_PREVIEW_SEC
 		AudioManager.play(&"encounter")
@@ -282,12 +303,13 @@ func _finish(now: float, success: bool) -> void:
 ## 아이템 인카운터: 아이템을 얻고 잠깐 보여 준 뒤 끝 (v0.84)
 func _found_item(now: float) -> void:
 	var id: StringName = current[&"item"]
-	PlayerState.add_item(id, 1)
+	var count := int(current.get(&"count", 1))
+	PlayerState.add_item(id, count)
 	state = State.RESULT
 	last_result = &"item"
 	_deadline = now + ITEM_SHOW_SEC
-	EventBus.items_received.emit({id: 1}, &"encounter")   # 아이템 획득 소리
-	EventBus.item_found.emit(id)
+	EventBus.items_received.emit({id: count}, &"encounter")   # 아이템 획득 소리
+	EventBus.item_found.emit(id, count)
 
 
 ## 전투가 끝난 뒤 엔트리의 전투 특성: 꿀모으기·볼줍기(15% 확률, v0.81) — 성공·실패 모두 (기획서 4.6)

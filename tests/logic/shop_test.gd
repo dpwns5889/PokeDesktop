@@ -20,7 +20,7 @@ func test_v01_items_and_prices() -> void:
 	var ids := GameData.all_items().filter(func(i: ItemData) -> bool: return i.category != GameData.CAPSULE_TEMPLATE) \
 		.map(func(i: ItemData) -> String: return String(i.id))   # 특성 캡슐(특성마다 하나, v0.79)은 trait_capsule_test
 	assert_array(ids).contains_exactly(["poke_ball", "great_ball", "ultra_ball", "exp_candy_s", "exp_candy_m",
-		"fire_stone", "water_stone", "thunder_stone", "leaf_stone", "moon_stone", "incense", "shiny_incense", "lucky_egg",
+		"fire_stone", "water_stone", "thunder_stone", "leaf_stone", "moon_stone", "incense", "shiny_incense", "sweet_honey", "lucky_egg",
 		"forget_berry", "pretty_feather", "pearl", "stardust", "nugget", "star_piece", "big_nugget"])
 	# 금구슬: 판매 전용 (픽업 특성, v0.28)
 	var nugget := GameData.get_item(&"nugget")
@@ -52,20 +52,27 @@ func test_v01_items_and_prices() -> void:
 	assert_int(big.sell_price).is_equal(6000)
 
 
-## 아이템 인카운터 드롭표 (v0.84): 모든 아이템이 있고 판매 전용, 등급이 높을수록 평균 판매가가 높다
+## 아이템 인카운터 드롭표 (v0.84, v0.88): 모든 아이템이 있고 귀중품은 판매 전용, 가중치 총합 100,
+## 등급이 높을수록 평균 판매가(수량 평균 반영)가 높고 기획서 4.2 값(466 / 850 / 1,427원)과 맞는다
 func test_item_encounter_tables() -> void:
 	var avg := []
 	for tier in [1, 2, 3]:
-		var total := 0
+		var total := 0.0
 		var weight := 0
 		for row in Formulas.ITEM_ENCOUNTER_TABLES[tier]:
 			var it := GameData.get_item(StringName(row[0]))
 			assert_object(it).override_failure_message(String(row[0])).is_not_null()
-			assert_bool(it.can_buy()).is_false()
-			total += it.sell_price * int(row[1])
+			if it.category == &"valuable":
+				assert_bool(it.can_buy()).is_false()
+			var count := (int(row[2]) + int(row[3])) / 2.0 if row.size() >= 4 else 1.0
+			total += it.sell_price * count * int(row[1])
 			weight += int(row[1])
-		avg.append(float(total) / weight)
+		assert_int(weight).override_failure_message("등급 %d 가중치 총합" % tier).is_equal(100)
+		avg.append(total / weight)
 	assert_bool(avg[0] < avg[1] and avg[1] < avg[2]).is_true()
+	assert_float(avg[0]).is_between(460.0, 475.0)
+	assert_float(avg[1]).is_between(845.0, 860.0)
+	assert_float(avg[2]).is_between(1420.0, 1435.0)
 	for r in GameData.all_regions():
 		assert_int(r.item_tier).override_failure_message(String(r.id)).is_between(1, 3)
 
