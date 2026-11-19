@@ -56,3 +56,9 @@ Godot 4.7.2(GDScript) 데스크탑 컴패니언. 기준 문서는 `docs/GAME_DES
 - 저장소는 LF를 쓴다. Python으로 파일을 쓸 때는 `open(p, 'w', encoding='utf-8', newline='\n')`을 쓴다.
 - 백슬래시 이스케이프가 들어간 코드는 Edit 도구로 고친다. 긴 Python 헬퍼는 Write로 scratchpad에 파일을 만들고 `python -I <파일>`로 실행한다. Bash heredoc을 거치면 `\n`이 실제 줄바꿈으로 바뀌어 GDScript 문자열이 깨진다.
 - 공백이 든 파일 이름(음원, 원본 시트)을 일괄 처리할 때는 `grep -lZ | xargs -0`을 쓴다.
+
+## 모델 사용 규칙
+- 작업을 시작할 때 현재 모델이 작업에 맞지 않으면, 시작하기 전에 한 줄로 알린다. (예: "이 작업은 Sonnet으로 충분해요. /model sonnet")
+- Opus: 기획, 설계, /grill-me, 원인을 모르는 버그, 여러 파일에 걸친 구조 변경
+- Sonnet: 계획이 확정된 구현, 원인이 분명한 버그, 문서 작성, 반복 작업
+- 같은 문제를 Sonnet으로 2번 실패하면 Opus로 바꾸자고 제안한다.

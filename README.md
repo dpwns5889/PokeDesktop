@@ -69,22 +69,37 @@
 - Godot가 다른 앱 창을 볼 수 없어서, **전체화면 감지**는 작은 PowerShell 감시 스크립트(Win32 `GetForegroundWindow`·`ShowWindow`)가 1초마다 판정해 창을 숨기고, 다시 보일 때 포커스를 빼앗지 않습니다. 게임이 끝나면 스스로 종료합니다.
 - 창은 주 모니터 우하단에 붙고, 해상도·작업표시줄이 바뀌면 따라가며, 화면 밖으로 나가지 않습니다.
 
+### 8. AI 에이전트와 함께 개발 ([`CLAUDE.md`](CLAUDE.md))
+- Claude Code가 지킬 규칙을 `CLAUDE.md`에 모았습니다. 원본은 기획서이고, `CLAUDE.md`는 요약과 작업 절차만 담습니다.
+- **작업 순서**: 기획서 11.1 "다음 작업" 표 확인 → 기획서 먼저 수정·HTML 재생성 → 코드 → 테스트 전부 통과 → 커밋하지 않은 상태로 넘김.
+- **버전 규칙**: 게임 변경 하나마다 0.01씩 올리고 기획서·`project.godot`·`export_presets.cfg`·README 네 곳을 함께 맞춥니다. 문서만 바뀌면 버전은 그대로입니다.
+- **Git**: `master` 하나, 사용자가 요청할 때만 커밋·push, 커밋 메시지에 기획서 버전 표기. exe는 저작권 스프라이트 때문에 Release에 올리지 않습니다.
+- **코드 규칙**: 데이터·로직·매니저·화면 계층 분리, 모든 변수에 정적 타입, 한국어 `##` 주석과 `(기획서 x.y)` 표기. 기획서에 없는 수치는 추천안과 함께 묻습니다.
+- **검증**: 로직을 바꾸면 테스트, 화면을 바꾸면 실제 창 캡처(사용자 세이브 백업·복원), 지형을 바꾸면 미리보기 이미지로 확인합니다.
+- **모델 선택**: 기획·설계·원인 모를 버그는 Opus, 확정된 구현·문서·반복 작업은 Sonnet. Sonnet이 같은 문제에서 2번 실패하면 Opus로 바꿉니다.
+
 ---
 
 ## 구조
 
 ```
+CLAUDE.md                AI 에이전트 작업 규칙 (원본은 기획서)
 docs/GAME_DESIGN.md      기획서 (기준 문서) / build_html.py 로 HTML 생성
-scripts/
-  autoload/              상태를 가진 매니저 (EventBus, PlayerState, EncounterManager, SaveManager …)
-  logic/                 순수 계산 (Formulas, EncounterLogic, ExpeditionLogic, BattleTraits, CaptureGame …)
-  data/                  Resource 정의 (PokemonSpecies, RegionData, ItemData, TraitData …)
-scenes/
-  main/                  메인 창 (companion), 걸어다니는 엔트리, 포획 연출, 들판 타일맵
-  battle/                과녁 전투
-  ui/                    패널 (도감·파티·보관함·지역·원정·가방·상점·설정), 확인 창, 진화 연출
-tools/source/             사람이 고치는 원본 JSON·CSV  →  data/**/*.tres (도구가 생성)
+assets/                  게임 실행에 쓰이는 것 전부
+  scripts/
+    autoload/            상태를 가진 매니저 (EventBus, PlayerState, EncounterManager, SaveManager …)
+    logic/               순수 계산 (Formulas, EncounterLogic, ExpeditionLogic, BattleTraits, CaptureGame …)
+    data/                Resource 정의 (PokemonSpecies, RegionData, ItemData, TraitData …)
+  scenes/
+    main/                메인 창 (companion), 걸어다니는 엔트리, 포획 연출, 들판 타일맵
+    battle/              과녁 전투
+    ui/                  패널 (도감·파티·보관함·지역·원정·가방·상점·설정), 확인 창, 진화 연출
+  data/                  *.tres 리소스 (도구가 생성)
+  audio/ fonts/ ui/      소리·폰트·UI 그림
+  sprites/ generated/    스프라이트 원본·가공 결과 (저작권, git 제외)
 tools/                   데이터 변환·스프라이트 가공·밸런스 시뮬레이터
+  source/                사람이 고치는 원본 JSON·CSV
+  previews/              검토용 미리보기 이미지
 tests/                   gdUnit4 테스트 (logic / data / ui)
 ```
 
