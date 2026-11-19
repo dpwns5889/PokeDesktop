@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="TraitData" format=3]
+
+[ext_resource type="Script" path="res://assets/scripts/data/trait_data.gd" id="1_ep4ek"]
+
+[resource]
+script = ExtResource("1_ep4ek")
+id = &"sand_stream"
+name_ko = "모래날림"
+description = "[전투] 땅·바위 타입 포켓몬이 더 잘 나온다."
+trigger = &"battle"
+effects = Array[Dictionary]([{
+"kind": "encounter_type_weight",
+"types": ["ground", "rock"],
+"value": 1.5
+}])

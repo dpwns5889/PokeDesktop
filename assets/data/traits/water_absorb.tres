@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="TraitData" format=3]
+
+[ext_resource type="Script" path="res://assets/scripts/data/trait_data.gd" id="1_4woji"]
+
+[resource]
+script = ExtResource("1_4woji")
+id = &"water_absorb"
+name_ko = "저수"
+description = "[원정] 물가 낚시에서 불리 타입 보정을 받지 않는다."
+effects = Array[Dictionary]([{
+"kind": "ignore_weak_type",
+"scope": "self",
+"when": {
+"expeditions": ["waterside_fishing"]
+}
+}])
+exclusive_with = Array[StringName]([&"rattled"])

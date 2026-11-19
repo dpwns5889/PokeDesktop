@@ -1,0 +1,23 @@
+[gd_resource type="Resource" script_class="PokemonSpecies" format=3]
+
+[ext_resource type="Script" path="res://assets/scripts/data/pokemon_species.gd" id="1_avojn"]
+
+[resource]
+script = ExtResource("1_avojn")
+dex_id = 91
+generation = 1
+name_ko = "파르셀"
+name_en = "cloyster"
+types = Array[StringName]([&"water", &"ice"])
+base_stats = {
+"atk": 95,
+"def": 180,
+"hp": 50,
+"spa": 85,
+"spd": 45,
+"spe": 70
+}
+catch_rate = 60
+base_exp = 184
+gender_ratio = 0.5
+evo_stage = 1

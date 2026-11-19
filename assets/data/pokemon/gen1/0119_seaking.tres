@@ -1,0 +1,24 @@
+[gd_resource type="Resource" script_class="PokemonSpecies" format=3]
+
+[ext_resource type="Script" path="res://assets/scripts/data/pokemon_species.gd" id="1_u7ere"]
+
+[resource]
+script = ExtResource("1_u7ere")
+dex_id = 119
+generation = 1
+name_ko = "왕콘치"
+name_en = "seaking"
+types = Array[StringName]([&"water"])
+base_stats = {
+"atk": 92,
+"def": 65,
+"hp": 80,
+"spa": 65,
+"spd": 80,
+"spe": 68
+}
+catch_rate = 60
+base_exp = 158
+gender_ratio = 0.5
+has_gender_sprites = true
+evo_stage = 1

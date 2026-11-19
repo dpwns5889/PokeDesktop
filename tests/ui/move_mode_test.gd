@@ -1,7 +1,7 @@
 extends GdUnitTestSuite
 ## 창 옮기기 모드 (기획서 3.1·6.3, v0.60): 설정에서 켰을 때만 창을 끌 수 있다.
 
-const SettingsPanel := preload("res://scenes/ui/settings_panel.gd")
+const SettingsPanel := preload("res://assets/scenes/ui/settings_panel.gd")
 
 
 func after_test() -> void:
@@ -27,6 +27,6 @@ func test_move_mode_starts_off_and_settings_toggle_switches_it() -> void:
 
 func test_drag_is_gated_by_move_mode() -> void:
 	# 배경 왼쪽 클릭으로 드래그를 시작하는 곳은 move_mode 조건이 붙어 있어야 한다
-	var src := FileAccess.get_file_as_string("res://scenes/main/companion.gd")
+	var src := FileAccess.get_file_as_string("res://assets/scenes/main/companion.gd")
 	assert_str(src).contains("MOUSE_BUTTON_LEFT when WindowManager.move_mode:")
 	assert_int(src.count("WindowManager.begin_drag()")).is_equal(1)

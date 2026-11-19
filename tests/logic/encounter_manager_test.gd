@@ -2,7 +2,7 @@ extends GdUnitTestSuite
 ## EncounterManager 상태 흐름 테스트. 실제 시계 대신 tick(now)에 가짜 시각을 넣는다. (기획서 4.2)
 
 const T0 := 1_000_000.0
-const Manager := preload("res://scripts/autoload/encounter_manager.gd")
+const Manager := preload("res://assets/scripts/autoload/encounter_manager.gd")
 
 var _m: Node
 var _saved_ball: StringName

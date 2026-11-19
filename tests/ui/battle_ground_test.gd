@@ -47,7 +47,7 @@ func test_shaking_moves_sideways_and_stops_cleanly() -> void:
 
 func test_floating_rule() -> void:
 	# 스프라이트가 떠 있는 종만 뜬다 — 비행 타입이어도 서 있으면 안 뜸 (v0.40)
-	var Companion := preload("res://scenes/main/companion.gd")
+	var Companion := preload("res://assets/scenes/main/companion.gd")
 	for pair in [[16, false], [17, false], [21, false], [6, false], [149, false], [83, false], [84, false],
 			[18, true], [22, true], [41, true], [12, true], [144, true], [151, true],
 			[81, true], [92, true], [109, true], [19, false], [25, false], [94, false]]:

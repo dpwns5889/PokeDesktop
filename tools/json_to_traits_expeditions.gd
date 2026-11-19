@@ -1,6 +1,6 @@
 extends SceneTree
-## data/source/traits.json → data/traits/*.tres (TraitData) + _roll_config.tres (TraitRollConfig)
-## data/source/expeditions_gen1.json → data/expeditions/*.tres (ExpeditionData)  (기획서 4.6, 4.10)
+## tools/source/traits.json → assets/data/traits/*.tres (TraitData) + _roll_config.tres (TraitRollConfig)
+## tools/source/expeditions_gen1.json → assets/data/expeditions/*.tres (ExpeditionData)  (기획서 4.6, 4.10)
 ## 실행: <godot> --headless --path . -s res://tools/json_to_traits_expeditions.gd
 
 
@@ -9,11 +9,11 @@ func _init() -> void:
 
 
 func _traits() -> int:
-	var data = JSON.parse_string(FileAccess.get_file_as_string("res://data/source/traits.json"))
+	var data = JSON.parse_string(FileAccess.get_file_as_string("res://tools/source/traits.json"))
 	if not data is Dictionary:
 		push_error("traits.json 을 읽지 못했습니다")
 		return 1
-	var dir := "res://data/traits"
+	var dir := "res://assets/data/traits"
 	_clean(dir)
 	for t in data.traits:
 		var tr := TraitData.new()
@@ -47,11 +47,11 @@ func _traits() -> int:
 
 
 func _expeditions() -> int:
-	var data = JSON.parse_string(FileAccess.get_file_as_string("res://data/source/expeditions_gen1.json"))
+	var data = JSON.parse_string(FileAccess.get_file_as_string("res://tools/source/expeditions_gen1.json"))
 	if not data is Dictionary:
 		push_error("expeditions_gen1.json 을 읽지 못했습니다")
 		return 1
-	var dir := "res://data/expeditions"
+	var dir := "res://assets/data/expeditions"
 	_clean(dir)
 	for x in data.expeditions:
 		var ex := ExpeditionData.new()

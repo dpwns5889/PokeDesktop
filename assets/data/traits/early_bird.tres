@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="TraitData" format=3]
+
+[ext_resource type="Script" path="res://assets/scripts/data/trait_data.gd" id="1_hybxo"]
+
+[resource]
+script = ExtResource("1_hybxo")
+id = &"early_bird"
+name_ko = "일찍기상"
+description = "[원정] 1시간 이하 원정의 시간 ×0.9."
+effects = Array[Dictionary]([{
+"kind": "duration_mult",
+"scope": "party",
+"value": 0.9,
+"when": {
+"max_duration_min": 60.0
+}
+}])
+exclusive_with = Array[StringName]([&"slow_start"])

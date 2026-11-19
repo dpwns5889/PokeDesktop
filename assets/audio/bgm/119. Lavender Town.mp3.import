@@ -1,0 +1,19 @@
+[remap]
+
+importer="mp3"
+type="AudioStreamMP3"
+uid="uid://bc8xlpqef6m7i"
+path="res://.godot/imported/119. Lavender Town.mp3-86bf641e3d2f78f75e70b5e5e589d01d.mp3str"
+
+[deps]
+
+source_file="res://assets/audio/bgm/119. Lavender Town.mp3"
+dest_files=["res://.godot/imported/119. Lavender Town.mp3-86bf641e3d2f78f75e70b5e5e589d01d.mp3str"]
+
+[params]
+
+loop=false
+loop_offset=0
+bpm=0
+beat_count=0
+bar_beats=4

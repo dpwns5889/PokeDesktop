@@ -1,0 +1,23 @@
+[gd_resource type="Resource" script_class="PokemonSpecies" format=3]
+
+[ext_resource type="Script" path="res://assets/scripts/data/pokemon_species.gd" id="1_dk2dx"]
+
+[resource]
+script = ExtResource("1_dk2dx")
+dex_id = 38
+generation = 1
+name_ko = "나인테일"
+name_en = "ninetales"
+types = Array[StringName]([&"fire"])
+base_stats = {
+"atk": 76,
+"def": 75,
+"hp": 73,
+"spa": 81,
+"spd": 100,
+"spe": 100
+}
+catch_rate = 75
+base_exp = 177
+gender_ratio = 0.25
+evo_stage = 1

@@ -1,0 +1,19 @@
+[remap]
+
+importer="oggvorbisstr"
+type="AudioStreamOggVorbis"
+uid="uid://dxe5caap4mako"
+path="res://.godot/imported/Use item.ogg-3d3d3f75464f4a971619a63902a995dc.oggvorbisstr"
+
+[deps]
+
+source_file="res://assets/audio/sfx/Use item.ogg"
+dest_files=["res://.godot/imported/Use item.ogg-3d3d3f75464f4a971619a63902a995dc.oggvorbisstr"]
+
+[params]
+
+loop=false
+loop_offset=0
+bpm=0
+beat_count=0
+bar_beats=4

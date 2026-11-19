@@ -1,0 +1,27 @@
+[gd_resource type="Resource" script_class="PokemonSpecies" format=3]
+
+[ext_resource type="Script" path="res://assets/scripts/data/pokemon_species.gd" id="1_sn27r"]
+
+[resource]
+script = ExtResource("1_sn27r")
+dex_id = 39
+generation = 1
+name_ko = "푸린"
+name_en = "jigglypuff"
+types = Array[StringName]([&"normal"])
+base_stats = {
+"atk": 45,
+"def": 20,
+"hp": 115,
+"spa": 45,
+"spd": 25,
+"spe": 20
+}
+catch_rate = 170
+base_exp = 95
+gender_ratio = 0.25
+evolutions = Array[Dictionary]([{
+"item": &"moon_stone",
+"method": &"item",
+"to": 40
+}])

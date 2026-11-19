@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="TraitData" format=3]
+
+[ext_resource type="Script" path="res://assets/scripts/data/trait_data.gd" id="1_w36lb"]
+
+[resource]
+script = ExtResource("1_w36lb")
+id = &"rattled"
+name_ko = "주눅"
+description = "[원정] 불리 타입 보정이 ×0.85에서 ×0.7로 커진다."
+tier = &"negative"
+effects = Array[Dictionary]([{
+"kind": "weak_type_mult",
+"scope": "self",
+"value": 0.7
+}])
+exclusive_with = Array[StringName]([&"heatproof", &"thick_fat", &"water_absorb"])

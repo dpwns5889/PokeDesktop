@@ -9,7 +9,7 @@
 - 비상업 개인 프로젝트 (포트폴리오·지인 공개)
 
 > 포켓몬 이름·이미지는 Nintendo / Game Freak / Creatures / The Pokémon Company의 저작물입니다.
-> 이 저장소에는 스프라이트 원본과 가공 결과(`Assets/Sprites/`, `Assets/Generated/`)를 넣지 않았고, 그림이 없으면 플레이스홀더로 실행됩니다.
+> 이 저장소에는 스프라이트 원본과 가공 결과(`assets/sprites/`, `assets/generated/`)를 넣지 않았고, 그림이 없으면 플레이스홀더로 실행됩니다.
 
 ---
 
@@ -40,7 +40,7 @@
 
 ### 2. 로직과 화면의 분리
 - **오토로드 매니저**(`EncounterManager`, `PlayerState`, `ExpeditionManager`, `ProfessorManager` …)가 상태를 갖고, UI는 매니저를 호출하고 `EventBus` 시그널을 받아 **표시만** 바꿉니다.
-- 계산식은 `scripts/logic/`의 **순수 static 함수**(`Formulas`, `EncounterLogic`, `ExpeditionLogic`, `BattleTraits`, `CaptureGame`, `WindowLayout`)에 모아 화면 없이 테스트합니다.
+- 계산식은 `assets/scripts/logic/`의 **순수 static 함수**(`Formulas`, `EncounterLogic`, `ExpeditionLogic`, `BattleTraits`, `CaptureGame`, `WindowLayout`)에 모아 화면 없이 테스트합니다.
 - 난수는 `RandomNumberGenerator`를 주입해 테스트에서 시드를 고정합니다.
 
 ### 3. 시간은 프레임이 아니라 시각으로
@@ -48,7 +48,7 @@
 - 원정·향로·행복의 알은 **실제 시각** 기준이라 절전·종료 후에도 정확합니다.
 
 ### 4. 데이터 주도 + 생성 파이프라인
-- 종·지역·아이템·특성·원정은 사람이 고치는 원본(`data/source/*.json`, CSV)에서 도구로 `.tres` 리소스를 만듭니다.
+- 종·지역·아이템·특성·원정은 사람이 고치는 원본(`tools/source/*.json`, CSV)에서 도구로 `.tres` 리소스를 만듭니다.
 - 스프라이트도 도구로 가공합니다(`tools/`).
   - HGSS 전투 시트 → 종별 시트(영역 자동 검출, 배경 제거, 암수·색다름 칸 정리)
   - 오버월드 시트 → 4방향 걷기 시트, 아이템 시트 → 24px 아이콘(가장자리 배경만 제거, 색상 바꾸기 옵션)
@@ -83,7 +83,7 @@ scenes/
   main/                  메인 창 (companion), 걸어다니는 엔트리, 포획 연출, 들판 타일맵
   battle/                과녁 전투
   ui/                    패널 (도감·파티·보관함·지역·원정·가방·상점·설정), 확인 창, 진화 연출
-data/source/             사람이 고치는 원본 JSON·CSV  →  data/**/*.tres (도구가 생성)
+tools/source/             사람이 고치는 원본 JSON·CSV  →  data/**/*.tres (도구가 생성)
 tools/                   데이터 변환·스프라이트 가공·밸런스 시뮬레이터
 tests/                   gdUnit4 테스트 (logic / data / ui)
 ```

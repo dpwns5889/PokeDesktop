@@ -107,7 +107,7 @@ func test_battle_ground_index_valid() -> void:
 		assert_int(r.battle_ground).override_failure_message(String(r.id)).is_between(0, 8)
 	assert_int(GameData.get_region(&"grassland").battle_ground).is_equal(0)
 	assert_int(GameData.get_region(&"waterside").battle_ground).is_equal(1)
-	assert_bool(ResourceLoader.exists("res://Assets/Generated/ui/ground.png")).is_true()
+	assert_bool(ResourceLoader.exists("res://assets/generated/ui/ground.png")).is_true()
 
 
 ## v0.76: 스타팅 3마리는 초원, 라프라스는 동굴에서 낮은 확률 + 추가 난이도

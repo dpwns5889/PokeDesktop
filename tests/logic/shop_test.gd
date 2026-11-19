@@ -1,7 +1,7 @@
 extends GdUnitTestSuite
 ## 아이템 데이터, 상점 구매·판매, 보관함 확장, 볼 선택 (기획서 4.2, 4.11, 4.12).
 
-const Manager := preload("res://scripts/autoload/encounter_manager.gd")
+const Manager := preload("res://assets/scripts/autoload/encounter_manager.gd")
 const T0 := 1_000_000.0
 
 var _snapshot: Dictionary

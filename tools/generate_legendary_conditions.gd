@@ -1,5 +1,5 @@
 extends SceneTree
-## 전설·환상 포켓몬 출현 조건 자동 생성 → data/legendary_rules/<dex>.tres. (기획서 4.5)
+## 전설·환상 포켓몬 출현 조건 자동 생성 → assets/data/legendary_rules/<dex>.tres. (기획서 4.5)
 ## 실행: <godot> --headless --path . -s res://tools/generate_legendary_conditions.gd -- --gen 1
 ## 생성 결과는 손으로 고쳐도 된다(다시 실행하면 덮어쓴다).
 ##
@@ -13,9 +13,9 @@ extends SceneTree
 ##   등장 레벨  = 일반 전설 50, 종족값 합 680 이상 70, 환상 30
 ##   확률      = 인카운터마다 3% (M10 밸런스)
 
-const SPECIES_DIR := "res://data/pokemon/gen%d"
-const REGIONS_DIR := "res://data/regions"
-const OUT_DIR := "res://data/legendary_rules"
+const SPECIES_DIR := "res://assets/data/pokemon/gen%d"
+const REGIONS_DIR := "res://assets/data/regions"
+const OUT_DIR := "res://assets/data/legendary_rules"
 const CHANCE := 0.03
 const STRONG_BST := 680
 

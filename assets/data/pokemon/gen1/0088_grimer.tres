@@ -1,0 +1,27 @@
+[gd_resource type="Resource" script_class="PokemonSpecies" format=3]
+
+[ext_resource type="Script" path="res://assets/scripts/data/pokemon_species.gd" id="1_8urhe"]
+
+[resource]
+script = ExtResource("1_8urhe")
+dex_id = 88
+generation = 1
+name_ko = "질퍽이"
+name_en = "grimer"
+types = Array[StringName]([&"poison"])
+base_stats = {
+"atk": 80,
+"def": 50,
+"hp": 80,
+"spa": 40,
+"spd": 50,
+"spe": 25
+}
+catch_rate = 190
+base_exp = 65
+gender_ratio = 0.5
+evolutions = Array[Dictionary]([{
+"method": &"level",
+"to": 89,
+"value": 38
+}])

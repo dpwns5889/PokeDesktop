@@ -1,0 +1,24 @@
+[gd_resource type="Resource" script_class="PokemonSpecies" format=3]
+
+[ext_resource type="Script" path="res://assets/scripts/data/pokemon_species.gd" id="1_ynqv5"]
+
+[resource]
+script = ExtResource("1_ynqv5")
+dex_id = 3
+generation = 1
+name_ko = "이상해꽃"
+name_en = "venusaur"
+types = Array[StringName]([&"grass", &"poison"])
+base_stats = {
+"atk": 82,
+"def": 83,
+"hp": 80,
+"spa": 100,
+"spd": 100,
+"spe": 80
+}
+catch_rate = 45
+base_exp = 236
+gender_ratio = 0.875
+has_gender_sprites = true
+evo_stage = 2

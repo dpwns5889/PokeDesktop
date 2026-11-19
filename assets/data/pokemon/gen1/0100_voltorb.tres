@@ -1,0 +1,27 @@
+[gd_resource type="Resource" script_class="PokemonSpecies" format=3]
+
+[ext_resource type="Script" path="res://assets/scripts/data/pokemon_species.gd" id="1_07hmc"]
+
+[resource]
+script = ExtResource("1_07hmc")
+dex_id = 100
+generation = 1
+name_ko = "찌리리공"
+name_en = "voltorb"
+types = Array[StringName]([&"electric"])
+base_stats = {
+"atk": 30,
+"def": 50,
+"hp": 40,
+"spa": 55,
+"spd": 55,
+"spe": 100
+}
+catch_rate = 190
+base_exp = 66
+gender_ratio = -1.0
+evolutions = Array[Dictionary]([{
+"method": &"level",
+"to": 101,
+"value": 30
+}])

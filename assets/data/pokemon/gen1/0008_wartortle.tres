@@ -1,0 +1,28 @@
+[gd_resource type="Resource" script_class="PokemonSpecies" format=3]
+
+[ext_resource type="Script" path="res://assets/scripts/data/pokemon_species.gd" id="1_kbyf0"]
+
+[resource]
+script = ExtResource("1_kbyf0")
+dex_id = 8
+generation = 1
+name_ko = "어니부기"
+name_en = "wartortle"
+types = Array[StringName]([&"water"])
+base_stats = {
+"atk": 63,
+"def": 80,
+"hp": 59,
+"spa": 65,
+"spd": 80,
+"spe": 58
+}
+catch_rate = 45
+base_exp = 142
+gender_ratio = 0.875
+evo_stage = 1
+evolutions = Array[Dictionary]([{
+"method": &"level",
+"to": 9,
+"value": 36
+}])

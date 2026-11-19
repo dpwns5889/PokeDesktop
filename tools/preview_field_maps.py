@@ -1,7 +1,7 @@
-"""들판 맵 미리보기 (검토용, v0.48): scripts/data/field_maps.gd 의 배치를 타일 그림으로 조립한다.
-가장자리 칸 고르기는 scenes/main/field_map.gd 와 같은 규칙.
+"""들판 맵 미리보기 (검토용, v0.48): assets/scripts/data/field_maps.gd 의 배치를 타일 그림으로 조립한다.
+가장자리 칸 고르기는 assets/scenes/main/field_map.gd 와 같은 규칙.
 
-실행: python tools/preview_field_maps.py  → Assets/Generated/preview_field_maps.png
+실행: python tools/preview_field_maps.py  → tools/previews/preview_field_maps.png
 """
 import re
 import time
@@ -9,8 +9,8 @@ import time
 from PIL import Image
 
 T = 16
-SRC = 'scripts/data/field_maps.gd'
-OUT = 'Assets/Generated/preview_field_maps.png'
+SRC = 'assets/scripts/data/field_maps.gd'
+OUT = 'tools/previews/preview_field_maps.png'
 BASE9 = {'p': 6, 'w': 15, 'h': 24}
 ROCK, BUSH = 33, 34
 # 여러 칸 오브젝트: 글자 → (첫 칸 번호, 가로, 세로) (v0.69, field_map.gd 와 같게)
@@ -147,7 +147,7 @@ def main():
     maps = load_maps()
     shots = []
     for region, rows in maps.items():
-        sheet = Image.open('Assets/Generated/field/%s.png' % region)
+        sheet = Image.open('assets/generated/field/%s.png' % region)
         im = Image.new('RGBA', (len(rows[0]) * T, len(rows) * T))
         for y in range(len(rows)):
             for x in range(len(rows[0])):

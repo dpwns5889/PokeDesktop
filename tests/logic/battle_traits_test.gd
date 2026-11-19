@@ -2,7 +2,7 @@ extends GdUnitTestSuite
 ## 전투 특성 (엔트리일 때 발동, 기획서 4.6·4.13, v0.28)
 
 const T0 := 1_000_000.0
-const Manager := preload("res://scripts/autoload/encounter_manager.gd")
+const Manager := preload("res://assets/scripts/autoload/encounter_manager.gd")
 
 var _snapshot: Dictionary
 

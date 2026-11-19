@@ -1,0 +1,28 @@
+[gd_resource type="Resource" script_class="PokemonSpecies" format=3]
+
+[ext_resource type="Script" path="res://assets/scripts/data/pokemon_species.gd" id="1_mjm24"]
+
+[resource]
+script = ExtResource("1_mjm24")
+dex_id = 111
+generation = 1
+name_ko = "뿔카노"
+name_en = "rhyhorn"
+types = Array[StringName]([&"ground", &"rock"])
+base_stats = {
+"atk": 85,
+"def": 95,
+"hp": 80,
+"spa": 30,
+"spd": 30,
+"spe": 25
+}
+catch_rate = 120
+base_exp = 69
+gender_ratio = 0.5
+has_gender_sprites = true
+evolutions = Array[Dictionary]([{
+"method": &"level",
+"to": 112,
+"value": 42
+}])

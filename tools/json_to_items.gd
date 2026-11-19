@@ -1,9 +1,9 @@
 extends SceneTree
-## data/source/items.json → data/items/<id>.tres (ItemData). (기획서 4.11)
+## tools/source/items.json → assets/data/items/<id>.tres (ItemData). (기획서 4.11)
 ## 실행: <godot> --headless --path . -s res://tools/json_to_items.gd
 
-const SRC := "res://data/source/items.json"
-const OUT_DIR := "res://data/items"
+const SRC := "res://tools/source/items.json"
+const OUT_DIR := "res://assets/data/items"
 
 
 func _init() -> void:

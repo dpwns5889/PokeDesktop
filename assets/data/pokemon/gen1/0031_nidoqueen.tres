@@ -1,0 +1,22 @@
+[gd_resource type="Resource" script_class="PokemonSpecies" format=3]
+
+[ext_resource type="Script" path="res://assets/scripts/data/pokemon_species.gd" id="1_srh4j"]
+
+[resource]
+script = ExtResource("1_srh4j")
+dex_id = 31
+generation = 1
+name_ko = "니드퀸"
+name_en = "nidoqueen"
+types = Array[StringName]([&"poison", &"ground"])
+base_stats = {
+"atk": 92,
+"def": 87,
+"hp": 90,
+"spa": 75,
+"spd": 85,
+"spe": 76
+}
+catch_rate = 45
+base_exp = 227
+evo_stage = 2

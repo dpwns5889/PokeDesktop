@@ -1,7 +1,7 @@
 extends GdUnitTestSuite
 ## 도감 완성·색이 다른 도감·세이브 v1→v2·보관함 필터 (기획서 v0.77)
 
-const StoragePanel := preload("res://scenes/ui/storage_panel.gd")
+const StoragePanel := preload("res://assets/scenes/ui/storage_panel.gd")
 
 var _snapshot: Dictionary
 

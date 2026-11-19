@@ -1,0 +1,27 @@
+[gd_resource type="Resource" script_class="ExpeditionData" format=3]
+
+[ext_resource type="Script" path="res://assets/scripts/data/expedition_data.gd" id="1_h0g0e"]
+
+[resource]
+script = ExtResource("1_h0g0e")
+id = &"grassland_walk"
+name_ko = "초원 산책"
+order = 1
+duration_sec = 300
+required_power = 600
+recommended_types = Array[StringName]([&"normal", &"flying"])
+reward_table = Array[Dictionary]([{
+"item": &"exp_candy_s",
+"max": 2,
+"min": 1,
+"weight": 30
+}, {
+"item": &"great_ball",
+"max": 2,
+"min": 1,
+"weight": 20
+}])
+reward_rolls = 2
+currency_reward = Vector2i(100, 250)
+exp_reward = 60
+player_exp_reward = 20

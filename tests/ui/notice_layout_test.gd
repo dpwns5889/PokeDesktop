@@ -1,8 +1,8 @@
 extends GdUnitTestSuite
 ## 알림 창 가운데 정렬·상점 구매/판매 버튼 (기획서 6.1·4.12, v0.53)
 
-const ConfirmPanel := preload("res://scenes/ui/confirm_panel.gd")
-const ShopPanel := preload("res://scenes/ui/shop_panel.gd")
+const ConfirmPanel := preload("res://assets/scenes/ui/confirm_panel.gd")
+const ShopPanel := preload("res://assets/scenes/ui/shop_panel.gd")
 
 
 ## v0.80 팝업 규칙: 알림이든 확인 창이든 문구·버튼은 창 가운데
@@ -58,7 +58,7 @@ func test_sell_plays_buy_sound_without_message() -> void:
 
 ## v0.66: 보관함 "중복 보내기" 결과처럼 긴 문구도 줄바꿈되어 오른쪽 칸(버튼 줄)을 패널 밖으로 밀지 않는다
 func test_storage_long_message_wraps() -> void:
-	var SP := preload("res://scenes/ui/storage_panel.gd")
+	var SP := preload("res://assets/scenes/ui/storage_panel.gd")
 	var p = auto_free(SP.new())
 	add_child(p)
 	p._show_message("12마리를 보냈다! 경험사탕 M 3, 경험사탕 S 9 — 아주 긴 결과 문구가 붙어도 칸을 넓히지 않는다")
@@ -76,7 +76,7 @@ func test_favorite_star_and_list_order() -> void:
 	PlayerState.reset()
 	var strong := PlayerState.add_caught({&"dex_id": 16, &"level": 30, &"gender": &"male", &"region": &"grassland"})
 	var weak := PlayerState.add_caught({&"dex_id": 19, &"level": 3, &"gender": &"female", &"region": &"grassland"})
-	var SP := preload("res://scenes/ui/storage_panel.gd")
+	var SP := preload("res://assets/scenes/ui/storage_panel.gd")
 	var sp = auto_free(SP.new())
 	add_child(sp)
 	sp.open_panel()
@@ -91,14 +91,14 @@ func test_favorite_star_and_list_order() -> void:
 	sp._fav.pressed.emit()
 	assert_bool(PlayerState.find_pokemon(weak.uid).favorite).is_true()
 	# 파티: 레벨이 낮아도 즐겨찾기가 먼저
-	var PP := preload("res://scenes/ui/party_panel.gd")
+	var PP := preload("res://assets/scenes/ui/party_panel.gd")
 	var pp = auto_free(PP.new())
 	add_child(pp)
 	pp.refresh()
 	assert_str(pp._pick_uids[0]).is_equal(weak.uid)
 	assert_str(pp._pick_list.get_item_text(0)).starts_with("★")
 	# 원정: 전투력이 낮아도 즐겨찾기가 먼저
-	var EP := preload("res://scenes/ui/expedition_panel.gd")
+	var EP := preload("res://assets/scenes/ui/expedition_panel.gd")
 	var ep = auto_free(EP.new())
 	add_child(ep)
 	ep._target = &"grassland_walk"
@@ -116,7 +116,7 @@ func test_storage_party_first() -> void:
 	var mid := PlayerState.add_caught({&"dex_id": 120, &"level": 5, &"gender": &"male", &"region": &"grassland"})
 	var top := PlayerState.add_caught({&"dex_id": 1, &"level": 50, &"gender": &"male", &"region": &"grassland"})
 	PlayerState.entries = [mid.uid, low.uid] as Array[String]
-	var SP := preload("res://scenes/ui/storage_panel.gd")
+	var SP := preload("res://assets/scenes/ui/storage_panel.gd")
 	var sp = auto_free(SP.new())
 	add_child(sp)
 	sp.open_panel()

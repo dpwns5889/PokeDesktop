@@ -1,4 +1,4 @@
-"""PokeAPI CSV → data/source/pokemon_gen<N>.csv, data/types/types.json 생성기. (기획서 7.3)
+"""PokeAPI CSV → tools/source/pokemon_gen<N>.csv, assets/data/types/types.json 생성기. (기획서 7.3)
 
 준비: PokeAPI 저장소의 data/v2/csv/ 에서 아래 파일을 한 폴더에 받는다.
   pokemon_species, pokemon, pokemon_stats, pokemon_types, types, type_names,
@@ -112,7 +112,7 @@ def main() -> None:
     if missing_evo:
         raise SystemExit(f"진화 방법을 찾지 못한 종: {missing_evo}")
 
-    out = ROOT / "data" / "source" / f"pokemon_gen{args.gen}.csv"
+    out = ROOT / "tools" / "source" / f"pokemon_gen{args.gen}.csv"
     cols = ["dex_id", "generation", "name_ko", "name_en", "type1", "type2",
             "hp", "atk", "def", "spa", "spd", "spe", "catch_rate", "base_exp",
             "gender_ratio", "has_gender_sprites", "evo_stage", "is_legendary", "is_mythical", "evolutions"]
@@ -135,11 +135,11 @@ def main() -> None:
                   if r["local_language_id"] == KO and r["type_id"] in type_ident}
     # types.json = 생성된 모든 세대 CSV에 쓰인 타입만
     used = set()
-    for csv_path in (ROOT / "data" / "source").glob("pokemon_gen*.csv"):
+    for csv_path in (ROOT / "tools" / "source").glob("pokemon_gen*.csv"):
         with open(csv_path, encoding="utf-8", newline="") as f:
             for r in csv.DictReader(f):
                 used.update(t for t in (r["type1"], r["type2"]) if t)
-    tj = ROOT / "data" / "types" / "types.json"
+    tj = ROOT / "assets" / "data" / "types" / "types.json"
     tj.write_text(json.dumps({t: type_names[t] for t in sorted(used)}, ensure_ascii=False, indent=2), encoding="utf-8")
     print(f"wrote {tj} ({len(used)} types)")
 

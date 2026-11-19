@@ -1,0 +1,27 @@
+[gd_resource type="Resource" script_class="PokemonSpecies" format=3]
+
+[ext_resource type="Script" path="res://assets/scripts/data/pokemon_species.gd" id="1_l7vet"]
+
+[resource]
+script = ExtResource("1_l7vet")
+dex_id = 16
+generation = 1
+name_ko = "구구"
+name_en = "pidgey"
+types = Array[StringName]([&"normal", &"flying"])
+base_stats = {
+"atk": 45,
+"def": 40,
+"hp": 40,
+"spa": 35,
+"spd": 35,
+"spe": 56
+}
+catch_rate = 255
+base_exp = 50
+gender_ratio = 0.5
+evolutions = Array[Dictionary]([{
+"method": &"level",
+"to": 17,
+"value": 18
+}])

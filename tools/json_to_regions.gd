@@ -1,9 +1,9 @@
 extends SceneTree
-## data/source/regions_gen<N>.json → data/regions/<id>.tres (RegionData). (기획서 4.4)
+## tools/source/regions_gen<N>.json → assets/data/regions/<id>.tres (RegionData). (기획서 4.4)
 ## 실행: <godot> --headless --path . -s res://tools/json_to_regions.gd -- --gen 1
 
-const SRC := "res://data/source/regions_gen%d.json"
-const OUT_DIR := "res://data/regions"
+const SRC := "res://tools/source/regions_gen%d.json"
+const OUT_DIR := "res://assets/data/regions"
 
 
 func _init() -> void:

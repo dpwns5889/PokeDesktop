@@ -1,0 +1,27 @@
+[gd_resource type="Resource" script_class="PokemonSpecies" format=3]
+
+[ext_resource type="Script" path="res://assets/scripts/data/pokemon_species.gd" id="1_bsw4j"]
+
+[resource]
+script = ExtResource("1_bsw4j")
+dex_id = 48
+generation = 1
+name_ko = "콘팡"
+name_en = "venonat"
+types = Array[StringName]([&"bug", &"poison"])
+base_stats = {
+"atk": 55,
+"def": 50,
+"hp": 60,
+"spa": 40,
+"spd": 55,
+"spe": 45
+}
+catch_rate = 190
+base_exp = 61
+gender_ratio = 0.5
+evolutions = Array[Dictionary]([{
+"method": &"level",
+"to": 49,
+"value": 31
+}])

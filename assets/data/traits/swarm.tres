@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="TraitData" format=3]
+
+[ext_resource type="Script" path="res://assets/scripts/data/trait_data.gd" id="1_ke7m8"]
+
+[resource]
+script = ExtResource("1_ke7m8")
+id = &"swarm"
+name_ko = "벌레의알림"
+description = "[원정] 자신이 벌레 타입이면 전투력 ×1.2."
+tier = &"rare"
+effects = Array[Dictionary]([{
+"kind": "power_mult",
+"scope": "self",
+"value": 1.2,
+"when": {
+"self_types": ["bug"]
+}
+}])

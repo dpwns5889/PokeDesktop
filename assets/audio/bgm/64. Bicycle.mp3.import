@@ -1,0 +1,19 @@
+[remap]
+
+importer="mp3"
+type="AudioStreamMP3"
+uid="uid://bls7liv25x81v"
+path="res://.godot/imported/64. Bicycle.mp3-c735c35288ad6e4ba71e3ccf0a99d14d.mp3str"
+
+[deps]
+
+source_file="res://assets/audio/bgm/64. Bicycle.mp3"
+dest_files=["res://.godot/imported/64. Bicycle.mp3-c735c35288ad6e4ba71e3ccf0a99d14d.mp3str"]
+
+[params]
+
+loop=false
+loop_offset=0
+bpm=0
+beat_count=0
+bar_beats=4

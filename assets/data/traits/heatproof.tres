@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="TraitData" format=3]
+
+[ext_resource type="Script" path="res://assets/scripts/data/trait_data.gd" id="1_wv1rr"]
+
+[resource]
+script = ExtResource("1_wv1rr")
+id = &"heatproof"
+name_ko = "내열"
+description = "[원정] 화산 조사에서 불리 타입 보정을 받지 않는다."
+effects = Array[Dictionary]([{
+"kind": "ignore_weak_type",
+"scope": "self",
+"when": {
+"expeditions": ["volcano_survey"]
+}
+}])
+exclusive_with = Array[StringName]([&"rattled"])

@@ -1,0 +1,27 @@
+[gd_resource type="Resource" script_class="PokemonSpecies" format=3]
+
+[ext_resource type="Script" path="res://assets/scripts/data/pokemon_species.gd" id="1_u4jnw"]
+
+[resource]
+script = ExtResource("1_u4jnw")
+dex_id = 46
+generation = 1
+name_ko = "파라스"
+name_en = "paras"
+types = Array[StringName]([&"bug", &"grass"])
+base_stats = {
+"atk": 70,
+"def": 55,
+"hp": 35,
+"spa": 45,
+"spd": 55,
+"spe": 25
+}
+catch_rate = 190
+base_exp = 57
+gender_ratio = 0.5
+evolutions = Array[Dictionary]([{
+"method": &"level",
+"to": 47,
+"value": 24
+}])

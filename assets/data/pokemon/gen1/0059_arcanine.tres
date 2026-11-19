@@ -1,0 +1,23 @@
+[gd_resource type="Resource" script_class="PokemonSpecies" format=3]
+
+[ext_resource type="Script" path="res://assets/scripts/data/pokemon_species.gd" id="1_764d2"]
+
+[resource]
+script = ExtResource("1_764d2")
+dex_id = 59
+generation = 1
+name_ko = "윈디"
+name_en = "arcanine"
+types = Array[StringName]([&"fire"])
+base_stats = {
+"atk": 110,
+"def": 80,
+"hp": 90,
+"spa": 100,
+"spd": 80,
+"spe": 95
+}
+catch_rate = 75
+base_exp = 194
+gender_ratio = 0.75
+evo_stage = 1

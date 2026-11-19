@@ -2,15 +2,15 @@ extends SceneTree
 ## 아이템 아이콘 시트 → 아이콘 PNG. (기획서 7.4, 4.11)
 ##
 ## 실행: <godot> --headless --path . -s res://tools/import_icons.gd
-## 영역 정의: res://data/atlas/items.json
-## 결과: res://Assets/Generated/icons/<item_id>.png (24×24, 배경 투명, 가운데 정렬)
-##       res://Assets/Generated/preview_icons.png (검토용)
+## 영역 정의: res://assets/data/atlas/items.json
+## 결과: res://assets/generated/icons/<item_id>.png (24×24, 배경 투명, 가운데 정렬)
+##       res://tools/previews/preview_icons.png (검토용)
 ## 경험사탕은 HGSS에 없는 아이템이라 이상한사탕 아이콘의 색을 바꿔 만든다(임시).
 ## recolor 항목에 "hue_set"(0~1)을 주면 회색까지 포함해 그 색으로 물들인다(어두운 외곽선 제외, "min_sat" 최소 채도, 채도 0인 회색은 "gray_hue", v0.84 별의모래·별의조각).
 ## 항목에 "sheet" 를 주면 그 시트(배경 투명)에서 자른다 — 배경색 지우기는 하지 않는다(흰 반짝임이 지워지지 않게). (v0.43, 금구슬)
 
-const DEF := "res://data/atlas/items.json"
-const OUT_DIR := "res://Assets/Generated/icons"
+const DEF := "res://assets/data/atlas/items.json"
+const OUT_DIR := "res://assets/generated/icons"
 
 
 func _init() -> void:
@@ -90,7 +90,7 @@ func _run() -> int:
 		var big := img.duplicate()
 		big.resize(size * 2, size * 2, Image.INTERPOLATE_NEAREST)
 		preview.blend_rect(big, Rect2i(0, 0, size * 2, size * 2), Vector2i(i * size * 2, 0))
-	preview.save_png(ProjectSettings.globalize_path("res://Assets/Generated/preview_icons.png"))
+	preview.save_png(ProjectSettings.globalize_path("res://tools/previews/preview_icons.png"))
 	print("아이콘 %d개 저장 (순서: %s)" % [ids.size(), ", ".join(ids)])
 	return 0
 

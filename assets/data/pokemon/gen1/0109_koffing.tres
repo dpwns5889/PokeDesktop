@@ -1,0 +1,27 @@
+[gd_resource type="Resource" script_class="PokemonSpecies" format=3]
+
+[ext_resource type="Script" path="res://assets/scripts/data/pokemon_species.gd" id="1_26w51"]
+
+[resource]
+script = ExtResource("1_26w51")
+dex_id = 109
+generation = 1
+name_ko = "또가스"
+name_en = "koffing"
+types = Array[StringName]([&"poison"])
+base_stats = {
+"atk": 65,
+"def": 95,
+"hp": 40,
+"spa": 60,
+"spd": 45,
+"spe": 35
+}
+catch_rate = 190
+base_exp = 68
+gender_ratio = 0.5
+evolutions = Array[Dictionary]([{
+"method": &"level",
+"to": 110,
+"value": 35
+}])

@@ -1,0 +1,23 @@
+[gd_resource type="Resource" script_class="PokemonSpecies" format=3]
+
+[ext_resource type="Script" path="res://assets/scripts/data/pokemon_species.gd" id="1_1651i"]
+
+[resource]
+script = ExtResource("1_1651i")
+dex_id = 135
+generation = 1
+name_ko = "쥬피썬더"
+name_en = "jolteon"
+types = Array[StringName]([&"electric"])
+base_stats = {
+"atk": 65,
+"def": 60,
+"hp": 65,
+"spa": 110,
+"spd": 95,
+"spe": 130
+}
+catch_rate = 45
+base_exp = 184
+gender_ratio = 0.875
+evo_stage = 1

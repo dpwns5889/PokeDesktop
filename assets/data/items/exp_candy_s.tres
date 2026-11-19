@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Script" path="res://assets/scripts/data/item_data.gd" id="1_ikeij"]
+
+[resource]
+script = ExtResource("1_ikeij")
+id = &"exp_candy_s"
+name_ko = "경험사탕 S"
+description = "포켓몬의 경험치가 100 오른다."
+category = &"exp_candy"
+order = 10
+params = {
+&"exp": 100.0
+}
+sources = Array[StringName]([&"expedition", &"professor"])
+sell_price = 100

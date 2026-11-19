@@ -1,0 +1,19 @@
+[remap]
+
+importer="mp3"
+type="AudioStreamMP3"
+uid="uid://ks7ta0houc6n"
+path="res://.godot/imported/128. Celadon City.mp3-2a1e3220b82bcfab293bc1a3c3c8f0fc.mp3str"
+
+[deps]
+
+source_file="res://assets/audio/bgm/128. Celadon City.mp3"
+dest_files=["res://.godot/imported/128. Celadon City.mp3-2a1e3220b82bcfab293bc1a3c3c8f0fc.mp3str"]
+
+[params]
+
+loop=false
+loop_offset=0
+bpm=0
+beat_count=0
+bar_beats=4

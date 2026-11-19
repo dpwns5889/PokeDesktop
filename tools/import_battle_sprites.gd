@@ -11,16 +11,16 @@ extends SceneTree
 ## - 앞모습 배경 #93BBEC → 투명 처리. (DS 색은 8의 배수라 배경색과 겹치지 않음)
 ##
 ## 결과
-## - res://Assets/Generated/sprites/gen<N>/<dex 4자리>.png  (PokemonSprites 배치)
-## - res://Assets/Generated/preview_gen<N>.png               (검토용: 도감 순서, 종당 [일반|암컷|색다름])
-## - res://data/atlas/gen<N>_battle.json                      (사용한 블록 좌표 기록)
+## - res://assets/generated/sprites/gen<N>/<dex 4자리>.png  (PokemonSprites 배치)
+## - res://tools/previews/preview_gen<N>.png               (검토용: 도감 순서, 종당 [일반|암컷|색다름])
+## - res://assets/data/atlas/gen<N>_battle.json                      (사용한 블록 좌표 기록)
 
 const SHEETS := {
-	1: "res://Assets/Sprites/DS _ DSi - Pokemon HeartGold _ SoulSilver - Battle - Pokemon (1st Generation) (1).png",
-	2: "res://Assets/Sprites/DS _ DSi - Pokemon HeartGold _ SoulSilver - Battle - Pokemon (2nd Generation).png",
+	1: "res://assets/sprites/DS _ DSi - Pokemon HeartGold _ SoulSilver - Battle - Pokemon (1st Generation) (1).png",
+	2: "res://assets/sprites/DS _ DSi - Pokemon HeartGold _ SoulSilver - Battle - Pokemon (2nd Generation).png",
 }
-const CSV := "res://data/source/pokemon_gen%d.csv"
-const OUT_DIR := "res://Assets/Generated/sprites/gen%d"
+const CSV := "res://tools/source/pokemon_gen%d.csv"
+const OUT_DIR := "res://assets/generated/sprites/gen%d"
 
 const CELL := 80
 const PITCH := 81
@@ -108,8 +108,8 @@ func _run(gen: int) -> int:
 			preview.blend_rect(out, Rect2i(0, CELL, CELL, CELL), Vector2i(px + CELL, py))
 		preview.blend_rect(out, Rect2i(CELL * 2, 0, CELL, CELL), Vector2i(px + CELL * 2, py))
 
-	preview.save_png(ProjectSettings.globalize_path("res://Assets/Generated/preview_gen%d.png" % gen))
-	var f := FileAccess.open("res://data/atlas/gen%d_battle.json" % gen, FileAccess.WRITE)
+	preview.save_png(ProjectSettings.globalize_path("res://tools/previews/preview_gen%d.png" % gen))
+	var f := FileAccess.open("res://assets/data/atlas/gen%d_battle.json" % gen, FileAccess.WRITE)
 	f.store_string(JSON.stringify({"sheet": SHEETS[gen], "cell": CELL, "pitch": PITCH,
 		"layout": "block origin = 일반 앞모습 프레임1. 오른쪽 칸 = 프레임2, 아래 칸 = 색이 다른 개체",
 		"entries": atlas}, "\t"))

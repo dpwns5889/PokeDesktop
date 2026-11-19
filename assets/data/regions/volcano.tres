@@ -1,0 +1,117 @@
+[gd_resource type="Resource" script_class="RegionData" format=3]
+
+[ext_resource type="Script" path="res://assets/scripts/data/encounter_entry.gd" id="1_tv6c7"]
+[ext_resource type="Script" path="res://assets/scripts/data/region_data.gd" id="2_5jjnp"]
+
+[sub_resource type="Resource" id="Resource_agr6p"]
+script = ExtResource("1_tv6c7")
+dex_id = 58
+weight = 14
+min_level = 22
+max_level = 28
+
+[sub_resource type="Resource" id="Resource_nafpn"]
+script = ExtResource("1_tv6c7")
+dex_id = 37
+weight = 14
+min_level = 22
+max_level = 28
+
+[sub_resource type="Resource" id="Resource_8y7j6"]
+script = ExtResource("1_tv6c7")
+dex_id = 77
+weight = 16
+min_level = 22
+max_level = 28
+
+[sub_resource type="Resource" id="Resource_t2x47"]
+script = ExtResource("1_tv6c7")
+dex_id = 126
+weight = 6
+min_level = 24
+max_level = 30
+
+[sub_resource type="Resource" id="Resource_tuyob"]
+script = ExtResource("1_tv6c7")
+dex_id = 109
+weight = 12
+min_level = 22
+max_level = 28
+
+[sub_resource type="Resource" id="Resource_elv7m"]
+script = ExtResource("1_tv6c7")
+dex_id = 110
+weight = 4
+min_level = 28
+max_level = 33
+
+[sub_resource type="Resource" id="Resource_vum0d"]
+script = ExtResource("1_tv6c7")
+dex_id = 74
+weight = 8
+min_level = 22
+max_level = 28
+
+[sub_resource type="Resource" id="Resource_q16pf"]
+script = ExtResource("1_tv6c7")
+dex_id = 75
+weight = 5
+min_level = 26
+max_level = 32
+
+[sub_resource type="Resource" id="Resource_sccea"]
+script = ExtResource("1_tv6c7")
+dex_id = 66
+weight = 6
+min_level = 22
+max_level = 28
+
+[sub_resource type="Resource" id="Resource_hj7ig"]
+script = ExtResource("1_tv6c7")
+dex_id = 67
+weight = 5
+min_level = 28
+max_level = 33
+
+[sub_resource type="Resource" id="Resource_2j1u2"]
+script = ExtResource("1_tv6c7")
+dex_id = 78
+weight = 5
+min_level = 30
+max_level = 35
+
+[sub_resource type="Resource" id="Resource_ndc12"]
+script = ExtResource("1_tv6c7")
+dex_id = 20
+weight = 5
+min_level = 24
+max_level = 30
+
+[sub_resource type="Resource" id="Resource_afxml"]
+script = ExtResource("1_tv6c7")
+dex_id = 132
+weight = 4
+min_level = 24
+max_level = 30
+
+[resource]
+script = ExtResource("2_5jjnp")
+id = &"volcano"
+name_ko = "화산"
+order = 6
+main_types = Array[StringName]([&"fire"])
+sky_color = Color(0.8784314, 0.627451, 0.47843137, 1)
+ground_color = Color(0.41960785, 0.23137255, 0.18039216, 1)
+encounters = Array[ExtResource("1_tv6c7")]([SubResource("Resource_agr6p"), SubResource("Resource_nafpn"), SubResource("Resource_8y7j6"), SubResource("Resource_t2x47"), SubResource("Resource_tuyob"), SubResource("Resource_elv7m"), SubResource("Resource_vum0d"), SubResource("Resource_q16pf"), SubResource("Resource_sccea"), SubResource("Resource_hj7ig"), SubResource("Resource_2j1u2"), SubResource("Resource_ndc12"), SubResource("Resource_afxml")])
+level_cap = 35
+encounter_interval = Vector2(240, 400)
+capture_fill = 0.75
+item_tier = 2
+battle_ground = 2
+unlock_conditions = Array[Dictionary]([{
+"type": "player_level",
+"value": 18
+}, {
+"type": "dex_caught_count",
+"value": 50
+}])

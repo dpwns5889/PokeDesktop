@@ -1,0 +1,21 @@
+[gd_resource type="Resource" script_class="PokemonSpecies" format=3]
+
+[ext_resource type="Script" path="res://assets/scripts/data/pokemon_species.gd" id="1_ktm5d"]
+
+[resource]
+script = ExtResource("1_ktm5d")
+dex_id = 113
+generation = 1
+name_ko = "럭키"
+name_en = "chansey"
+types = Array[StringName]([&"normal"])
+base_stats = {
+"atk": 5,
+"def": 5,
+"hp": 250,
+"spa": 35,
+"spd": 105,
+"spe": 50
+}
+catch_rate = 30
+base_exp = 395

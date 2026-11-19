@@ -1,0 +1,27 @@
+[gd_resource type="Resource" script_class="PokemonSpecies" format=3]
+
+[ext_resource type="Script" path="res://assets/scripts/data/pokemon_species.gd" id="1_56tio"]
+
+[resource]
+script = ExtResource("1_56tio")
+dex_id = 27
+generation = 1
+name_ko = "모래두지"
+name_en = "sandshrew"
+types = Array[StringName]([&"ground"])
+base_stats = {
+"atk": 75,
+"def": 85,
+"hp": 50,
+"spa": 20,
+"spd": 30,
+"spe": 40
+}
+catch_rate = 255
+base_exp = 60
+gender_ratio = 0.5
+evolutions = Array[Dictionary]([{
+"method": &"level",
+"to": 28,
+"value": 22
+}])

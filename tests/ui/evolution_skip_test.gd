@@ -1,7 +1,7 @@
 extends GdUnitTestSuite
 ## 진화 연출 "넘기기" (기획서 4.9, v0.83)
 
-const EvolutionOverlay := preload("res://scenes/ui/evolution_overlay.gd")
+const EvolutionOverlay := preload("res://assets/scenes/ui/evolution_overlay.gd")
 
 var _snapshot: Dictionary
 

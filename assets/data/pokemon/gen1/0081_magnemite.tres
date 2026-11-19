@@ -1,0 +1,27 @@
+[gd_resource type="Resource" script_class="PokemonSpecies" format=3]
+
+[ext_resource type="Script" path="res://assets/scripts/data/pokemon_species.gd" id="1_cj28p"]
+
+[resource]
+script = ExtResource("1_cj28p")
+dex_id = 81
+generation = 1
+name_ko = "코일"
+name_en = "magnemite"
+types = Array[StringName]([&"electric"])
+base_stats = {
+"atk": 35,
+"def": 70,
+"hp": 25,
+"spa": 95,
+"spd": 55,
+"spe": 45
+}
+catch_rate = 190
+base_exp = 65
+gender_ratio = -1.0
+evolutions = Array[Dictionary]([{
+"method": &"level",
+"to": 82,
+"value": 30
+}])

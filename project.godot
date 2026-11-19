@@ -12,7 +12,7 @@ config_version=5
 
 config/name="PokeCompanion"
 config/version="0.86"
-run/main_scene="res://scenes/main/companion.tscn"
+run/main_scene="res://assets/scenes/main/companion.tscn"
 config/features=PackedStringArray("4.7", "GL Compatibility")
 run/max_fps=30
 run/low_processor_mode=true
@@ -20,19 +20,19 @@ config/icon="uid://c5iftjno2ymmt"
 
 [autoload]
 
-EventBus="*res://scripts/autoload/event_bus.gd"
-Settings="*res://scripts/autoload/settings.gd"
-GameData="*res://scripts/autoload/game_data.gd"
-PlayerState="*res://scripts/autoload/player_state.gd"
-SaveManager="*res://scripts/autoload/save_manager.gd"
-UnlockManager="*res://scripts/autoload/unlock_manager.gd"
-EncounterManager="*res://scripts/autoload/encounter_manager.gd"
-ExpeditionManager="*res://scripts/autoload/expedition_manager.gd"
-ShopManager="*res://scripts/autoload/shop_manager.gd"
-ProfessorManager="*res://scripts/autoload/professor_manager.gd"
-EvolutionManager="*res://scripts/autoload/evolution_manager.gd"
-AudioManager="*res://scripts/autoload/audio_manager.gd"
-WindowManager="*res://scripts/autoload/window_manager.gd"
+EventBus="*res://assets/scripts/autoload/event_bus.gd"
+Settings="*res://assets/scripts/autoload/settings.gd"
+GameData="*res://assets/scripts/autoload/game_data.gd"
+PlayerState="*res://assets/scripts/autoload/player_state.gd"
+SaveManager="*res://assets/scripts/autoload/save_manager.gd"
+UnlockManager="*res://assets/scripts/autoload/unlock_manager.gd"
+EncounterManager="*res://assets/scripts/autoload/encounter_manager.gd"
+ExpeditionManager="*res://assets/scripts/autoload/expedition_manager.gd"
+ShopManager="*res://assets/scripts/autoload/shop_manager.gd"
+ProfessorManager="*res://assets/scripts/autoload/professor_manager.gd"
+EvolutionManager="*res://assets/scripts/autoload/evolution_manager.gd"
+AudioManager="*res://assets/scripts/autoload/audio_manager.gd"
+WindowManager="*res://assets/scripts/autoload/window_manager.gd"
 
 [display]
 
@@ -49,7 +49,7 @@ enabled=PackedStringArray("res://addons/gdUnit4/plugin.cfg")
 
 [gui]
 
-theme/custom="res://Assets/UI/main_theme.tres"
+theme/custom="res://assets/ui/main_theme.tres"
 
 [physics]
 

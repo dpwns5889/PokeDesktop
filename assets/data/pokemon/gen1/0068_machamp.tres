@@ -1,0 +1,23 @@
+[gd_resource type="Resource" script_class="PokemonSpecies" format=3]
+
+[ext_resource type="Script" path="res://assets/scripts/data/pokemon_species.gd" id="1_r1lpe"]
+
+[resource]
+script = ExtResource("1_r1lpe")
+dex_id = 68
+generation = 1
+name_ko = "괴력몬"
+name_en = "machamp"
+types = Array[StringName]([&"fighting"])
+base_stats = {
+"atk": 130,
+"def": 80,
+"hp": 90,
+"spa": 65,
+"spd": 85,
+"spe": 55
+}
+catch_rate = 45
+base_exp = 227
+gender_ratio = 0.75
+evo_stage = 2

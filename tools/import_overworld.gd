@@ -13,18 +13,18 @@ extends SceneTree
 ##   1세대 시트에서는 이상해꽃·피카츄 두 종.
 ##
 ## 결과
-## - res://Assets/Generated/overworld/gen<N>/<dex 4자리>.png  64×32 (앞1 | 앞2), 암컷 모습이 있으면 64×64 (2행 = 암컷)
-## - res://Assets/Generated/overworld/gen<N>/walk/<dex 4자리>.png  64×128 걷기 시트 (v0.45, M12 걸어다니는 엔트리)
+## - res://assets/generated/overworld/gen<N>/<dex 4자리>.png  64×32 (앞1 | 앞2), 암컷 모습이 있으면 64×64 (2행 = 암컷)
+## - res://assets/generated/overworld/gen<N>/walk/<dex 4자리>.png  64×128 걷기 시트 (v0.45, M12 걸어다니는 엔트리)
 ##   행: 0 아래(앞) / 1 위(뒤) / 2 왼쪽 / 3 오른쪽, 열: 걷기 2프레임. 암컷 모습은 <dex>_f.png
 ##   원본 블록: 왼쪽 열 0·1행 = 위, 2·3행 = 아래 / 오른쪽 열 0·1행 = 왼쪽, 2·3행 = 오른쪽
-## - res://Assets/Generated/preview_overworld_gen<N>.png       (검토용: 도감 순서)
+## - res://tools/previews/preview_overworld_gen<N>.png       (검토용: 도감 순서)
 
 const SHEETS := {
-	1: "res://Assets/Sprites/DS _ DSi - Pokemon HeartGold _ SoulSilver - Overworld - Pokemon (1st Generation, Overworld).png",
+	1: "res://assets/sprites/DS _ DSi - Pokemon HeartGold _ SoulSilver - Overworld - Pokemon (1st Generation, Overworld).png",
 }
 const SPECIES_COUNT := {1: 151}
-const OUT_DIR := "res://Assets/Generated/overworld/gen%d"
-const PREVIEW := "res://Assets/Generated/preview_overworld_gen%d.png"
+const OUT_DIR := "res://assets/generated/overworld/gen%d"
+const PREVIEW := "res://tools/previews/preview_overworld_gen%d.png"
 
 const LINE := Color8(0, 64, 128)
 const MALE_DOT := Color8(0, 128, 255)

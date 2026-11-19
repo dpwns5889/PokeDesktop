@@ -1,7 +1,7 @@
 extends GdUnitTestSuite
 ## 전투 칸 아래 버전 표시 (기획서 6.1, v0.64). 버전은 project.godot 한 곳에 두고 기획서 문서 버전과 같아야 한다.
 
-const Companion := preload("res://scenes/main/companion.gd")
+const Companion := preload("res://assets/scenes/main/companion.gd")
 
 
 func test_version_matches_design_doc() -> void:

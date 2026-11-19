@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Script" path="res://assets/scripts/data/item_data.gd" id="1_od7q1"]
+
+[resource]
+script = ExtResource("1_od7q1")
+id = &"nugget"
+name_ko = "금구슬"
+description = "금으로 된 구슬. 상점에 팔면 2,000원."
+category = &"valuable"
+order = 34
+sources = Array[StringName]([&"encounter"])
+sell_price = 2000

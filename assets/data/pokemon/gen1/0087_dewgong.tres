@@ -1,0 +1,23 @@
+[gd_resource type="Resource" script_class="PokemonSpecies" format=3]
+
+[ext_resource type="Script" path="res://assets/scripts/data/pokemon_species.gd" id="1_ugn63"]
+
+[resource]
+script = ExtResource("1_ugn63")
+dex_id = 87
+generation = 1
+name_ko = "쥬레곤"
+name_en = "dewgong"
+types = Array[StringName]([&"water", &"ice"])
+base_stats = {
+"atk": 70,
+"def": 80,
+"hp": 90,
+"spa": 70,
+"spd": 95,
+"spe": 70
+}
+catch_rate = 75
+base_exp = 166
+gender_ratio = 0.5
+evo_stage = 1

@@ -1,0 +1,23 @@
+[gd_resource type="Resource" script_class="PokemonSpecies" format=3]
+
+[ext_resource type="Script" path="res://assets/scripts/data/pokemon_species.gd" id="1_lag4q"]
+
+[resource]
+script = ExtResource("1_lag4q")
+dex_id = 80
+generation = 1
+name_ko = "야도란"
+name_en = "slowbro"
+types = Array[StringName]([&"water", &"psychic"])
+base_stats = {
+"atk": 75,
+"def": 110,
+"hp": 95,
+"spa": 100,
+"spd": 80,
+"spe": 30
+}
+catch_rate = 75
+base_exp = 172
+gender_ratio = 0.5
+evo_stage = 1

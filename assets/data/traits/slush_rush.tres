@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="TraitData" format=3]
+
+[ext_resource type="Script" path="res://assets/scripts/data/trait_data.gd" id="1_78i7s"]
+
+[resource]
+script = ExtResource("1_78i7s")
+id = &"slush_rush"
+name_ko = "눈치우기"
+description = "[전투] 얼음 타입 포켓몬이 더 잘 나온다."
+trigger = &"battle"
+effects = Array[Dictionary]([{
+"kind": "encounter_type_weight",
+"types": ["ice"],
+"value": 1.5
+}])

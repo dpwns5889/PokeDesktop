@@ -204,7 +204,7 @@ func test_crossfade_between_tracks() -> void:
 # ---------------------------------------------------------------- 종료 확인
 
 func test_close_button_asks_before_quitting() -> void:
-	var src := FileAccess.get_file_as_string("res://scenes/main/companion.gd")
+	var src := FileAccess.get_file_as_string("res://assets/scenes/main/companion.gd")
 	assert_str(src).contains("close.pressed.connect(_ask_quit)")
 	assert_str(src).contains("_confirm.ask(\"종료\"")
 
@@ -256,7 +256,7 @@ func test_bgm_stays_paused_while_another_sfx_plays() -> void:
 # ---------------------------------------------------------------- v0.31: 포획 정보 창
 
 func test_caught_panel_shows_until_confirmed() -> void:
-	var panel = auto_free(preload("res://scenes/ui/caught_panel.gd").new())
+	var panel = auto_free(preload("res://assets/scenes/ui/caught_panel.gd").new())
 	add_child(panel)
 	var inst := PlayerState.add_caught({&"dex_id": 25, &"level": 7, &"gender": &"female", &"shiny": true, &"region": &"grassland"})
 	panel.show_pokemon(inst, true)

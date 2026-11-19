@@ -1,0 +1,22 @@
+[gd_resource type="Resource" script_class="PokemonSpecies" format=3]
+
+[ext_resource type="Script" path="res://assets/scripts/data/pokemon_species.gd" id="1_xeuom"]
+
+[resource]
+script = ExtResource("1_xeuom")
+dex_id = 126
+generation = 1
+name_ko = "마그마"
+name_en = "magmar"
+types = Array[StringName]([&"fire"])
+base_stats = {
+"atk": 95,
+"def": 57,
+"hp": 65,
+"spa": 100,
+"spd": 85,
+"spe": 93
+}
+catch_rate = 45
+base_exp = 173
+gender_ratio = 0.75

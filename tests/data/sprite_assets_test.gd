@@ -41,5 +41,5 @@ func test_make_frames_returns_two_frame_idle() -> void:
 
 func test_v01_item_icons_exist() -> void:
 	for id in ICONS:
-		var path := "res://Assets/Generated/icons/%s.png" % id
+		var path := "res://assets/generated/icons/%s.png" % id
 		assert_bool(ResourceLoader.exists(path)).override_failure_message("아이콘 없음: " + path).is_true()

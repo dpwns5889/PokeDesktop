@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Script" path="res://assets/scripts/data/item_data.gd" id="1_p1ump"]
+
+[resource]
+script = ExtResource("1_p1ump")
+id = &"stardust"
+name_ko = "별의모래"
+description = "반짝이는 모래. 상점에 팔면 800원."
+category = &"valuable"
+order = 32
+sources = Array[StringName]([&"encounter"])
+sell_price = 800

@@ -1,0 +1,19 @@
+[remap]
+
+importer="mp3"
+type="AudioStreamMP3"
+uid="uid://cql1loav2lvm4"
+path="res://.godot/imported/146. Safari Zone Gate.mp3-4934137ec6cc311ec084462543bbd9df.mp3str"
+
+[deps]
+
+source_file="res://assets/audio/bgm/146. Safari Zone Gate.mp3"
+dest_files=["res://.godot/imported/146. Safari Zone Gate.mp3-4934137ec6cc311ec084462543bbd9df.mp3str"]
+
+[params]
+
+loop=false
+loop_offset=0
+bpm=0
+beat_count=0
+bar_beats=4

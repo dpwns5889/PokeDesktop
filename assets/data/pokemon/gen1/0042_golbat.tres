@@ -1,0 +1,24 @@
+[gd_resource type="Resource" script_class="PokemonSpecies" format=3]
+
+[ext_resource type="Script" path="res://assets/scripts/data/pokemon_species.gd" id="1_lbeck"]
+
+[resource]
+script = ExtResource("1_lbeck")
+dex_id = 42
+generation = 1
+name_ko = "골뱃"
+name_en = "golbat"
+types = Array[StringName]([&"poison", &"flying"])
+base_stats = {
+"atk": 80,
+"def": 70,
+"hp": 75,
+"spa": 65,
+"spd": 75,
+"spe": 90
+}
+catch_rate = 90
+base_exp = 159
+gender_ratio = 0.5
+has_gender_sprites = true
+evo_stage = 1

@@ -1,0 +1,24 @@
+[gd_resource type="Resource" script_class="PokemonSpecies" format=3]
+
+[ext_resource type="Script" path="res://assets/scripts/data/pokemon_species.gd" id="1_jvfdr"]
+
+[resource]
+script = ExtResource("1_jvfdr")
+dex_id = 150
+generation = 1
+name_ko = "뮤츠"
+name_en = "mewtwo"
+types = Array[StringName]([&"psychic"])
+base_stats = {
+"atk": 110,
+"def": 90,
+"hp": 106,
+"spa": 154,
+"spd": 90,
+"spe": 130
+}
+catch_rate = 3
+base_exp = 306
+gender_ratio = -1.0
+is_legendary = true
+fixed_trait_ids = Array[StringName]([&"legend"])

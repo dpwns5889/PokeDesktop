@@ -1,0 +1,26 @@
+[gd_resource type="Resource" script_class="PokemonSpecies" format=3]
+
+[ext_resource type="Script" path="res://assets/scripts/data/pokemon_species.gd" id="1_wosok"]
+
+[resource]
+script = ExtResource("1_wosok")
+dex_id = 29
+generation = 1
+name_ko = "니드런♀"
+name_en = "nidoran-f"
+types = Array[StringName]([&"poison"])
+base_stats = {
+"atk": 47,
+"def": 52,
+"hp": 55,
+"spa": 40,
+"spd": 40,
+"spe": 41
+}
+catch_rate = 235
+base_exp = 55
+evolutions = Array[Dictionary]([{
+"method": &"level",
+"to": 30,
+"value": 16
+}])

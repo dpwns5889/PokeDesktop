@@ -1,0 +1,57 @@
+[gd_resource type="Resource" script_class="ExpeditionData" format=3]
+
+[ext_resource type="Script" path="res://assets/scripts/data/expedition_data.gd" id="1_av6os"]
+
+[resource]
+script = ExtResource("1_av6os")
+id = &"deep_cave_expedition"
+name_ko = "깊은 동굴 원정"
+order = 9
+duration_sec = 28800
+required_power = 10800
+recommended_types = Array[StringName]([&"dragon", &"rock"])
+weak_types = Array[StringName]([&"ice"])
+reward_table = Array[Dictionary]([{
+"item": &"exp_candy_m",
+"max": 4,
+"min": 2,
+"weight": 20
+}, {
+"item": &"ultra_ball",
+"max": 5,
+"min": 2,
+"weight": 15
+}, {
+"item": &"fire_stone",
+"max": 1,
+"min": 1,
+"weight": 8
+}, {
+"item": &"leaf_stone",
+"max": 1,
+"min": 1,
+"weight": 8
+}, {
+"item": &"moon_stone",
+"max": 1,
+"min": 1,
+"weight": 8
+}, {
+"item": &"incense",
+"max": 2,
+"min": 1,
+"weight": 6
+}, {
+"item": &"shiny_incense",
+"max": 1,
+"min": 1,
+"weight": 2
+}])
+reward_rolls = 5
+currency_reward = Vector2i(2400, 4000)
+exp_reward = 2500
+player_exp_reward = 300
+unlock_conditions = Array[Dictionary]([{
+"type": "region_unlocked",
+"value": "deep_cave"
+}])

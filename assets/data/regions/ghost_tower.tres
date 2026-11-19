@@ -1,0 +1,110 @@
+[gd_resource type="Resource" script_class="RegionData" format=3]
+
+[ext_resource type="Script" path="res://assets/scripts/data/encounter_entry.gd" id="1_uc7ok"]
+[ext_resource type="Script" path="res://assets/scripts/data/region_data.gd" id="2_a75fo"]
+
+[sub_resource type="Resource" id="Resource_f8k6l"]
+script = ExtResource("1_uc7ok")
+dex_id = 92
+weight = 22
+min_level = 25
+max_level = 31
+
+[sub_resource type="Resource" id="Resource_o5ssj"]
+script = ExtResource("1_uc7ok")
+dex_id = 93
+weight = 7
+min_level = 30
+max_level = 36
+
+[sub_resource type="Resource" id="Resource_8mu1g"]
+script = ExtResource("1_uc7ok")
+dex_id = 104
+weight = 12
+min_level = 25
+max_level = 31
+
+[sub_resource type="Resource" id="Resource_bd3qd"]
+script = ExtResource("1_uc7ok")
+dex_id = 105
+weight = 4
+min_level = 30
+max_level = 36
+
+[sub_resource type="Resource" id="Resource_4yajc"]
+script = ExtResource("1_uc7ok")
+dex_id = 63
+weight = 12
+min_level = 25
+max_level = 31
+
+[sub_resource type="Resource" id="Resource_2ydvb"]
+script = ExtResource("1_uc7ok")
+dex_id = 64
+weight = 7
+min_level = 30
+max_level = 36
+
+[sub_resource type="Resource" id="Resource_8gdjx"]
+script = ExtResource("1_uc7ok")
+dex_id = 96
+weight = 12
+min_level = 25
+max_level = 31
+
+[sub_resource type="Resource" id="Resource_ei5ro"]
+script = ExtResource("1_uc7ok")
+dex_id = 97
+weight = 7
+min_level = 30
+max_level = 36
+
+[sub_resource type="Resource" id="Resource_181vi"]
+script = ExtResource("1_uc7ok")
+dex_id = 122
+weight = 6
+min_level = 26
+max_level = 32
+
+[sub_resource type="Resource" id="Resource_tfqlb"]
+script = ExtResource("1_uc7ok")
+dex_id = 106
+weight = 3
+min_level = 27
+max_level = 33
+min_player_level = 24
+
+[sub_resource type="Resource" id="Resource_ll20s"]
+script = ExtResource("1_uc7ok")
+dex_id = 107
+weight = 3
+min_level = 27
+max_level = 33
+min_player_level = 24
+
+[sub_resource type="Resource" id="Resource_nmy0y"]
+script = ExtResource("1_uc7ok")
+dex_id = 143
+weight = 2
+min_level = 30
+max_level = 36
+min_player_level = 26
+
+[resource]
+script = ExtResource("2_a75fo")
+id = &"ghost_tower"
+name_ko = "유령탑"
+order = 7
+main_types = Array[StringName]([&"ghost", &"psychic"])
+sky_color = Color(0.49411765, 0.41568628, 0.61960787, 1)
+ground_color = Color(0.29411766, 0.2509804, 0.3764706, 1)
+encounters = Array[ExtResource("1_uc7ok")]([SubResource("Resource_f8k6l"), SubResource("Resource_o5ssj"), SubResource("Resource_8mu1g"), SubResource("Resource_bd3qd"), SubResource("Resource_4yajc"), SubResource("Resource_2ydvb"), SubResource("Resource_8gdjx"), SubResource("Resource_ei5ro"), SubResource("Resource_181vi"), SubResource("Resource_tfqlb"), SubResource("Resource_ll20s"), SubResource("Resource_nmy0y")])
+level_cap = 38
+encounter_interval = Vector2(280, 460)
+capture_fill = 0.72
+item_tier = 3
+battle_ground = 8
+unlock_conditions = Array[Dictionary]([{
+"type": "player_level",
+"value": 22
+}])

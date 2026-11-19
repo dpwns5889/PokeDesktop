@@ -6,8 +6,14 @@
 /reports/
 
 # 저작권 리소스: 공개 저장소에 올리지 않는다 (기획서 12장)
-/Assets/Sprites/
-/Assets/Generated/
+/assets/sprites/
+/assets/generated/
 
 # 내보낸 실행 파일
 /build/
+
+# 검토용 미리보기 (저작권 스프라이트 포함)
+/tools/previews/*.png
+
+# 이 PC 전용 Claude 설정
+/CLAUDE.local.md

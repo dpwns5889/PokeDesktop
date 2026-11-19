@@ -56,7 +56,7 @@ func test_entry_reference_uses_max_ivs() -> void:
 
 
 func test_storage_stat_marks() -> void:
-	var SP := preload("res://scenes/ui/storage_panel.gd")
+	var SP := preload("res://assets/scenes/ui/storage_panel.gd")
 	assert_str(SP.stat_bbcode(&"atk", 50, 31)).contains("★★")
 	assert_str(SP.stat_bbcode(&"atk", 50, 27)).contains("★")
 	assert_str(SP.stat_bbcode(&"atk", 50, 27)).not_contains("★★")

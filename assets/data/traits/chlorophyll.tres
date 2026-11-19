@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="TraitData" format=3]
+
+[ext_resource type="Script" path="res://assets/scripts/data/trait_data.gd" id="1_olqeq"]
+
+[resource]
+script = ExtResource("1_olqeq")
+id = &"chlorophyll"
+name_ko = "엽록소"
+description = "[원정] 숲 탐험에서 전투력 ×1.2."
+effects = Array[Dictionary]([{
+"kind": "power_mult",
+"scope": "self",
+"value": 1.2,
+"when": {
+"expeditions": ["forest_trip"]
+}
+}])

@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="TraitData" format=3]
+
+[ext_resource type="Script" path="res://assets/scripts/data/trait_data.gd" id="1_iycb5"]
+
+[resource]
+script = ExtResource("1_iycb5")
+id = &"shadow_tag"
+name_ko = "그림자밟기"
+description = "[전투] 고스트 타입 포켓몬이 더 잘 나온다."
+trigger = &"battle"
+effects = Array[Dictionary]([{
+"kind": "encounter_type_weight",
+"types": ["ghost"],
+"value": 1.5
+}])

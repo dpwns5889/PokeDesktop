@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Script" path="res://assets/scripts/data/item_data.gd" id="1_emw6b"]
+
+[resource]
+script = ExtResource("1_emw6b")
+id = &"star_piece"
+name_ko = "별의조각"
+description = "붉게 빛나는 별 모양 조각. 상점에 팔면 3,000원."
+category = &"valuable"
+order = 35
+sources = Array[StringName]([&"encounter"])
+sell_price = 3000

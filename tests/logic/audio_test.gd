@@ -83,7 +83,7 @@ func test_levelup_evolve_unlock_play_sounds() -> void:
 func test_attack_sound_on_target_hit() -> void:
 	var p: AudioStreamPlayer = AudioManager._players[&"attack"]
 	p.stop()
-	var battle: Control = auto_free(load("res://scenes/battle/battle.tscn").instantiate())
+	var battle: Control = auto_free(load("res://assets/scenes/battle/battle.tscn").instantiate())
 	add_child(battle)
 	var rng := RandomNumberGenerator.new()
 	rng.seed = 1

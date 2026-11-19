@@ -1,7 +1,7 @@
 extends GdUnitTestSuite
 ## 원정 보상 팝업 (기획서 4.10·6.2, v0.59): 제목 = 원정지 + 성공/실패, 위 = 아이템 칸, 아래 = 레벨이 오른 포켓몬 칸, 확인으로 닫기
 
-const RewardPanel := preload("res://scenes/ui/expedition_reward_panel.gd")
+const RewardPanel := preload("res://assets/scenes/ui/expedition_reward_panel.gd")
 
 var _snapshot: Dictionary
 

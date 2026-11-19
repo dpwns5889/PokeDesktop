@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="TraitData" format=3]
+
+[ext_resource type="Script" path="res://assets/scripts/data/trait_data.gd" id="1_necuw"]
+
+[resource]
+script = ExtResource("1_necuw")
+id = &"sand_rush"
+name_ko = "모래헤치기"
+description = "[원정] 동굴 발굴·깊은 동굴 원정에서 전투력 ×1.2."
+effects = Array[Dictionary]([{
+"kind": "power_mult",
+"scope": "self",
+"value": 1.2,
+"when": {
+"expeditions": ["cave_dig", "deep_cave_expedition"]
+}
+}])

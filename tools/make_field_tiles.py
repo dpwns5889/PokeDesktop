@@ -1,13 +1,13 @@
 """왼쪽 들판 타일 생성기 (기획서 6.1, 7.4, v0.48).
 
-Assets/Sprites/reference/ 의 게임 화면(확대·흐림·원근이 있어 그대로 자를 수 없음)에서 뽑은
+assets/sprites/reference/ 의 게임 화면(확대·흐림·원근이 있어 그대로 자를 수 없음)에서 뽑은
 색 팔레트와 무늬를 참고해, 정면 탑뷰 16×16 타일을 코드로 새로 그린다.
 원근 보정: 비스듬히 보이던 절벽·단은 "윗면 + 한 칸 앞면"으로 단순화한다.
 
 실행: python tools/make_field_tiles.py   (프로젝트 루트에서)
-결과: Assets/Generated/field/<region_id>.png  (1600×16, 칸 100개 — 칸 번호는 FieldMap 과 같음)
-      Assets/Generated/preview_field.png      (검토용: 지역별 타일 줄)
-      Assets/Generated/preview_field_maps.png (검토용: 모든 지역 들판, tools/preview_field_maps.py)
+결과: assets/generated/field/<region_id>.png  (1600×16, 칸 100개 — 칸 번호는 FieldMap 과 같음)
+      tools/previews/preview_field.png      (검토용: 지역별 타일 줄)
+      tools/previews/preview_field_maps.png (검토용: 모든 지역 들판, tools/preview_field_maps.py)
 
 칸 번호 (v0.70)
   0 땅  1 땅(풀결)  2 땅(얼룩)  3 장식
@@ -24,7 +24,7 @@ Assets/Sprites/reference/ 의 게임 화면(확대·흐림·원근이 있어 그
          잘려 있어, 한 그루 나무 그림에서 삐져나온 잎 가장자리를 옆 땅 칸에 그린다
   99    풀 덤불 (Tileset1 덤불을 작게 다듬음, 지나갈 수 있음 — 34 덤불은 Object 열매 덤불에서 열매를 지운 것, 못 지나감)
 
-v0.69: Assets/Sprites/tilemap/Tileset1.png 와 Object.png 가 있으면 모든 칸을 그 두 장에서 잘라 쓴다 (아래 TILESETS).
+v0.69: assets/sprites/tilemap/Tileset1.png 와 Object.png 가 있으면 모든 칸을 그 두 장에서 잘라 쓴다 (아래 TILESETS).
 없으면 코드로 그린 그림.
 """
 import math
@@ -35,7 +35,7 @@ import sys
 from PIL import Image
 
 T = 16
-TREE_W, TREE_H = 3, 4   # 나무 한 그루 = 3×4칸 (v0.69 Object.png, scenes/main/field_map.gd 와 같게)
+TREE_W, TREE_H = 3, 4   # 나무 한 그루 = 3×4칸 (v0.69 Object.png, assets/scenes/main/field_map.gd 와 같게)
 ROCK_I, BUSH_I = 33, 34   # 돌·덤불 칸 (ROCK 은 아래 팔레트 이름)
 TREE = 35                                   # 35~46 나무 3×4
 BOULDER = TREE + TREE_W * TREE_H            # 47~50 큰 바위 2×2
@@ -52,8 +52,8 @@ CLUSTER = WATER_BOULDER + 2 * 2            # 75~90 나무 군락 4×4 (여러 �
 CLUSTER_SIDE = CLUSTER + 4 * 4             # 91~98 군락 양 끝 옆 칸 (줄마다 왼쪽 옆·오른쪽 옆)
 LEAF_BUSH = CLUSTER_SIDE + 4 * 2           # 99 풀 덤불 (지나갈 수 있음)
 COLS = LEAF_BUSH + 1
-OUT_DIR = 'Assets/Generated/field'
-PREVIEW = 'Assets/Generated/preview_field.png'
+OUT_DIR = 'assets/generated/field'
+PREVIEW = 'tools/previews/preview_field.png'
 
 
 def hx(s):
@@ -534,12 +534,12 @@ def tree_small(p):
 
 
 # ---------------------------------------------------------------- 타일 세트에서 자르기 (v0.68)
-# Assets/Sprites/tilemap/Tileset1.png (땅·풀숲·꽃밭·길·물·용암·단·다리, 16×16 칸)와
-# Assets/Sprites/tilemap/Object.png (나무·바위·덤불·기계·상자, 16×16 칸) 두 장에서 잘라 쓴다.
+# assets/sprites/tilemap/Tileset1.png (땅·풀숲·꽃밭·길·물·용암·단·다리, 16×16 칸)와
+# assets/sprites/tilemap/Object.png (나무·바위·덤불·기계·상자, 16×16 칸) 두 장에서 잘라 쓴다.
 # 칸 좌표 = (세트, 열, 줄). 비어 있는(투명) 곳은 그 지역 땅 칸(0번) 위에 겹친다.
 # 세트 파일이 없으면(공개 저장소 등) 그 칸은 위의 코드로 그린 그림을 그대로 쓴다.
 
-SETS_DIR = 'Assets/Sprites/tilemap'
+SETS_DIR = 'assets/sprites/tilemap'
 S, O = 'Tileset1', 'Object'
 _sets = {}
 

@@ -1,0 +1,23 @@
+[gd_resource type="Resource" script_class="PokemonSpecies" format=3]
+
+[ext_resource type="Script" path="res://assets/scripts/data/pokemon_species.gd" id="1_exfwl"]
+
+[resource]
+script = ExtResource("1_exfwl")
+dex_id = 117
+generation = 1
+name_ko = "시드라"
+name_en = "seadra"
+types = Array[StringName]([&"water"])
+base_stats = {
+"atk": 65,
+"def": 95,
+"hp": 55,
+"spa": 95,
+"spd": 45,
+"spe": 85
+}
+catch_rate = 75
+base_exp = 154
+gender_ratio = 0.5
+evo_stage = 1

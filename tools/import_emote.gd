@@ -4,11 +4,11 @@ extends SceneTree
 ## 실행: <godot> --headless --path . -s res://tools/import_emote.gd
 ## 이후:  <godot> --headless --path . --import
 ##
-## 원본 Assets/Sprites/Emote.png (96×16, v0.34): 16×16 칸 6개 = [ . | .. | ... | ! | ?1 | ?2 ]  (배경 투명)
-## Assets/Sprites 는 내보내기에서 빠지므로(원본 보관용) Assets/Generated/ui/emote.png 로 복사해 쓴다.
+## 원본 assets/sprites/Emote.png (96×16, v0.34): 16×16 칸 6개 = [ . | .. | ... | ! | ?1 | ?2 ]  (배경 투명)
+## assets/sprites 는 내보내기에서 빠지므로(원본 보관용) assets/generated/ui/emote.png 로 복사해 쓴다.
 
-const SRC := "res://Assets/Sprites/Emote.png"
-const OUT := "res://Assets/Generated/ui/emote.png"
+const SRC := "res://assets/sprites/Emote.png"
+const OUT := "res://assets/generated/ui/emote.png"
 const CELL := 16
 const FRAMES := 6
 

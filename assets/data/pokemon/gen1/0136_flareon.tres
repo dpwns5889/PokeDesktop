@@ -1,0 +1,23 @@
+[gd_resource type="Resource" script_class="PokemonSpecies" format=3]
+
+[ext_resource type="Script" path="res://assets/scripts/data/pokemon_species.gd" id="1_6udho"]
+
+[resource]
+script = ExtResource("1_6udho")
+dex_id = 136
+generation = 1
+name_ko = "부스터"
+name_en = "flareon"
+types = Array[StringName]([&"fire"])
+base_stats = {
+"atk": 130,
+"def": 60,
+"hp": 65,
+"spa": 95,
+"spd": 110,
+"spe": 65
+}
+catch_rate = 45
+base_exp = 184
+gender_ratio = 0.875
+evo_stage = 1

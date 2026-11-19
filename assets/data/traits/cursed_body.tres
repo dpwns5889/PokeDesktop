@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="TraitData" format=3]
+
+[ext_resource type="Script" path="res://assets/scripts/data/trait_data.gd" id="1_6u76a"]
+
+[resource]
+script = ExtResource("1_6u76a")
+id = &"cursed_body"
+name_ko = "저주받은바디"
+description = "[원정] 유령탑의 밤에서 전투력 ×1.2."
+effects = Array[Dictionary]([{
+"kind": "power_mult",
+"scope": "self",
+"value": 1.2,
+"when": {
+"expeditions": ["ghost_tower_night"]
+}
+}])

@@ -1,0 +1,24 @@
+[gd_resource type="Resource" script_class="PokemonSpecies" format=3]
+
+[ext_resource type="Script" path="res://assets/scripts/data/pokemon_species.gd" id="1_hskmj"]
+
+[resource]
+script = ExtResource("1_hskmj")
+dex_id = 112
+generation = 1
+name_ko = "코뿌리"
+name_en = "rhydon"
+types = Array[StringName]([&"ground", &"rock"])
+base_stats = {
+"atk": 130,
+"def": 120,
+"hp": 105,
+"spa": 45,
+"spd": 45,
+"spe": 40
+}
+catch_rate = 60
+base_exp = 170
+gender_ratio = 0.5
+has_gender_sprites = true
+evo_stage = 1

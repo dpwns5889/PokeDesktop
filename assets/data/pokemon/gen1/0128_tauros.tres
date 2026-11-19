@@ -1,0 +1,22 @@
+[gd_resource type="Resource" script_class="PokemonSpecies" format=3]
+
+[ext_resource type="Script" path="res://assets/scripts/data/pokemon_species.gd" id="1_47a4w"]
+
+[resource]
+script = ExtResource("1_47a4w")
+dex_id = 128
+generation = 1
+name_ko = "켄타로스"
+name_en = "tauros"
+types = Array[StringName]([&"normal"])
+base_stats = {
+"atk": 100,
+"def": 95,
+"hp": 75,
+"spa": 40,
+"spd": 70,
+"spe": 110
+}
+catch_rate = 45
+base_exp = 172
+gender_ratio = 1.0

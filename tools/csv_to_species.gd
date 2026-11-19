@@ -1,11 +1,11 @@
 extends SceneTree
-## data/source/pokemon_gen<N>.csv → data/pokemon/gen<N>/<dex>_<name>.tres (PokemonSpecies). (기획서 7.3)
+## tools/source/pokemon_gen<N>.csv → assets/data/pokemon/gen<N>/<dex>_<name>.tres (PokemonSpecies). (기획서 7.3)
 ##
 ## 실행: <godot> --headless --path . -s res://tools/csv_to_species.gd -- --gen 1
 ## CSV는 tools/build_species_csv.py 로 만든다. 151종을 손으로 만들지 않는다.
 
-const CSV := "res://data/source/pokemon_gen%d.csv"
-const OUT_DIR := "res://data/pokemon/gen%d"
+const CSV := "res://tools/source/pokemon_gen%d.csv"
+const OUT_DIR := "res://assets/data/pokemon/gen%d"
 const STAT_KEYS := ["hp", "atk", "def", "spa", "spd", "spe"]
 
 

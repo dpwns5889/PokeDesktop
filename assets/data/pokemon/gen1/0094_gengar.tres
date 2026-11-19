@@ -1,0 +1,23 @@
+[gd_resource type="Resource" script_class="PokemonSpecies" format=3]
+
+[ext_resource type="Script" path="res://assets/scripts/data/pokemon_species.gd" id="1_e8vrd"]
+
+[resource]
+script = ExtResource("1_e8vrd")
+dex_id = 94
+generation = 1
+name_ko = "팬텀"
+name_en = "gengar"
+types = Array[StringName]([&"ghost", &"poison"])
+base_stats = {
+"atk": 65,
+"def": 60,
+"hp": 60,
+"spa": 130,
+"spd": 75,
+"spe": 110
+}
+catch_rate = 45
+base_exp = 225
+gender_ratio = 0.5
+evo_stage = 2

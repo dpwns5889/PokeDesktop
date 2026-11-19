@@ -1,0 +1,22 @@
+[gd_resource type="Resource" script_class="PokemonSpecies" format=3]
+
+[ext_resource type="Script" path="res://assets/scripts/data/pokemon_species.gd" id="1_3pdlt"]
+
+[resource]
+script = ExtResource("1_3pdlt")
+dex_id = 114
+generation = 1
+name_ko = "덩쿠리"
+name_en = "tangela"
+types = Array[StringName]([&"grass"])
+base_stats = {
+"atk": 55,
+"def": 115,
+"hp": 65,
+"spa": 100,
+"spd": 40,
+"spe": 60
+}
+catch_rate = 45
+base_exp = 87
+gender_ratio = 0.5

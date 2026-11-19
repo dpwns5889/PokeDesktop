@@ -1,0 +1,145 @@
+[gd_resource type="Resource" script_class="RegionData" format=3]
+
+[ext_resource type="Script" path="res://assets/scripts/data/encounter_entry.gd" id="1_u1ffs"]
+[ext_resource type="Script" path="res://assets/scripts/data/region_data.gd" id="2_jpms3"]
+
+[sub_resource type="Resource" id="Resource_dnuef"]
+script = ExtResource("1_u1ffs")
+dex_id = 10
+min_level = 4
+max_level = 7
+
+[sub_resource type="Resource" id="Resource_gt8sq"]
+script = ExtResource("1_u1ffs")
+dex_id = 11
+weight = 6
+min_level = 5
+max_level = 8
+
+[sub_resource type="Resource" id="Resource_moq2w"]
+script = ExtResource("1_u1ffs")
+dex_id = 13
+min_level = 4
+max_level = 7
+
+[sub_resource type="Resource" id="Resource_f1ok5"]
+script = ExtResource("1_u1ffs")
+dex_id = 14
+weight = 6
+min_level = 5
+max_level = 8
+
+[sub_resource type="Resource" id="Resource_st8aa"]
+script = ExtResource("1_u1ffs")
+dex_id = 25
+weight = 6
+min_level = 5
+max_level = 9
+
+[sub_resource type="Resource" id="Resource_b5r2p"]
+script = ExtResource("1_u1ffs")
+dex_id = 43
+weight = 12
+min_level = 5
+max_level = 9
+
+[sub_resource type="Resource" id="Resource_l6wc0"]
+script = ExtResource("1_u1ffs")
+dex_id = 69
+weight = 12
+min_level = 5
+max_level = 9
+
+[sub_resource type="Resource" id="Resource_8r1u1"]
+script = ExtResource("1_u1ffs")
+dex_id = 46
+min_level = 5
+max_level = 9
+
+[sub_resource type="Resource" id="Resource_qlmkf"]
+script = ExtResource("1_u1ffs")
+dex_id = 48
+min_level = 6
+max_level = 10
+
+[sub_resource type="Resource" id="Resource_mlwhl"]
+script = ExtResource("1_u1ffs")
+dex_id = 102
+weight = 5
+min_level = 7
+max_level = 11
+min_player_level = 5
+
+[sub_resource type="Resource" id="Resource_25iwk"]
+script = ExtResource("1_u1ffs")
+dex_id = 114
+weight = 4
+min_level = 8
+max_level = 12
+min_player_level = 6
+
+[sub_resource type="Resource" id="Resource_3q2bd"]
+script = ExtResource("1_u1ffs")
+dex_id = 30
+weight = 4
+min_level = 9
+max_level = 12
+min_player_level = 6
+
+[sub_resource type="Resource" id="Resource_jr4v6"]
+script = ExtResource("1_u1ffs")
+dex_id = 33
+weight = 4
+min_level = 9
+max_level = 12
+min_player_level = 6
+
+[sub_resource type="Resource" id="Resource_pbbb6"]
+script = ExtResource("1_u1ffs")
+dex_id = 123
+weight = 3
+min_level = 10
+max_level = 12
+min_player_level = 8
+
+[sub_resource type="Resource" id="Resource_t7gxe"]
+script = ExtResource("1_u1ffs")
+dex_id = 127
+weight = 3
+min_level = 10
+max_level = 12
+min_player_level = 8
+
+[sub_resource type="Resource" id="Resource_sabf2"]
+script = ExtResource("1_u1ffs")
+dex_id = 115
+weight = 2
+min_level = 10
+max_level = 12
+min_player_level = 8
+
+[sub_resource type="Resource" id="Resource_pebwl"]
+script = ExtResource("1_u1ffs")
+dex_id = 128
+weight = 2
+min_level = 10
+max_level = 12
+min_player_level = 8
+
+[resource]
+script = ExtResource("2_jpms3")
+id = &"forest"
+name_ko = "숲"
+order = 2
+main_types = Array[StringName]([&"bug", &"grass", &"poison"])
+sky_color = Color(0.56078434, 0.7882353, 0.65882355, 1)
+ground_color = Color(0.30980393, 0.56078434, 0.27058825, 1)
+encounters = Array[ExtResource("1_u1ffs")]([SubResource("Resource_dnuef"), SubResource("Resource_gt8sq"), SubResource("Resource_moq2w"), SubResource("Resource_f1ok5"), SubResource("Resource_st8aa"), SubResource("Resource_b5r2p"), SubResource("Resource_l6wc0"), SubResource("Resource_8r1u1"), SubResource("Resource_qlmkf"), SubResource("Resource_mlwhl"), SubResource("Resource_25iwk"), SubResource("Resource_3q2bd"), SubResource("Resource_jr4v6"), SubResource("Resource_pbbb6"), SubResource("Resource_t7gxe"), SubResource("Resource_sabf2"), SubResource("Resource_pebwl")])
+level_cap = 12
+encounter_interval = Vector2(45, 150)
+capture_fill = 0.95
+battle_ground = 3
+unlock_conditions = Array[Dictionary]([{
+"type": "player_level",
+"value": 3
+}])
