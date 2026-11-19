@@ -33,6 +33,7 @@ func progress(c: Dictionary) -> Dictionary:
 	var target := int(c.get("value", 0)) if c.get("type") != "region_unlocked" and c.get("type") != "species_caught" else 1
 	var current := 0
 	var label := ""
+	var label_bbcode := ""   # 색을 넣은 문구(RichTextLabel 용). 비어 있으면 label 그대로 (v0.90)
 	match c.get("type", ""):
 		"player_level":
 			current = PlayerState.level
@@ -52,11 +53,14 @@ func progress(c: Dictionary) -> Dictionary:
 			var r := GameData.get_region(StringName(c.value))
 			current = 1 if PlayerState.unlocked_regions.has(StringName(c.value)) else 0
 			label = "%s 해금" % (r.name_ko if r else str(c.value))
+			if r:
+				label_bbcode = "%s 해금" % UiUtil.region_bbcode(r)   # 대표 타입 색
 		_:
 			push_warning("알 수 없는 조건: %s" % c)
 			label = "?"
 			target = 1
-	return {"current": mini(current, target), "target": target, "label": label}
+	return {"current": mini(current, target), "target": target, "label": label,
+		"label_bbcode": label_bbcode if label_bbcode != "" else label}
 
 
 ## 그 타입을 가진(어느 슬롯이든) 포획 종 수

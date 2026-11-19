@@ -106,6 +106,7 @@ encounters = Array[ExtResource("1_tv6c7")]([SubResource("Resource_agr6p"), SubRe
 level_cap = 35
 encounter_interval = Vector2(240, 400)
 capture_fill = 0.75
+poke_ball_fill = 0.8
 item_tier = 2
 battle_ground = 2
 unlock_conditions = Array[Dictionary]([{

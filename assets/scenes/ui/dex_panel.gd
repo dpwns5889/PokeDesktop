@@ -1,6 +1,6 @@
 extends OverlayPanel
 ## 도감 패널. 151종 격자: 미발견 ?, 발견만 실루엣, 포획은 원래 모습. (기획서 4.7, 6.2)
-## 도감을 완성하면(v0.77) 제목 줄에 "색다름" 전환: 색이 다른 모습으로 잡은 종은 색이 다른 전투 모습, 못 잡은 종은 흐리게.
+## 도감을 완성하면(v0.77) 제목 줄에 "색이다른" 전환: 색이 다른 모습으로 잡은 종은 색이 다른 전투 모습, 못 잡은 종은 흐리게.
 
 const CELL := 34
 const ICON := 24   # v0.55: 오버월드 아이콘 1:1
@@ -22,7 +22,7 @@ func _panel_title() -> String:
 
 func _ready() -> void:
 	super()
-	_shiny_toggle = add_header_button("색다름", func() -> void:
+	_shiny_toggle = add_header_button("색이다른", func() -> void:
 		_shiny_view = not _shiny_view
 		refresh())
 	EventBus.pokemon_caught.connect(func(_i: Dictionary) -> void: _refresh_if_visible())
@@ -51,7 +51,7 @@ func refresh() -> void:
 	var all := GameData.all_species()
 	_shiny_toggle.visible = PlayerState.is_dex_complete()
 	_shiny_view = _shiny_view and _shiny_toggle.visible
-	_shiny_toggle.text = "일반" if _shiny_view else "색다름"
+	_shiny_toggle.text = "일반" if _shiny_view else "색이다른"
 	if _shiny_view:
 		_header.text = "색이 다른 %d / %d" % [PlayerState.dex_shiny_count(), all.size()]
 	else:

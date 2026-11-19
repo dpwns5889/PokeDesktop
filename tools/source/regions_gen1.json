@@ -45,7 +45,7 @@
 			]
 		},
 		{
-			"id": "power_plant", "capture_fill": 0.8, "item_tier": 2, "name_ko": "발전소", "order": 5, "main_types": ["electric"], "level_cap": 30, "sky": "#c9c58a", "ground": "#7a7a7a",
+			"id": "power_plant", "capture_fill": 0.8, "poke_ball_fill": 0.9, "item_tier": 2, "name_ko": "발전소", "order": 5, "main_types": ["electric"], "level_cap": 30, "sky": "#c9c58a", "ground": "#7a7a7a",
 			"interval": [200, 340], "battle_ground": 5,
 			"unlock": [{"type": "player_level", "value": 14}, {"type": "type_caught_count", "type_id": "electric", "value": 2}],
 			"encounters": [
@@ -54,7 +54,7 @@
 			]
 		},
 		{
-			"id": "volcano", "capture_fill": 0.75, "item_tier": 2, "name_ko": "화산", "order": 6, "main_types": ["fire"], "level_cap": 35, "sky": "#e0a07a", "ground": "#6b3b2e",
+			"id": "volcano", "capture_fill": 0.75, "poke_ball_fill": 0.8, "item_tier": 2, "name_ko": "화산", "order": 6, "main_types": ["fire"], "level_cap": 35, "sky": "#e0a07a", "ground": "#6b3b2e",
 			"interval": [240, 400], "battle_ground": 2,
 			"unlock": [{"type": "player_level", "value": 18}, {"type": "dex_caught_count", "value": 50}],
 			"encounters": [
@@ -64,7 +64,7 @@
 			]
 		},
 		{
-			"id": "ghost_tower", "capture_fill": 0.72, "item_tier": 3, "name_ko": "유령탑", "order": 7, "main_types": ["ghost", "psychic"], "level_cap": 38, "sky": "#7e6a9e", "ground": "#4b4060",
+			"id": "ghost_tower", "capture_fill": 0.72, "poke_ball_fill": 0.7, "item_tier": 3, "name_ko": "유령탑", "order": 7, "main_types": ["ghost", "psychic"], "level_cap": 38, "sky": "#7e6a9e", "ground": "#4b4060",
 			"interval": [280, 460], "battle_ground": 8,
 			"unlock": [{"type": "player_level", "value": 22}],
 			"encounters": [
@@ -74,7 +74,7 @@
 			]
 		},
 		{
-			"id": "snow_mountain", "capture_fill": 0.68, "item_tier": 3, "name_ko": "설산", "order": 8, "main_types": ["ice"], "level_cap": 45, "sky": "#cfe3f2", "ground": "#f2f6fa",
+			"id": "snow_mountain", "capture_fill": 0.68, "poke_ball_fill": 0.6, "item_tier": 3, "name_ko": "설산", "order": 8, "main_types": ["ice"], "level_cap": 45, "sky": "#cfe3f2", "ground": "#f2f6fa",
 			"interval": [320, 520], "battle_ground": 7,
 			"unlock": [{"type": "player_level", "value": 27}, {"type": "type_caught_count", "type_id": "water", "value": 10}],
 			"encounters": [
@@ -84,7 +84,7 @@
 			]
 		},
 		{
-			"id": "deep_cave", "capture_fill": 0.65, "item_tier": 3, "name_ko": "깊은 동굴", "order": 9, "main_types": ["rock", "ground"], "level_cap": 60, "sky": "#3b3f55", "ground": "#57505a",
+			"id": "deep_cave", "capture_fill": 0.65, "poke_ball_fill": 0.5, "item_tier": 3, "name_ko": "깊은 동굴", "order": 9, "main_types": ["rock", "ground"], "level_cap": 60, "sky": "#3b3f55", "ground": "#57505a",
 			"interval": [360, 580], "battle_ground": 4,
 			"unlock": [{"type": "player_level", "value": 32}, {"type": "dex_caught_count", "value": 100}],
 			"encounters": [

@@ -15,6 +15,9 @@ signal open_requested(panel_id: StringName)
 ## 패널이 덮는 영역 (기준 해상도). 메인 창(companion)의 레이아웃과 맞춘다.
 const AREA := Rect2(0, 18, 320, 163)   # 위 버튼 줄 18px, 아래 HUD 19px
 
+## 팝업(확인 창·포획 정보·원정 보상)의 확인 버튼 아래 여백 (v0.58 확인 창, v0.91 모든 팝업). 아래 HUD의 경험치 바와 닿지 않게
+const POPUP_BOTTOM_GAP := 18
+
 var content: VBoxContainer
 var _title_label: Label
 var _header_row: HBoxContainer
@@ -76,6 +79,16 @@ func close_panel() -> void:
 	if visible:
 		hide()
 		closed.emit()
+
+
+## 팝업 맨 아래(버튼 줄 다음)에 여백을 붙인다 (v0.91). 반환: 여백 Control
+func add_popup_bottom_gap(box: VBoxContainer, height: int = POPUP_BOTTOM_GAP) -> Control:
+	var gap := Control.new()
+	gap.name = "BottomGap"
+	gap.custom_minimum_size.y = height
+	gap.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	box.add_child(gap)
+	return gap
 
 
 ## 제목 줄(닫기 버튼 왼쪽)에 버튼을 추가한다.

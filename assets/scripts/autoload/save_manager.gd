@@ -6,7 +6,7 @@ extends Node
 ## - 자동 저장: 상태가 바뀌면 다음 프레임에 저장(여러 변경을 한 번에), 그리고 60초마다, 종료 직전.
 ## - 헤드리스(테스트) 실행에서는 자동으로 읽거나 쓰지 않는다 → 테스트가 실제 세이브를 건드리지 않는다.
 
-const SAVE_VERSION := 2
+const SAVE_VERSION := 3
 const SAVE_FILE := "save.json"
 const AUTOSAVE_INTERVAL_SEC := 60.0
 
@@ -128,6 +128,8 @@ func migrate(d: Dictionary) -> Dictionary:
 		push_warning("더 새로운 버전의 세이브(%d)입니다. 알 수 없는 항목은 무시됩니다." % v)
 	if v <= 1:
 		d = _migrate_v1_to_v2(d)
+	if v <= 2:
+		d = _migrate_v2_to_v3(d)
 	d["save_version"] = SAVE_VERSION
 	return d
 
@@ -144,6 +146,13 @@ static func _migrate_v1_to_v2(d: Dictionary) -> Dictionary:
 			var key := str(int(p.dex_id))
 			if dex.get(key) is Dictionary:
 				dex[key]["shiny"] = int(dex[key].get("shiny", 0)) + 1
+	return d
+
+
+## v2 → v3 (v0.92): 상점 계약 목록 shop_unlocks 추가 (없으면 빈 목록)
+static func _migrate_v2_to_v3(d: Dictionary) -> Dictionary:
+	if not d.get("shop_unlocks") is Array:
+		d["shop_unlocks"] = []
 	return d
 
 

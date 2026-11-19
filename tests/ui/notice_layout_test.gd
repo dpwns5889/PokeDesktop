@@ -42,6 +42,25 @@ func test_region_name_is_colored_by_main_type() -> void:
 	assert_bool(p._rich_box.visible).is_false()
 
 
+## v0.91: 모든 팝업의 확인 버튼 아래에 18px 여백 (경험치 바와 닿지 않게)
+func test_popups_keep_bottom_gap_above_hud() -> void:
+	var CaughtPanel := preload("res://assets/scenes/ui/caught_panel.gd")
+	var RewardPanel := preload("res://assets/scenes/ui/expedition_reward_panel.gd")
+	# 포획 정보 창만 내용이 많아 버튼을 조금 더 내렸다 (CaughtPanel.BOTTOM_GAP)
+	for cls in [ConfirmPanel, CaughtPanel, RewardPanel]:
+		var p: OverlayPanel = auto_free(cls.new())
+		add_child(p)
+		var gap := p.content.get_child(p.content.get_child_count() - 1)   # 맨 아래 = 여백
+		assert_str(String(gap.name)).override_failure_message(str(cls.resource_path)).is_equal("BottomGap")
+		var want := CaughtPanel.BOTTOM_GAP if cls == CaughtPanel else OverlayPanel.POPUP_BOTTOM_GAP
+		assert_float(gap.custom_minimum_size.y).is_equal(float(want))
+	assert_int(CaughtPanel.BOTTOM_GAP).is_less(OverlayPanel.POPUP_BOTTOM_GAP)
+	assert_int(CaughtPanel.BOTTOM_GAP).is_greater(0)   # 그래도 경험치 바와 닿지는 않는다
+	# 진화 연출: 다른 팝업과 버튼 바닥 높이가 같다 (패널은 안쪽 아래 여백 2px + 18px, 진화 연출은 그 합 20px)
+	var EvoOverlay := preload("res://assets/scenes/ui/evolution_overlay.gd")
+	assert_float(EvoOverlay.AREA.size.y - (EvoOverlay.BUTTON_Y + EvoOverlay.BUTTON_SIZE.y)).is_equal(float(OverlayPanel.POPUP_BOTTOM_GAP + 2))
+
+
 func _assert_centered(p: ConfirmPanel) -> void:
 	assert_int(p._message.horizontal_alignment).is_equal(HORIZONTAL_ALIGNMENT_CENTER)
 	assert_int(p._message.vertical_alignment).is_equal(VERTICAL_ALIGNMENT_CENTER)
@@ -51,11 +70,13 @@ func _assert_centered(p: ConfirmPanel) -> void:
 func test_shop_mode_buttons() -> void:
 	var p = auto_free(ShopPanel.new())
 	add_child(p)
-	assert_bool(p._buy_tab.button_pressed).is_true()
+	assert_int(p._mode.selected).is_equal(p.Mode.BUY)   # 처음엔 구매
 	assert_bool(p._selling()).is_false()
-	p._sell_tab.button_pressed = true
-	assert_bool(p._buy_tab.button_pressed).is_false()
+	p._set_mode(p.Mode.SELL)
 	assert_bool(p._selling()).is_true()
+	p._set_mode(p.Mode.UPGRADE)
+	assert_bool(p._selling()).is_false()
+	assert_bool(p._upgrading()).is_true()
 
 
 ## v0.66: 팔면 "팔았다" 문구 없이 구매와 같은 소리 (문구가 판매 버튼을 밀어내 잘리게 했다)
@@ -66,7 +87,7 @@ func test_sell_plays_buy_sound_without_message() -> void:
 	var p = auto_free(ShopPanel.new())
 	add_child(p)
 	p.open_panel()
-	p._sell_tab.button_pressed = true
+	p._set_mode(p.Mode.SELL)
 	p._list.select(p._ids.find(&"great_ball"))
 	p._update_order()
 	var snd: AudioStreamPlayer = AudioManager._players[&"buy_item"]
@@ -148,4 +169,78 @@ func test_storage_party_first() -> void:
 		sp._sort.select(sort)
 		sp.refresh()
 		assert_array(sp._uids).contains_exactly([mid.uid, low.uid, top.uid])
+	PlayerState.load_save_dict(snap)
+
+
+## v0.93: 업그레이드 모드에는 보관함 확장과 상점 계약이 있고, 구매 모드 목록에서는 빠진다
+func test_shop_upgrade_mode_lists_storage_and_contracts() -> void:
+	var snap := PlayerState.to_save_dict()
+	PlayerState.reset()
+	PlayerState.unlock_region(&"cave")
+	var p = auto_free(ShopPanel.new())
+	add_child(p)
+	p.open_panel()
+	var contract := StringName(ShopPanel.CONTRACT_PREFIX + "great_ball_discount")
+	# 구매: 아이템만
+	assert_bool(p._ids.has(ShopPanel.STORAGE_ROW)).is_false()
+	assert_bool(p._ids.has(contract)).is_false()
+	# 업그레이드: 보관함 확장 → 슈퍼볼 계약 (하이퍼볼 계약은 슈퍼볼 계약 뒤)
+	p._set_mode(p.Mode.UPGRADE)
+	assert_array(p._ids).contains_exactly([ShopPanel.STORAGE_ROW, contract])
+	assert_str(p._button.text).is_equal("확장")   # 첫 줄 = 보관함 확장
+	p._list.select(1)
+	p._update_order()
+	assert_str(p._button.text).is_equal("계약")
+	PlayerState.currency = 1_000_000
+	p._on_order()   # 슈퍼볼 계약을 맺는다
+	assert_bool(ShopManager.has_contract(&"great_ball_discount")).is_true()
+	assert_array(p._ids).contains_exactly([ShopPanel.STORAGE_ROW, StringName(ShopPanel.CONTRACT_PREFIX + "ultra_ball_sale")])
+	PlayerState.load_save_dict(snap)
+
+
+## v0.93: 소지금은 제목 줄에 "소지금: ~원" 형식, 모드 드롭다운은 왼쪽 열 맨 위
+func test_shop_money_in_header_and_mode_in_left_column() -> void:
+	var snap := PlayerState.to_save_dict()
+	PlayerState.reset()
+	PlayerState.currency = 1234
+	var p = auto_free(ShopPanel.new())
+	add_child(p)
+	p.open_panel()
+	assert_str(p._money.text).is_equal("소지금: 1,234원")
+	assert_object(p._money.get_parent()).is_same(p._header_row)
+	assert_object(p._mode.get_parent()).is_same(p._list.get_parent())   # 왼쪽 열(목록과 같은 열)
+	assert_int(p._mode.get_index()).is_equal(0)   # 맨 위
+	PlayerState.load_save_dict(snap)
+
+
+## v0.91: 포획 정보 창은 한 줄씩 — 새로 등록! / 이름·성별·레벨·타입 / 특성 1·2·3 (능력치는 뺌)
+func test_caught_panel_rows_top_to_bottom() -> void:
+	var snap := PlayerState.to_save_dict()
+	PlayerState.reset()
+	var CaughtPanel := preload("res://assets/scenes/ui/caught_panel.gd")
+	var p = auto_free(CaughtPanel.new())
+	add_child(p)
+	var inst := PlayerState.add_caught({&"dex_id": 6, &"level": 12, &"gender": &"male", &"region": &"grassland"})   # 리자몽: 불꽃·비행
+	var ids: Array[String] = []
+	for t in GameData.all_traits():
+		if ids.size() < 3 and (t.tier == &"normal" or t.tier == &"rare"):
+			ids.append(String(t.id))
+	inst["traits"] = ids
+	p.show_pokemon(inst, true)
+	# 위에서 아래로: 새로 등록! → (이름·타입 한 줄) → 특성들, 능력치 칸 없음
+	var info: Node = p._new_label.get_parent()
+	assert_int(info.get_child_count()).is_equal(3)
+	assert_int(p._new_label.get_index()).is_equal(0)
+	assert_int(p._traits.get_index()).is_equal(2)
+	var line: Node = info.get_child(1)
+	assert_object(p._name.get_parent()).is_same(line)   # 이름과 타입이 같은 줄
+	assert_object(p._status.get_parent()).is_same(line)
+	assert_bool(p._traits is VBoxContainer).is_true()   # 특성은 세로로 한 줄씩
+	assert_int(p._traits.get_child_count()).is_equal(3)
+	# 특성 상자는 정보 칸(214)보다 좁다 (v0.91)
+	for b in p._traits.get_children():
+		assert_float(b.custom_minimum_size.x).is_equal(CaughtPanel.TRAIT_BADGE_WIDTH)
+	assert_float(CaughtPanel.TRAIT_BADGE_WIDTH).is_less(float(CaughtPanel.INFO_WIDTH))
+	# 타입 1, 타입 2 가 같은 줄
+	assert_int(p._status.get_children().filter(func(c: Node) -> bool: return c is TypeBadge).size()).is_equal(2)
 	PlayerState.load_save_dict(snap)

@@ -129,14 +129,17 @@ func begin_battle() -> Dictionary:
 		species.is_legendary or species.is_mythical, _ball_modifier(ball),
 		entry_bonus(), float(current.get(&"difficulty_bonus", 0.0)))
 	params[&"fill"] = float(params[&"fill"]) * float(entry_traits().fill_mult)   # 긴장감 (4.6)
-	params[&"fill"] = float(params[&"fill"]) * region_capture_fill()   # 후반 지역일수록 덜 참 (v0.63)
+	params[&"fill"] = float(params[&"fill"]) * region_capture_fill(ball)   # 후반 지역일수록 덜 참 (v0.63), 몬스터볼은 더 (v0.92)
 	return params
 
 
-## 지금 지역의 게이지 배율 (RegionData.capture_fill, v0.63). 지역이 없으면 1.0
-func region_capture_fill() -> float:
+## 지금 지역의 게이지 배율 (RegionData.capture_fill, v0.63). 지역이 없으면 1.0.
+## ball 이 몬스터볼이면 그 지역의 몬스터볼 추가 배율(poke_ball_fill, v0.92)도 곱한다 (슈퍼볼·하이퍼볼은 그대로)
+func region_capture_fill(ball: StringName = &"") -> float:
 	var region := GameData.get_region(PlayerState.current_region)
-	return region.capture_fill if region else 1.0
+	if region == null:
+		return 1.0
+	return region.capture_fill * (region.poke_ball_fill if ball == PlayerState.INFINITE_BALL else 1.0)
 
 
 ## 엔트리의 전투 특성을 합친 효과 (BattleTraits.collect, 기획서 4.6)
@@ -168,9 +171,9 @@ func active_buffs() -> Array[Dictionary]:
 	var el := PlayerState.item_seconds_left("lucky_egg", now)   # 행복의 알 (v0.61)
 	if el > 0:
 		out.append({"text": "행복의 알 %d분" % ceili(el / 60.0), "good": true})
-	var hl := PlayerState.item_seconds_left("sweet_honey", now)   # 달콤한꿀 (v0.87)
+	var hl := PlayerState.item_seconds_left("sweet_honey", now)   # 향긋한 허브 (v0.87)
 	if hl > 0:
-		out.append({"text": "달콤한꿀 %d분" % ceili(hl / 60.0), "good": true})
+		out.append({"text": "향긋한 허브 %d분" % ceili(hl / 60.0), "good": true})
 	return out
 
 
@@ -181,7 +184,7 @@ func finish_battle(success: bool) -> void:
 	_finish(_now(), success)
 
 
-## 달콤한꿀 사용 (기획서 4.11, v0.87): 가방이 부른다. 처음 켤 때만 남은 대기 시간을 ×0.5 (연장일 때는 다시 줄이지 않는다).
+## 향긋한 허브 사용 (기획서 4.11, v0.87): 가방이 부른다. 처음 켤 때만 남은 대기 시간을 ×0.5 (연장일 때는 다시 줄이지 않는다).
 ## 반환: "" = 성공, 아니면 이유
 func use_sweet_honey(now: float) -> String:
 	var was_active := PlayerState.item_seconds_left("sweet_honey", int(now)) > 0
@@ -228,7 +231,7 @@ func _now() -> float:
 func _schedule_next(now: float) -> void:
 	var interval := Formulas.roll_encounter_interval(rng, GameData.get_region(PlayerState.current_region))
 	interval *= float(entry_traits().interval_mult)   # 악취 (4.6)
-	interval *= PlayerState.interval_multiplier(int(now))   # 달콤한꿀 (4.11, v0.87)
+	interval *= PlayerState.interval_multiplier(int(now))   # 향긋한 허브 (4.11, v0.87)
 	if fast_mode:
 		interval = FAST_INTERVAL_SEC + rng.randf_range(-FAST_JITTER_SEC, FAST_JITTER_SEC)
 	_deadline = now + interval
@@ -241,7 +244,7 @@ func _on_region_changed(_id: StringName) -> void:
 		return
 	var now := _now()
 	var limit := Formulas.encounter_interval_range(GameData.get_region(PlayerState.current_region)).y \
-		* PlayerState.interval_multiplier(int(now))   # 달콤한꿀 (v0.87)
+		* PlayerState.interval_multiplier(int(now))   # 향긋한 허브 (v0.87)
 	match state:
 		State.WAITING:
 			if _deadline - now > limit:

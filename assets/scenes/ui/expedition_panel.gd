@@ -231,7 +231,7 @@ func _show_list_detail() -> void:
 		if not ExpeditionManager.is_unlocked(x):
 			for c in x.unlock_conditions:
 				var p := UnlockManager.progress(c)
-				lines.append("조건: %s (%d/%d)" % [p.label, p.current, p.target])
+				lines.append("조건: %s (%d/%d)" % [p.label_bbcode, p.current, p.target])   # 지역 이름은 대표 타입 색 (v0.90)
 			_action.disabled = true
 			_action.text = "잠김"
 		elif PlayerState.expeditions.size() >= ExpeditionManager.max_slots():

@@ -12,7 +12,6 @@ var _ok: Button
 var _button_row: HBoxContainer
 ## 가운데 정렬일 때 버튼 아래 여백 → 버튼이 창 맨 아래보다 조금 위에 온다 (v0.58)
 var _bottom_gap: Control
-const CENTERED_BOTTOM_GAP := 18
 var _cancel: Button
 ## 지금 알림(notify)으로 떠 있는지
 var is_notice := false
@@ -53,10 +52,7 @@ func _build_content(box: VBoxContainer) -> void:
 	_ok.focus_mode = Control.FOCUS_NONE
 	_ok.pressed.connect(_confirm)
 	row.add_child(_ok)
-	_bottom_gap = Control.new()
-	_bottom_gap.custom_minimum_size.y = CENTERED_BOTTOM_GAP
-	_bottom_gap.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	box.add_child(_bottom_gap)
+	_bottom_gap = add_popup_bottom_gap(box)
 
 
 ## bbcode = true 면 message 를 BBCode 로 읽는다(색 넣기, v0.89). 이때 message 에 [ ] 가 있으면 태그로 읽히니 주의

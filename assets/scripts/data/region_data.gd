@@ -20,6 +20,8 @@ extends Resource
 @export var encounter_interval: Vector2 = Vector2.ZERO
 ## 과녁 한 번에 차는 게이지 배율 (v0.63). 후반 지역일수록 작아 상위 볼·엔트리가 필요하게 (1.0 = 기본)
 @export var capture_fill: float = 1.0
+## 몬스터볼에만 곱하는 추가 배율 (v0.92, 기획서 4.3): 발전소부터 뒤로 갈수록 몬스터볼로 잡기 어렵게. 슈퍼볼·하이퍼볼에는 적용 안 함 (1.0 = 그대로)
+@export var poke_ball_fill: float = 1.0
 ## 아이템 인카운터 등급 1~3 (v0.84): 높을수록 비싼 귀중품이 잘 나온다 (Formulas.ITEM_ENCOUNTER_TABLES)
 @export var item_tier: int = 1
 ## 전투 바닥 번호 (assets/generated/ui/ground.png 의 칸, tools/import_battle_ground.gd 참고) (v0.35)

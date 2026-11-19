@@ -1,5 +1,5 @@
 extends GdUnitTestSuite
-## 달콤한꿀 (기획서 4.2, 4.11, v0.87): 상점 Lv10부터 2,000원, 쓰면 30분 동안 인카운터 간격 ×0.5
+## 향긋한 허브 (기획서 4.2, 4.11, v0.87): 상점 Lv10부터 2,000원, 쓰면 30분 동안 인카운터 간격 ×0.5
 ## 아이템 인카운터 수량(v0.88)도 여기서 본다.
 
 const Manager := preload("res://assets/scripts/autoload/encounter_manager.gd")
@@ -25,7 +25,7 @@ func after_test() -> void:
 func test_item_is_shop_only_2000_from_lv10() -> void:
 	var honey := GameData.get_item(&"sweet_honey")
 	assert_object(honey).is_not_null()
-	assert_str(honey.name_ko).is_equal("달콤한꿀")
+	assert_str(honey.name_ko).is_equal("향긋한 허브")
 	assert_str(String(honey.category)).is_equal("boost")
 	assert_int(honey.buy_price).is_equal(2000)
 	assert_int(honey.sell_price).is_equal(600)
@@ -108,7 +108,7 @@ func test_saved_and_shown_as_buff() -> void:
 	PlayerState.load_save_dict(d)
 	assert_int(PlayerState.item_seconds_left("sweet_honey", now)).is_equal(30 * 60)
 	var texts := EncounterManager.active_buffs().map(func(b: Dictionary) -> String: return b.text)
-	assert_array(texts).contains(["달콤한꿀 30분"])
+	assert_array(texts).contains(["향긋한 허브 30분"])
 
 
 ## 아이템 인카운터 수량 (v0.88): 슈퍼볼은 1~3개, 나머지는 1개

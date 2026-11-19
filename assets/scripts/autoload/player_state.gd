@@ -37,6 +37,8 @@ var entries: Array[String] = []
 ## 쓰고 있는 향로 (v0.41). {"incense": {"type": "fire", "end_at": unix}, "shiny_incense": {"end_at": unix}}
 ## 끝나는 시각은 실제 시각 기준(앱이 꺼져 있어도 흐른다).
 var active_items: Dictionary = {}
+## 상점 계약(영구 해금) id 목록 (v0.92, 기획서 4.12): "great_ball_discount", "ultra_ball_sale"
+var shop_unlocks: Array[String] = []
 ## 도감 완성(151종 포획) 시각 (v0.77). 0 = 아직. 완성 알림을 확인했으면 dex_complete_noticed (왕관 표시)
 var dex_completed_at: int = 0
 var dex_complete_noticed := false
@@ -63,6 +65,7 @@ func reset() -> void:
 	expeditions = []
 	entries = []
 	active_items = {}
+	shop_unlocks = []
 	dex_completed_at = 0
 	dex_complete_noticed = false
 
@@ -89,6 +92,18 @@ func add_exp(amount: int, now: int = -1) -> void:
 	if level >= MAX_PLAYER_LEVEL:
 		experience = 0
 	changed.emit()
+
+
+## 개발용(우클릭 개발 메뉴, 기획서 4.2): 플레이어 레벨을 1 올린다. 경험치는 0으로, 레벨업 시그널은 그대로 보낸다
+## (지역 해금·알림이 평소 레벨업과 같게 동작). 최대 레벨이면 false
+func debug_level_up() -> bool:
+	if level >= MAX_PLAYER_LEVEL:
+		return false
+	level += 1
+	experience = 0
+	EventBus.player_leveled_up.emit(level)
+	changed.emit()
+	return true
 
 
 # ---------------------------------------------------------------- 지역 (기획서 4.4)
@@ -347,15 +362,15 @@ func player_exp_multiplier(now: int) -> float:
 	return _timed_item_mult(&"lucky_egg", "player_exp_mult", 1.5, now)
 
 
-# ---------------------------------------------------------------- 달콤한꿀 (기획서 4.11, v0.87)
+# ---------------------------------------------------------------- 향긋한 허브 (기획서 4.11, v0.87)
 
-## 달콤한꿀 사용: 30분 동안 인카운터 간격 ×0.5. 쓰고 있는 중이면 30분 연장.
+## 향긋한 허브 사용: 30분 동안 인카운터 간격 ×0.5. 쓰고 있는 중이면 30분 연장.
 ## 남은 대기 시간 줄이기는 EncounterManager.use_sweet_honey 가 한다. 반환: "" = 성공, 아니면 이유
 func use_sweet_honey(now: int) -> String:
-	return _use_timed_item(&"sweet_honey", 30, "달콤한꿀이 없습니다.", now)
+	return _use_timed_item(&"sweet_honey", 30, "향긋한 허브가 없습니다.", now)
 
 
-## 인카운터 간격 배율 (달콤한꿀 켜져 있으면 0.5, 아니면 1.0)
+## 인카운터 간격 배율 (향긋한 허브 켜져 있으면 0.5, 아니면 1.0)
 func interval_multiplier(now: int) -> float:
 	return _timed_item_mult(&"sweet_honey", "interval_mult", 0.5, now)
 
@@ -520,6 +535,7 @@ func to_save_dict() -> Dictionary:
 		"expeditions": expeditions.duplicate(true),
 		"entries": entries.duplicate(),
 		"active_items": active_items.duplicate(true),
+		"shop_unlocks": shop_unlocks.duplicate(),
 		"dex_completed_at": dex_completed_at,
 		"dex_complete_noticed": dex_complete_noticed,
 	}
@@ -596,6 +612,14 @@ func load_save_dict(d: Dictionary) -> void:
 		if not x.get("mods") is Dictionary:
 			x["mods"] = {}
 		expeditions.append(x)
+
+	# 상점 계약 (v0.92): 알려진 id 만, 중복 없이
+	var raw_unlocks: Variant = d.get("shop_unlocks", [])
+	if raw_unlocks is Array:
+		for u in raw_unlocks:
+			var key := str(u)
+			if ShopManager.CONTRACTS.has(StringName(key)) and not shop_unlocks.has(key):
+				shop_unlocks.append(key)
 
 	# 향로·행복의 알: 형식이 맞는 것만 (끝난 것은 그대로 두어도 효과가 없다)
 	var raw_active: Variant = d.get("active_items", {})

@@ -37,6 +37,22 @@ func test_level_capped_at_40() -> void:
 	assert_int(PlayerState.level).is_equal(40)
 
 
+## 개발용 레벨 +1: 레벨업 시그널을 평소처럼 보내고 경험치는 0, 최대 레벨에서는 거절
+func test_debug_level_up() -> void:
+	var got := []
+	var cb := func(lv: int) -> void: got.append(lv)
+	EventBus.player_leveled_up.connect(cb)
+	PlayerState.experience = 7
+	assert_bool(PlayerState.debug_level_up()).is_true()
+	EventBus.player_leveled_up.disconnect(cb)
+	assert_int(PlayerState.level).is_equal(2)
+	assert_int(PlayerState.experience).is_equal(0)
+	assert_array(got).contains_exactly([2])
+	PlayerState.level = PlayerState.MAX_PLAYER_LEVEL
+	assert_bool(PlayerState.debug_level_up()).is_false()
+	assert_int(PlayerState.level).is_equal(PlayerState.MAX_PLAYER_LEVEL)
+
+
 func test_catch_updates_dex_and_gives_exp() -> void:
 	PlayerState.level = 30   # 레벨업이 끼지 않도록 필요 경험치가 큰 레벨에서 비교
 	PlayerState.add_caught(_enc(16, 4))

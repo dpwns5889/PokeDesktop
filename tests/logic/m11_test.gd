@@ -264,15 +264,16 @@ func test_caught_panel_shows_until_confirmed() -> void:
 	assert_bool(panel._header_row.get_node("Close").visible).is_false()   # 닫기 없음, 확인으로만
 	assert_str(panel._name.text).contains("피카츄")
 	assert_str(panel._name.text).contains("Lv7")
-	var tags: Array = panel._status.get_children().filter(func(c): return c is Label).map(func(c): return c.text)
-	assert_array(tags).contains(["색이 다른"])
-	# "새로 등록!" 은 이름 바로 위 (v0.35)
+	# 색이 다르면 "색이 다른" 글자 대신 이름이 노란색 (v0.91)
+	assert_str(panel._name.text).contains("[color=#%s]피카츄" % panel.NEW_COLOR.to_html(false))
+	assert_bool(panel._status.get_children().any(func(c): return c is Label)).is_false()
+	# "새로 등록!" 은 이름 바로 위 한 줄 (v0.35, v0.91)
 	assert_bool(panel._new_label.visible).is_true()
-	assert_int(panel._new_label.get_index()).is_equal(panel._name.get_index() - 1)
+	assert_int(panel._new_label.get_index()).is_equal(panel._name.get_parent().get_index() - 1)   # 이름 줄 바로 위
 	panel.show_pokemon(inst, false)
 	assert_bool(panel._new_label.visible).is_false()
 	assert_object(panel._sprite.texture).is_not_null()
-	assert_str(panel._stats[&"hp"].text).starts_with("HP ")
+	assert_bool("_stats" in panel).is_false()   # v0.91: 능력치는 이 창에서 뺐다
 	var ok: Button = panel.content.get_child(1).get_child(0)
 	assert_str(ok.text).is_equal("확인")
 	ok.pressed.emit()

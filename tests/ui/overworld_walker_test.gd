@@ -116,3 +116,23 @@ func test_walks_tile_by_tile() -> void:
 				stops += 1
 				last_stop = w.foot_position()
 		assert_int(stops).is_greater(3)
+
+
+## v0.91: 저장 초기화(game_reset)하면 엔트리 상자와 걸어다니는 포켓몬도 사라진다 (이전에는 그대로 남았다)
+func test_game_reset_clears_walkers_and_entry_icons() -> void:
+	var snap := PlayerState.to_save_dict()
+	PlayerState.reset()
+	var a := PlayerState.add_caught({&"dex_id": 25, &"level": 5, &"gender": &"male", &"region": &"grassland"})
+	PlayerState.entries = [a.uid] as Array[String]
+	var main: Node = auto_free((load("res://assets/scenes/main/companion.tscn") as PackedScene).instantiate())
+	add_child(main)
+	await get_tree().process_frame
+	main._refresh_entry_widgets()
+	assert_int(main._walkers.get_child_count()).is_equal(1)
+	assert_int(main._entry_icons.get_child_count()).is_equal(1)
+	PlayerState.reset()   # SaveManager.reset_save 와 같은 순서: 상태를 비우고 game_reset
+	EventBus.game_reset.emit()
+	await get_tree().process_frame
+	assert_int(main._walkers.get_child_count()).is_equal(0)
+	assert_int(main._entry_icons.get_child_count()).is_equal(0)
+	PlayerState.load_save_dict(snap)

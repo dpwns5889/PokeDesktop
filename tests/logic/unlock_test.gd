@@ -48,6 +48,16 @@ func test_progress_reports_current_and_target() -> void:
 	assert_str(p.label).contains("10")
 
 
+## v0.90: 원정 설명의 잠금 조건은 지역 이름을 대표 타입 색으로 (다른 조건은 label 그대로)
+func test_region_condition_label_bbcode_is_colored() -> void:
+	var p := UnlockManager.progress({"type": "region_unlocked", "value": "volcano"})
+	assert_str(p.label).is_equal("화산 해금")
+	assert_str(p.label_bbcode).is_equal("%s 해금" % UiUtil.region_bbcode(GameData.get_region(&"volcano")))
+	assert_str(p.label_bbcode).contains("[color=#")
+	var q := UnlockManager.progress({"type": "dex_caught_count", "value": 10})
+	assert_str(q.label_bbcode).is_equal(q.label)
+
+
 func test_forest_unlocks_at_player_level_3() -> void:
 	var unlocked: Array = []
 	var cb := func(id: StringName) -> void: unlocked.append(id)

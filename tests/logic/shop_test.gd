@@ -20,7 +20,7 @@ func test_v01_items_and_prices() -> void:
 	var ids := GameData.all_items().filter(func(i: ItemData) -> bool: return i.category != GameData.CAPSULE_TEMPLATE) \
 		.map(func(i: ItemData) -> String: return String(i.id))   # 특성 캡슐(특성마다 하나, v0.79)은 trait_capsule_test
 	assert_array(ids).contains_exactly(["poke_ball", "great_ball", "ultra_ball", "exp_candy_s", "exp_candy_m",
-		"fire_stone", "water_stone", "thunder_stone", "leaf_stone", "moon_stone", "incense", "shiny_incense", "sweet_honey", "lucky_egg",
+		"fire_stone", "water_stone", "thunder_stone", "leaf_stone", "moon_stone", "incense", "shiny_incense", "lucky_egg", "sweet_honey",
 		"forget_berry", "pretty_feather", "pearl", "stardust", "nugget", "star_piece", "big_nugget"])
 	# 금구슬: 판매 전용 (픽업 특성, v0.28)
 	var nugget := GameData.get_item(&"nugget")
@@ -28,13 +28,13 @@ func test_v01_items_and_prices() -> void:
 	assert_int(nugget.sell_price).is_equal(2000)
 	var great := GameData.get_item(&"great_ball")
 	assert_int(great.buy_price).is_equal(500)
-	assert_int(great.sell_price).is_equal(250)
+	assert_int(great.sell_price).is_equal(150)   # v0.92: 250 → 150 (계약 뒤 구매가 200원보다 낮게)
 	assert_float(great.catch_modifier()).is_equal(1.5)
 	assert_float(GameData.get_item(&"ultra_ball").catch_modifier()).is_equal(2.0)
 	# 경험사탕 S 는 v0.82부터 상점에서 안 팖 (원정·박사에게서만)
 	assert_bool(GameData.get_item(&"exp_candy_s").can_buy()).is_false()
-	# 원정 전용 = 상점에서 안 팖
-	assert_bool(GameData.get_item(&"ultra_ball").can_buy()).is_false()
+	# 하이퍼볼은 계약 전에는 상점에 안 보인다 (v0.92: 하이퍼볼 취급 계약 뒤 1,000원), 경험사탕 M 은 원정·박사 전용
+	assert_bool(ShopManager.is_on_sale(GameData.get_item(&"ultra_ball"))).is_false()
 	assert_bool(GameData.get_item(&"exp_candy_m").can_buy()).is_false()
 	assert_bool(GameData.get_item(&"poke_ball").can_sell()).is_false()
 	# 진화의 돌: 상점에서 팔지 않고(v0.42) 원정에서 얻는다 — 다섯 가지 모두 어떤 원정 보상에 있다
@@ -53,7 +53,7 @@ func test_v01_items_and_prices() -> void:
 
 
 ## 아이템 인카운터 드롭표 (v0.84, v0.88): 모든 아이템이 있고 귀중품은 판매 전용, 가중치 총합 100,
-## 등급이 높을수록 평균 판매가(수량 평균 반영)가 높고 기획서 4.2 값(466 / 850 / 1,427원)과 맞는다
+## 등급이 높을수록 평균 판매가(수량 평균 반영)가 높고 기획서 4.2 값(446 / 830 / 1,417원)과 맞는다
 func test_item_encounter_tables() -> void:
 	var avg := []
 	for tier in [1, 2, 3]:
@@ -70,9 +70,9 @@ func test_item_encounter_tables() -> void:
 		assert_int(weight).override_failure_message("등급 %d 가중치 총합" % tier).is_equal(100)
 		avg.append(total / weight)
 	assert_bool(avg[0] < avg[1] and avg[1] < avg[2]).is_true()
-	assert_float(avg[0]).is_between(460.0, 475.0)
-	assert_float(avg[1]).is_between(845.0, 860.0)
-	assert_float(avg[2]).is_between(1420.0, 1435.0)
+	assert_float(avg[0]).is_between(440.0, 455.0)   # v0.92: 슈퍼볼 판매가 150원
+	assert_float(avg[1]).is_between(825.0, 840.0)
+	assert_float(avg[2]).is_between(1410.0, 1425.0)
 	for r in GameData.all_regions():
 		assert_int(r.item_tier).override_failure_message(String(r.id)).is_between(1, 3)
 

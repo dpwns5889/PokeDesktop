@@ -5,7 +5,7 @@ extends Control
 ## - 위 버튼 줄 왼쪽: 도감·보관함·지역·원정·가방·상점 → 장면을 덮는 패널(OverlayPanel). 별도 OS 창은 쓰지 않는다.
 ## - 위 버튼 줄 오른쪽: 설정(톱니바퀴, 창·소리·개발용) / 종료(X)
 ## - 배경 드래그 이동, Ctrl+휠 배율 (M1)
-## - 우클릭 메뉴: 개발(디버그) 빌드에서만 — 지금 인카운터, 돈 +10,000원, 저장 초기화
+## - 우클릭 메뉴: 개발(디버그) 빌드에서만 — 지금 인카운터, 돈 +10,000원, 레벨 +1, 저장 초기화
 ## - 인카운터: 풀숲 흔들림 → 포켓몬 등장 → 클릭하면 전투 → 결과 (M3)
 ## - 풀숲 위 말풍선(v0.33): 대기 중 ". .. ..." 반복, 인카운터가 나면 "!" 가 2배로 확 커지며 나타남,
 ##   타이머가 멈추면(선택한 볼이 없음) "?" (v0.34)
@@ -81,11 +81,11 @@ const BUFF_GOOD := Color(0.62, 0.85, 1.0)
 const BUFF_BAD := Color(1.0, 0.55, 0.5)
 const TITLE_RIGHT := 312.0
 ## 도감 완성 알림 문구 (v0.77)
-const DEX_COMPLETE_TEXT := "관동 지방의 포켓몬 151종을 모두 잡았다!\n\n이제 색이 다른 포켓몬이 더 자주 나타난다. (1/512 → 1/128)\n도감에서 색이 다른 포켓몬 기록을 볼 수 있다."
+const DEX_COMPLETE_TEXT := "관동 지방의 포켓몬 151종을 모두 잡았다!\n\n이제 색이 다른 포켓몬이 [color=#ffd959]더 자주 나타난다[/color].\n도감에서 색이 다른 포켓몬 기록을 볼 수 있다."
 const CROWN_COLOR := Color(1.0, 0.82, 0.25)
 ## 아이템 인카운터 아이콘 크기 (24px 아이콘 2배, v0.84)
-const FOUND_ICON_PX := 48.0
-enum DevMenu { ENCOUNTER, MONEY, RESET_SAVE }
+const FOUND_ICON_PX := 24.0   # 아이템 아이콘 기본 크기 (v0.91, 이전 2배 48)
+enum DevMenu { ENCOUNTER, MONEY, LEVEL_UP, RESET_SAVE }
 
 var _dev_menu: PopupMenu        # 개발용 우클릭 메뉴 (디버그 빌드만)
 var _crown: Control             # 도감 완성 왕관 (v0.77)
@@ -408,6 +408,7 @@ func _on_game_reset() -> void:
 	_title.text = "저장을 초기화했다"
 	_clear_notices()
 	_set_walkers_watching(false)
+	_refresh_entry_widgets()   # 엔트리가 비었으니 엔트리 상자·걸어다니는 포켓몬도 지운다 (v0.91)
 	_update_hud()
 
 
@@ -465,7 +466,7 @@ func _show_unlock_notice() -> void:
 		return   # 포획 정보 창을 확인한 뒤
 	if dex_due:
 		_confirm.notify("도감 완성!", DEX_COMPLETE_TEXT, func() -> void:
-			PlayerState.mark_dex_complete_noticed())
+			PlayerState.mark_dex_complete_noticed(), true)   # BBCode: "더 자주 나타난다"만 노란색 (v0.90)
 		AudioManager.play(&"region_unlocked")
 		return
 	_confirm.notify("새 지역 해금", "새로운 지역이 해금되었다!\n%s\n\n지역 버튼에서 이동할 수 있다." % ", ".join(_unlock_names),
@@ -1246,6 +1247,7 @@ func _build_dev_menu() -> void:
 	_dev_menu.add_separator("개발용")
 	_dev_menu.add_item("지금 인카운터", DevMenu.ENCOUNTER)
 	_dev_menu.add_item("돈 +10,000원", DevMenu.MONEY)
+	_dev_menu.add_item("레벨 +1", DevMenu.LEVEL_UP)
 	_dev_menu.add_item("저장 초기화...", DevMenu.RESET_SAVE)
 	_dev_menu.id_pressed.connect(_on_dev_menu)
 	add_child(_dev_menu)
@@ -1258,6 +1260,8 @@ func _on_dev_menu(id: int) -> void:
 			EncounterManager.trigger_now()
 		DevMenu.MONEY:
 			PlayerState.add_currency(10000)
+		DevMenu.LEVEL_UP:
+			PlayerState.debug_level_up()
 		DevMenu.RESET_SAVE:
 			_confirm.ask("저장 초기화 (개발용)",
 				"저장된 진행을 모두 지웁니다.\n(레벨, 도감, 보관함, 아이템, 재화)\n설정(창 크기·소리 등)은 유지됩니다.\n되돌릴 수 없습니다. 계속할까요?",

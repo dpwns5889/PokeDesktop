@@ -86,3 +86,10 @@ func test_storage_filter_status_and_types() -> void:
 	assert_bool(StoragePanel.matches_filter(water, shiny_traits, no_types)).is_false()
 	assert_bool(StoragePanel.matches_filter(water, none, fire_or_water)).is_true()   # 타입끼리 또는
 	assert_bool(StoragePanel.matches_filter(fire_shiny, shiny_traits, grass)).is_false()   # 상태 그리고 타입
+
+
+## v0.90: 도감 완성 팝업 문구는 분수 표시 없이, "더 자주 나타난다"만 노란색(BBCode)
+func test_popup_text_has_no_fraction_and_yellow_highlight() -> void:
+	var text: String = preload("res://assets/scenes/main/companion.gd").DEX_COMPLETE_TEXT
+	assert_bool(text.contains("1/512") or text.contains("1/128")).is_false()
+	assert_str(text).contains("[color=#ffd959]더 자주 나타난다[/color]")

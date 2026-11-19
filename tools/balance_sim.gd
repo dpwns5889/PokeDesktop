@@ -21,7 +21,7 @@ extends Node
 ## - 진화: 레벨 진화는 모두 수락, 진화의 돌은 새 종이 나오면 사용(v0.42: 돌은 원정에서만 얻는다).
 ## - 상점: 슈퍼볼이 10개 미만이면 산다(소지금 3,000원은 남김). 보관함이 90% 차면 (돈이 되는 만큼) 확장.
 ## - 아이템 인카운터(v0.84): 인카운터가 아이템이면 얻고 끝. 하루 끝에 귀중품을 모두 판다(--verbose 에 "아이템 N개 M원").
-## - 달콤한꿀(v0.87): 플레이어 Lv10부터 하루 시작에 돈이 있으면 --honey 개(기본 2개 = 1시간, 인카운터 간격 ×0.5)를 사서 쓴다. 0이면 안 쓴다.
+## - 향긋한 허브(v0.87): 플레이어 Lv10부터 하루 시작에 돈이 있으면 --honey 개(기본 2개 = 1시간, 인카운터 간격 ×0.5)를 사서 쓴다. 0이면 안 쓴다.
 
 const DEFAULT_SEEDS := 5
 ## 기획서 9.3 일차별 목표 [일차, 플레이어 Lv, 포획 종 수]
@@ -32,8 +32,17 @@ const TOLERANCE := 0.15
 ## 원정에 진화 후보를 몇 마리 더 데려가는지 / 남은 사탕을 나눠 줄 주력 수
 const EXTRA_EVOLUTION_MEMBERS := 3
 const MAIN_TEAM := 10
-## 하루에 쓰는 달콤한꿀 개수 (--honey 로 바꿈)
+## 하루에 쓰는 향긋한 허브 개수 (--honey 로 바꿈)
 const DEFAULT_HONEY_PER_DAY := 2
+## 가상 플레이어가 상위 볼을 쓰는 난이도 기준 배율 (v0.92): 기준 = 0.5 × 지역 몬스터볼 추가 배율 × 이 값. 1.0 이면 후반에 막혀 진행이 크게 느려지고(9.3.2), 0.65 부터 목표를 통과한다
+const DEFAULT_BALL_SCALE := 0.65
+## 슈퍼볼을 이 개수까지 사 둔다 (v0.92: 10 → 30, 후반 지역에서 슈퍼볼을 많이 쓰게 되므로)
+const GREAT_BALL_STOCK := 30
+## 하이퍼볼 계약 뒤 사 두는 개수와, 하이퍼볼을 먼저 쓰는 난이도 (v0.92)
+const ULTRA_BALL_STOCK := 5
+const ULTRA_FIRST_DIFFICULTY := 0.7
+## 계약·구매 뒤에 남기는 돈 (Q10: 비용 + 3,000원)
+const RESERVE := 3000
 
 var rng := RandomNumberGenerator.new()
 var now := 0.0
@@ -42,8 +51,14 @@ var hours := 5.0
 var react := 0.7
 var verbose := false
 var honey_per_day := DEFAULT_HONEY_PER_DAY
+var no_spend := false   # 지출 없이 모으기만 (--no-spend): 계약 비용 가늠용, v0.92
+var ball_scale := DEFAULT_BALL_SCALE   # 상위 볼을 쓰는 난이도 기준 배율 (0 이면 항상 상위 볼, --ball-scale, v0.92)
 var stats := {}
 var _party_sizes: Array[int] = []    # 자동 선택 인원 (진화 후보 제외), 모든 실행
+var _level_log: Array = []   # 실행마다 {레벨: [일, 소지금+귀중품]} (--no-spend 로 계약 비용 가늠, v0.92)
+var _level_seen := 1
+var _cur_day := 1
+var _late_log: Array = []   # 실행마다의 stats (후반 지역 볼 사용 집계, v0.92)
 var missing_count := {}   # dex_id -> 못 잡은 실행 수
 var _next_send_try := 0.0
 
@@ -58,6 +73,8 @@ func _ready() -> void:
 			"--hours": hours = float(args[i + 1])
 			"--react": react = float(args[i + 1])
 			"--honey": honey_per_day = int(args[i + 1])
+			"--ball-scale": ball_scale = float(args[i + 1])
+			"--no-spend": no_spend = true
 			"--verbose": verbose = true
 	# 시뮬레이터가 실제 매니저의 실시간 처리와 섞이지 않게
 	EncounterManager.set_process(false)
@@ -84,21 +101,27 @@ func _run(seed: int) -> Array:
 	now = 2_000_000_000.0
 	_next_send_try = 0.0
 	stats = {"encounters": 0, "reacted": 0, "caught": 0, "fled": 0, "legend": 0, "expeditions": 0, "transferred": 0,
-		"battles": 0, "won": 0, "full": 0, "diff_sum": 0.0, "items": 0, "item_money": 0, "honey": 0}
+		"battles": 0, "won": 0, "full": 0, "diff_sum": 0.0, "items": 0, "item_money": 0, "honey": 0,
+		"late_battles": 0, "late_poke": 0, "late_won": 0, "late_poke_won": 0}
 	var daily: Array = []
+	_level_seen = 1
+	_level_log.append({})
 	for day in range(1, days + 1):
+		_cur_day = day
 		_claim_expeditions()
 		var day_end := now + hours * 3600.0
 		_use_honey()
 		while true:
 			now += Formulas.roll_encounter_interval(rng, GameData.get_region(PlayerState.current_region)) \
-				* PlayerState.interval_multiplier(int(now))   # 달콤한꿀 (v0.87)
+				* PlayerState.interval_multiplier(int(now))   # 향긋한 허브 (v0.87)
 			if now >= day_end:
 				break
 			_encounter()
 			_claim_expeditions()
 			_send_expedition()
 			_handle_evolutions()
+			_log_level()
+			_buy_contracts()
 		stats.item_money += int(ShopManager.sell_all_valuables().get("money", 0))   # v0.84: 귀중품은 하루 끝에 판다
 		_end_of_day()
 		var snap := _snapshot(day)
@@ -116,11 +139,35 @@ func _run(seed: int) -> Array:
 	for s in GameData.all_species():
 		if not PlayerState.is_caught(s.dex_id):
 			missing_count[s.dex_id] = missing_count.get(s.dex_id, 0) + 1
+	_late_log.append(stats.duplicate())
 	return daily
 
 
-## 하루 시작에 달콤한꿀을 사서 쓴다 (v0.87): 실제 상점 규칙(Lv10, 2,000원)을 따른다. 돈이 모자라면 못 산다
+## 레벨이 처음 오를 때 그 시점의 (일, 소지금 + 팔 수 있는 귀중품)을 기록한다 (v0.92)
+func _log_level() -> void:
+	while PlayerState.level > _level_seen:
+		_level_seen += 1
+		_level_log.back()[_level_seen] = [_cur_day, PlayerState.currency + int(ShopManager.valuables().get("total", 0))]
+
+
+## 계약은 돈(+귀중품을 팔면)이 비용 + RESERVE 이상일 때 바로 맺는다 (v0.92). 처음 맺은 레벨·일을 기록한다
+func _buy_contracts() -> void:
+	if no_spend:
+		return
+	for cid in ShopManager.visible_contracts():
+		var cost := int(ShopManager.CONTRACTS[cid].cost)
+		if PlayerState.currency + int(ShopManager.valuables().get("total", 0)) < cost + RESERVE:
+			return
+		stats.item_money += int(ShopManager.sell_all_valuables().get("money", 0))
+		if ShopManager.buy_contract(cid).ok:
+			stats["c_%s_level" % cid] = PlayerState.level
+			stats["c_%s_day" % cid] = _cur_day
+
+
+## 하루 시작에 향긋한 허브를 사서 쓴다 (v0.87): 실제 상점 규칙(Lv10, 2,000원)을 따른다. 돈이 모자라면 못 산다
 func _use_honey() -> void:
+	if no_spend:
+		return
 	for i in honey_per_day:
 		if not ShopManager.buy(&"sweet_honey").ok:
 			return
@@ -165,17 +212,24 @@ func _encounter() -> void:
 	var legendary: bool = enc.get(&"legendary", false)
 	var bonus := float(enc.get(&"difficulty_bonus", 0.0))   # 출현 표의 추가 난이도 (v0.76)
 	var difficulty := Formulas.capture_difficulty(species.catch_rate, enc[&"level"], legendary, bonus)
-	var ball := _choose_ball(difficulty)
+	var ball := _choose_ball(difficulty, region)
 	PlayerState.select_ball(ball)
 	PlayerState.consume_selected_ball()
 	var item := GameData.get_item(ball)
 	var params := Formulas.capture_params(species.catch_rate, enc[&"level"], legendary, item.catch_modifier(),
 		EncounterManager.entry_bonus(), bonus)
-	params[&"fill"] = float(params[&"fill"]) * EncounterManager.region_capture_fill()   # v0.63 지역 배율
+	params[&"fill"] = float(params[&"fill"]) * EncounterManager.region_capture_fill(ball)   # v0.63 지역 배율, v0.92 몬스터볼 추가 배율
 	stats.battles += 1
 	stats.diff_sum += difficulty
+	var late := region != null and region.poke_ball_fill < 1.0   # 발전소부터 (v0.92)
+	if late:
+		stats.late_battles += 1
+		stats.late_poke += 1 if ball == &"poke_ball" else 0
 	if _play_capture(params):
 		stats.won += 1
+		if late:
+			stats.late_won += 1
+			stats.late_poke_won += 1 if ball == &"poke_ball" else 0
 		PlayerState.add_caught(enc)
 		stats.caught += 1
 		if legendary:
@@ -185,9 +239,15 @@ func _encounter() -> void:
 	PlayerState.select_ball(&"poke_ball")
 
 
-func _choose_ball(difficulty: float) -> StringName:
-	if difficulty >= 0.5:
-		for b in [&"ultra_ball", &"great_ball"]:
+## 난이도가 기준 이상이면 가진 가장 좋은 볼. 기준 = 0.5 × 그 지역의 몬스터볼 추가 배율(poke_ball_fill) × ball_scale:
+## 몬스터볼이 덜 찰수록 더 쉬운 상대부터 슈퍼볼을 쓴다 (v0.92, 초원~동굴은 추가 배율이 1.0 이라 기존 0.5 × ball_scale)
+func _choose_ball(difficulty: float, region: RegionData = null) -> StringName:
+	var poke_fill := region.poke_ball_fill if region else 1.0
+	if difficulty >= 0.5 * poke_fill * ball_scale:
+		# 아주 어려운 상대(0.7 이상)에는 하이퍼볼을 먼저, 아니면 슈퍼볼을 먼저 (v0.92)
+		var order: Array[StringName] = []
+		order.assign([&"ultra_ball", &"great_ball"] if difficulty >= ULTRA_FIRST_DIFFICULTY else [&"great_ball", &"ultra_ball"])
+		for b in order:
 			if PlayerState.item_count(b) > 0:
 				return b
 	return &"poke_ball"
@@ -310,7 +370,7 @@ func _tidy_storage() -> void:
 	if not dups.is_empty():
 		var r := ProfessorManager.transfer(dups)
 		stats.transferred += r.get("count", 0)
-	while PlayerState.storage_count() >= PlayerState.storage_capacity * 0.9 and ShopManager.can_expand_storage() 			and PlayerState.currency >= ShopManager.next_expansion_cost() + 3000:
+	while not no_spend and PlayerState.storage_count() >= PlayerState.storage_capacity * 0.9 and ShopManager.can_expand_storage() 			and PlayerState.currency >= ShopManager.next_expansion_cost() + 3000:
 		ShopManager.expand_storage()
 
 
@@ -378,7 +438,7 @@ func _use_stones() -> void:
 			if e.method != &"item" or PlayerState.is_caught(e.to):
 				continue
 			var item := StringName(e.item)
-			if PlayerState.item_count(item) == 0 and GameData.get_item(item).can_buy() 					and PlayerState.currency >= 3000 + GameData.get_item(item).buy_price:   # v0.42: 돌은 상점에 없음
+			if not no_spend and PlayerState.item_count(item) == 0 and GameData.get_item(item).can_buy() 					and PlayerState.currency >= 3000 + GameData.get_item(item).buy_price:   # v0.42: 돌은 상점에 없음
 				ShopManager.buy(item, 1)
 			if PlayerState.item_count(item) > 0:
 				EvolutionManager.request_item_evolution(p.uid, item)
@@ -387,10 +447,19 @@ func _use_stones() -> void:
 
 
 func _shop() -> void:
-	var need := 10 - PlayerState.item_count(&"great_ball")
-	var afford := (PlayerState.currency - 3000) / 500
+	if no_spend:
+		return
+	var great := GameData.get_item(&"great_ball")
+	var need := GREAT_BALL_STOCK - PlayerState.item_count(&"great_ball")
+	var afford := (PlayerState.currency - RESERVE) / ShopManager.price_of(great)   # v0.92: 계약 뒤에는 싸다
 	if need > 0 and afford > 0:
 		ShopManager.buy(&"great_ball", mini(need, afford))
+	var ultra := GameData.get_item(&"ultra_ball")
+	if ShopManager.is_on_sale(ultra):   # 하이퍼볼 취급 계약 뒤 (v0.92)
+		var u_need := ULTRA_BALL_STOCK - PlayerState.item_count(&"ultra_ball")
+		var u_afford := (PlayerState.currency - RESERVE) / ShopManager.price_of(ultra)
+		if u_need > 0 and u_afford > 0:
+			ShopManager.buy(&"ultra_ball", mini(u_need, u_afford))
 
 
 func _handle_evolutions() -> void:
@@ -444,5 +513,49 @@ func _report(runs: Array) -> void:
 		for n in _party_sizes:
 			total += n
 		print("원정 자동 선택 인원: 평균 %.1f, 최소 %d, 최대 %d (진화 후보 제외)" % [float(total) / _party_sizes.size(), _party_sizes.min(), _party_sizes.max()])
+	# 발전소부터(몬스터볼 추가 배율 < 1) 지역의 전투 (v0.92)
+	var lb := 0.0
+	var lp := 0.0
+	var lw := 0.0
+	var lpw := 0.0
+	for st in _late_log:
+		lb += st.late_battles
+		lp += st.late_poke
+		lw += st.late_won
+		lpw += st.late_poke_won
+	if lb > 0.0:
+		print("발전소 이후 지역 전투: 실행당 %.0f회, 슈퍼볼 이상 %d%%, 승률 전체 %d%% / 몬스터볼 %d%% / 슈퍼볼 이상 %d%%" % [lb / _late_log.size(), roundi(100.0 * (lb - lp) / lb),
+			roundi(100.0 * lw / lb), roundi(100.0 * lpw / maxf(1.0, lp)), roundi(100.0 * (lw - lpw) / maxf(1.0, lb - lp))])
+	_report_levels_and_contracts()
 	print("마지막 날까지 못 잡은 종 (못 잡은 실행 수): %d종" % miss.size())
 	print("  " + ", ".join(names))
+
+
+## 레벨별 (처음 오른 일, 소지금+귀중품) 평균과, 계약을 맺은 레벨·일 평균 (v0.92)
+func _report_levels_and_contracts() -> void:
+	var rows: Array[String] = []
+	for lv in range(9, 32):
+		var n := 0
+		var d := 0.0
+		var m := 0.0
+		for lg in _level_log:
+			if lg.has(lv):
+				n += 1
+				d += lg[lv][0]
+				m += lg[lv][1]
+		if n > 0:
+			rows.append("Lv%d: %.1f일차 %d원" % [lv, d / n, roundi(m / n)])
+	print("레벨별 처음 오른 시점의 일차·소지금+귀중품(%s): %s" % ["지출 없음" if no_spend else "보통", " | ".join(rows)])
+	for cid in ShopManager.CONTRACTS:
+		var n := 0
+		var lv := 0.0
+		var dy := 0.0
+		for st in _late_log:
+			if st.has("c_%s_level" % cid):
+				n += 1
+				lv += st["c_%s_level" % cid]
+				dy += st["c_%s_day" % cid]
+		if n > 0:
+			print("계약 %s(%d원): %d/%d회 맺음, 평균 Lv%.1f(%.1f일차)" % [cid, ShopManager.CONTRACTS[cid].cost, n, _late_log.size(), lv / n, dy / n])
+		else:
+			print("계약 %s(%d원): 맺지 못함" % [cid, ShopManager.CONTRACTS[cid].cost])

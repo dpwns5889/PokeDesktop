@@ -72,6 +72,7 @@ func _build_content(box: VBoxContainer) -> void:
 	_ok.focus_mode = Control.FOCUS_NONE
 	_ok.pressed.connect(close_panel)
 	row.add_child(_ok)
+	add_popup_bottom_gap(box)   # 확인 버튼이 아래 HUD(경험치 바)와 닿지 않게 (v0.91)
 
 
 func _section_label(text: String) -> Label:

@@ -7,7 +7,7 @@ extends Panel
 
 const AREA := Rect2(0, 0, 320, 181)
 const BUTTON_SIZE := Vector2(80, 22)
-const BUTTON_Y := 152.0
+const BUTTON_Y := 139.0   # 버튼 아래 18px (v0.91, 다른 팝업과 같게. 이전 152)
 const BUTTON_GAP := 8.0
 ## 깜빡임 간격 (초): 점점 빨라진다
 const FLASHES := [0.5, 0.42, 0.36, 0.3, 0.26, 0.22, 0.18, 0.15, 0.12, 0.1, 0.08, 0.08, 0.06, 0.06]
@@ -36,10 +36,10 @@ func _init() -> void:
 	add_theme_stylebox_override(&"panel", bg)
 
 	_sprite = AnimatedSprite2D.new()
-	_sprite.position = Vector2(160, 80)
+	_sprite.position = Vector2(160, 67)   # v0.91: 80 → 67
 	add_child(_sprite)
 	_text = Label.new()
-	_text.position = Vector2(8, 128)
+	_text.position = Vector2(8, 115)   # v0.91: 128 → 115
 	_text.size = Vector2(304, 20)
 	_text.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	add_child(_text)
