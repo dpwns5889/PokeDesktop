@@ -126,6 +126,19 @@ static func region_bbcode(region: RegionData) -> String:
 	return "[color=#%s]%s[/color]" % [type_color(region.main_types[0]).to_html(false), region.name_ko]
 
 
+## RichTextLabel 용: 원정지 이름을 그 원정지 지역의 대표 타입 색으로 (기획서 6.2, v0.94).
+## 지역 = 해금 조건의 지역(region_unlocked), 조건이 없으면 초원
+static func expedition_bbcode(x: ExpeditionData) -> String:
+	var region_id: StringName = &"grassland"
+	for c in x.unlock_conditions:
+		if c.get("type") == "region_unlocked":
+			region_id = StringName(c.value)
+	var r := GameData.get_region(region_id)
+	if r == null or r.main_types.is_empty():
+		return x.name_ko
+	return "[color=#%s]%s[/color]" % [type_color(r.main_types[0]).to_html(false), x.name_ko]
+
+
 static func types_bbcode(types: Array, sep := " / ") -> String:
 	return sep.join(types.map(func(t) -> String: return type_bbcode(StringName(t))))
 

@@ -30,7 +30,7 @@ reward_table = Array[Dictionary]([{
 "item": &"thunder_stone",
 "max": 1,
 "min": 1,
-"weight": 12
+"weight": 6
 }, {
 "item": &"incense",
 "max": 1,

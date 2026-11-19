@@ -6,6 +6,7 @@ extends Node
 ##   item     아이템 인카운터 (슈퍼볼 ×2 발견)
 ##   caught3  특성이 3개인 포켓몬의 포획 정보 창 (caught3_scrolled = 스크롤을 끝까지 내린 모습도 저장)
 ##   caught3long  이름이 가장 긴 특성 3개로 (상자 끝이 잘리는 모습)
+##   expedition  원정 패널에서 설산 등반·초원 산책을 고른 모습 (원정지 이름 색)
 ##   caughtbig  타입 2개·그림이 가장 큰 종·색이 다른·Lv100·가장 긴 특성 3개 (가장 넓은 경우)
 ## 결과: tools/previews/capture_<이름>.png (기준 해상도 그대로, 저작권 스프라이트가 들어 있어 git 제외)
 ## 주의: 사용자 세이브를 읽고 자동 저장할 수 있으니, 실행 전후로 세이브를 백업·복원한다 (CLAUDE.md).
@@ -31,6 +32,9 @@ func _ready() -> void:
 				await _capture_caught3(true)
 			"caughtbig":
 				await _capture_caught3(true, _biggest_dual_type())
+			"expedition":
+				await _capture_expedition(&"snow_climb", "expedition_snow")
+				await _capture_expedition(&"grassland_walk", "expedition_grass")
 	get_tree().quit()
 
 
@@ -59,6 +63,20 @@ func _capture_item() -> void:
 	await _save("item")
 	EncounterManager.reset_to_waiting()
 	await _frames(10)
+
+
+## 원정 패널에서 원정지 하나를 고른 모습 (설명 맨 위 원정지 이름 색, v0.94)
+func _capture_expedition(id: StringName, tag: String) -> void:
+	_main._toggle_panel(&"expedition")
+	await _frames(6)
+	var panel = _main._panels[&"expedition"]
+	for i in panel._rows.size():
+		if panel._rows[i].get("id", &"") == id:
+			panel._list.select(i)
+			panel._show_list_detail()
+	await _save(tag)
+	_main._toggle_panel(&"expedition")
+	await _frames(4)
 
 
 ## 타입이 2개인 종 중 색이 다른 전투 모습이 가장 큰(투명 여백을 뺀 넓이) 종

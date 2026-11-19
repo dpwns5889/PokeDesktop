@@ -21,7 +21,7 @@ var _list_box: HBoxContainer
 var _slots: Label
 var _list: ItemList
 var _detail_head_box: MarginContainer
-var _detail_head: Label
+var _detail_head: RichTextLabel
 var _detail: RichTextLabel
 ## 원정지 이름 아래 여백 (v0.59)
 const DETAIL_HEAD_GAP := 5
@@ -82,7 +82,7 @@ func _build_content(box: VBoxContainer) -> void:
 	_detail_head_box = MarginContainer.new()
 	_detail_head_box.add_theme_constant_override(&"margin_bottom", DETAIL_HEAD_GAP)
 	right.add_child(_detail_head_box)
-	_detail_head = Label.new()
+	_detail_head = UiUtil.rich_label()   # 원정지 이름을 지역 색으로 (v0.94)
 	_detail_head_box.add_child(_detail_head)
 	_detail = UiUtil.rich_label(false)
 	_detail.size_flags_vertical = Control.SIZE_EXPAND_FILL
@@ -208,7 +208,7 @@ func _show_list_detail() -> void:
 		var done := ExpeditionManager.is_done(e)
 		var x := GameData.get_expedition(StringName(e.id))
 		var lines: Array[String] = []
-		var heading := x.name_ko if x else String(e.id)
+		var heading := UiUtil.expedition_bbcode(x) if x else String(e.id)
 		# 보낸 원정은 전투력·요구치·참여 포켓몬 이름을 보여 주지 않고 마릿수만 (v0.59)
 		if done:
 			lines.append("귀환! 보상을 받을 수 있다")
@@ -231,7 +231,7 @@ func _show_list_detail() -> void:
 		if not ExpeditionManager.is_unlocked(x):
 			for c in x.unlock_conditions:
 				var p := UnlockManager.progress(c)
-				lines.append("조건: %s (%d/%d)" % [p.label_bbcode, p.current, p.target])   # 지역 이름은 대표 타입 색 (v0.90)
+				lines.append("조건: %s (%d/%d)" % [p.label, p.current, p.target])
 			_action.disabled = true
 			_action.text = "잠김"
 		elif PlayerState.expeditions.size() >= ExpeditionManager.max_slots():
@@ -241,7 +241,7 @@ func _show_list_detail() -> void:
 		else:
 			_action.disabled = false
 			_action.text = "파티 편성"
-		_set_detail("%s  %s" % [x.name_ko, _duration_text(x.duration_sec)], lines)
+		_set_detail("%s  %s" % [UiUtil.expedition_bbcode(x), _duration_text(x.duration_sec)], lines)
 
 
 ## 오른쪽 설명: 맨 위 원정지 이름(아래 여백을 두어 한눈에 보이게, v0.59) + 내용. 안내 메시지가 있으면 메시지만.

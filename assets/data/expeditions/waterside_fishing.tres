@@ -25,7 +25,7 @@ reward_table = Array[Dictionary]([{
 "item": &"water_stone",
 "max": 1,
 "min": 1,
-"weight": 10
+"weight": 5
 }])
 currency_reward = Vector2i(300, 500)
 exp_reward = 150

@@ -30,7 +30,7 @@ reward_table = Array[Dictionary]([{
 "item": &"moon_stone",
 "max": 1,
 "min": 1,
-"weight": 12
+"weight": 6
 }])
 currency_reward = Vector2i(600, 1000)
 exp_reward = 400

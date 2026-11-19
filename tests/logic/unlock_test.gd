@@ -48,14 +48,17 @@ func test_progress_reports_current_and_target() -> void:
 	assert_str(p.label).contains("10")
 
 
-## v0.90: 원정 설명의 잠금 조건은 지역 이름을 대표 타입 색으로 (다른 조건은 label 그대로)
-func test_region_condition_label_bbcode_is_colored() -> void:
+## v0.94: 잠금 조건 줄은 색 없이(v0.90 되돌림), 원정지 이름은 그 원정지 지역의 대표 타입 색 (조건 없으면 초원)
+func test_expedition_name_is_colored_by_region() -> void:
 	var p := UnlockManager.progress({"type": "region_unlocked", "value": "volcano"})
 	assert_str(p.label).is_equal("화산 해금")
-	assert_str(p.label_bbcode).is_equal("%s 해금" % UiUtil.region_bbcode(GameData.get_region(&"volcano")))
-	assert_str(p.label_bbcode).contains("[color=#")
-	var q := UnlockManager.progress({"type": "dex_caught_count", "value": 10})
-	assert_str(q.label_bbcode).is_equal(q.label)
+	assert_bool(p.has("label_bbcode")).is_false()
+	var snow := GameData.get_region(&"snow_mountain")
+	assert_str(UiUtil.expedition_bbcode(GameData.get_expedition(&"snow_climb"))).is_equal(
+		"[color=#%s]설산 등반[/color]" % UiUtil.type_color(snow.main_types[0]).to_html(false))
+	var grass := GameData.get_region(&"grassland")
+	assert_str(UiUtil.expedition_bbcode(GameData.get_expedition(&"grassland_walk"))).contains(
+		UiUtil.type_color(grass.main_types[0]).to_html(false))
 
 
 func test_forest_unlocks_at_player_level_3() -> void:
