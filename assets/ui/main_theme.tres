@@ -1,6 +1,12 @@
-[gd_resource type="Theme" load_steps=3 format=3]
+[gd_resource type="Theme" load_steps=21 format=3]
 
 [ext_resource type="FontFile" path="res://assets/fonts/pokemon-dppt.ttf" id="1_font"]
+[ext_resource type="Texture2D" path="res://assets/ui/skin/button_normal.png" id="2_bn"]
+[ext_resource type="Texture2D" path="res://assets/ui/skin/button_hover.png" id="3_bh"]
+[ext_resource type="Texture2D" path="res://assets/ui/skin/button_pressed.png" id="4_bp"]
+[ext_resource type="Texture2D" path="res://assets/ui/skin/button_disabled.png" id="5_bd"]
+[ext_resource type="Texture2D" path="res://assets/ui/skin/grabber.png" id="6_gr"]
+[ext_resource type="Texture2D" path="res://assets/ui/skin/grabber_hover.png" id="7_gh"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_tooltip"]
 content_margin_left = 4.0
@@ -18,7 +24,125 @@ corner_radius_top_right = 2
 corner_radius_bottom_right = 2
 corner_radius_bottom_left = 2
 
+[sub_resource type="StyleBoxTexture" id="Btn_normal"]
+content_margin_left = 6.0
+content_margin_top = 1.0
+content_margin_right = 6.0
+content_margin_bottom = 1.0
+texture = ExtResource("2_bn")
+texture_margin_left = 3.0
+texture_margin_top = 3.0
+texture_margin_right = 3.0
+texture_margin_bottom = 10.0
+
+[sub_resource type="StyleBoxTexture" id="Btn_hover"]
+content_margin_left = 6.0
+content_margin_top = 1.0
+content_margin_right = 6.0
+content_margin_bottom = 1.0
+texture = ExtResource("3_bh")
+texture_margin_left = 3.0
+texture_margin_top = 3.0
+texture_margin_right = 3.0
+texture_margin_bottom = 10.0
+
+[sub_resource type="StyleBoxTexture" id="Btn_pressed"]
+content_margin_left = 6.0
+content_margin_top = 1.0
+content_margin_right = 6.0
+content_margin_bottom = 1.0
+texture = ExtResource("4_bp")
+texture_margin_left = 3.0
+texture_margin_top = 3.0
+texture_margin_right = 3.0
+texture_margin_bottom = 10.0
+
+[sub_resource type="StyleBoxTexture" id="Btn_disabled"]
+content_margin_left = 6.0
+content_margin_top = 1.0
+content_margin_right = 6.0
+content_margin_bottom = 1.0
+texture = ExtResource("5_bd")
+texture_margin_left = 3.0
+texture_margin_top = 3.0
+texture_margin_right = 3.0
+texture_margin_bottom = 10.0
+
+[sub_resource type="StyleBoxEmpty" id="Empty"]
+
+[sub_resource type="StyleBoxFlat" id="Slider_track"]
+content_margin_top = 3.0
+content_margin_bottom = 3.0
+bg_color = Color(0.741, 0.741, 0.741, 1)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.29, 0.29, 0.29, 1)
+corner_radius_top_left = 2
+corner_radius_top_right = 2
+corner_radius_bottom_right = 2
+corner_radius_bottom_left = 2
+
+[sub_resource type="StyleBoxFlat" id="Slider_fill"]
+content_margin_top = 3.0
+content_margin_bottom = 3.0
+bg_color = Color(0.29, 0.45, 0.906, 1)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.29, 0.29, 0.29, 1)
+corner_radius_top_left = 2
+corner_radius_top_right = 2
+corner_radius_bottom_right = 2
+corner_radius_bottom_left = 2
+
+[sub_resource type="StyleBoxFlat" id="Slider_fill_hover"]
+content_margin_top = 3.0
+content_margin_bottom = 3.0
+bg_color = Color(0.388, 0.549, 1, 1)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.29, 0.29, 0.29, 1)
+corner_radius_top_left = 2
+corner_radius_top_right = 2
+corner_radius_bottom_right = 2
+corner_radius_bottom_left = 2
+
 [resource]
 default_font = ExtResource("1_font")
 default_font_size = 16
+Button/colors/font_color = Color(0.22, 0.22, 0.22, 1)
+Button/colors/font_disabled_color = Color(0.5, 0.5, 0.5, 1)
+Button/colors/font_focus_color = Color(0.22, 0.22, 0.22, 1)
+Button/colors/font_hover_color = Color(0.22, 0.22, 0.22, 1)
+Button/colors/font_hover_pressed_color = Color(0.22, 0.22, 0.22, 1)
+Button/colors/font_pressed_color = Color(0.22, 0.22, 0.22, 1)
+Button/styles/disabled = SubResource("Btn_disabled")
+Button/styles/focus = SubResource("Empty")
+Button/styles/hover = SubResource("Btn_hover")
+Button/styles/hover_pressed = SubResource("Btn_pressed")
+Button/styles/normal = SubResource("Btn_normal")
+Button/styles/pressed = SubResource("Btn_pressed")
+CheckButton/colors/font_color = Color(0.875, 0.875, 0.875, 1)
+CheckButton/colors/font_disabled_color = Color(0.875, 0.875, 0.875, 0.5)
+CheckButton/colors/font_focus_color = Color(0.95, 0.95, 0.95, 1)
+CheckButton/colors/font_hover_color = Color(0.95, 0.95, 0.95, 1)
+CheckButton/colors/font_hover_pressed_color = Color(1, 1, 1, 1)
+CheckButton/colors/font_pressed_color = Color(1, 1, 1, 1)
+CheckButton/styles/disabled = SubResource("Empty")
+CheckButton/styles/focus = SubResource("Empty")
+CheckButton/styles/hover = SubResource("Empty")
+CheckButton/styles/hover_pressed = SubResource("Empty")
+CheckButton/styles/normal = SubResource("Empty")
+CheckButton/styles/pressed = SubResource("Empty")
+HSlider/icons/grabber = ExtResource("6_gr")
+HSlider/icons/grabber_highlight = ExtResource("7_gh")
+HSlider/styles/grabber_area = SubResource("Slider_fill")
+HSlider/styles/grabber_area_highlight = SubResource("Slider_fill_hover")
+HSlider/styles/slider = SubResource("Slider_track")
+OptionButton/constants/modulate_arrow = 1
 TooltipPanel/styles/panel = SubResource("StyleBoxFlat_tooltip")

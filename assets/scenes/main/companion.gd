@@ -313,6 +313,10 @@ func _style_bar_button(b: Button, normal: StyleBox, hover: StyleBox, pressed: St
 	b.add_theme_stylebox_override(&"pressed", pressed)
 	b.add_theme_stylebox_override(&"hover_pressed", pressed)
 	b.add_theme_stylebox_override(&"disabled", normal)
+	# 테마 Button 글자는 흰 버튼용 진회색이라, 파란 버튼 줄은 밝은 글자로 고정
+	b.add_theme_color_override(&"font_color", Color(0.875, 0.875, 0.875))
+	b.add_theme_color_override(&"font_hover_color", Color(0.95, 0.95, 0.95))
+	b.add_theme_color_override(&"font_disabled_color", Color(0.875, 0.875, 0.875, 0.5))
 	b.add_theme_color_override(&"font_pressed_color", Color(0.15, 0.1, 0.05))
 	b.add_theme_color_override(&"font_hover_pressed_color", Color(0.15, 0.1, 0.05))
 

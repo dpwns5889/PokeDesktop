@@ -127,7 +127,7 @@ func _build_content(box: VBoxContainer) -> void:
 	var wipe := Button.new()
 	wipe.text = "저장된 데이터 삭제"
 	wipe.focus_mode = Control.FOCUS_NONE
-	wipe.add_theme_color_override(&"font_color", Color(1, 0.45, 0.4))
+	wipe.add_theme_color_override(&"font_color", Color(0.85, 0.1, 0.1))   # 확인 창 DANGER_COLOR 와 같음
 	wipe.pressed.connect(_on_wipe)
 	sec.add_child(wipe)
 

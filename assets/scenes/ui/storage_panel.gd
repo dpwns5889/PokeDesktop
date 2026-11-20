@@ -23,7 +23,8 @@ const IV_STAR_COLOR := "#ffd34a"
 const IV_LOW_COLOR := "#8fd3ff"
 ## 필터 상태 항목 [id, 이름] (v0.77)
 const FILTER_STATUS := [["favorite", "즐겨찾기"], ["shiny", "색이 다른"], ["traits", "특성 있음"], ["busy", "원정 중"], ["entry", "엔트리"]]
-const FILTER_ON_COLOR := Color(1, 0.85, 0.35)
+const FILTER_ON_COLOR := Color(0.75, 0.45, 0.05)   # 흰 버튼 위 진한 금색 (진화 버튼 글자와 같음)
+const FILTER_OFF_COLOR := Color(0.22, 0.22, 0.22)
 
 var _count: Label
 var _sort: OptionButton
@@ -266,7 +267,7 @@ func refresh() -> void:
 		_count.text = "%d/%d" % [items.size(), PlayerState.storage_count()]
 	else:
 		_count.text = "%d/%d" % [PlayerState.storage_count(), PlayerState.storage_capacity]
-	_filter_button.tint = FILTER_ON_COLOR if filtering else IconButton.COLOR
+	_filter_button.tint = FILTER_ON_COLOR if filtering else FILTER_OFF_COLOR
 	_list.clear()
 	_uids.clear()
 	var keep := -1
@@ -603,7 +604,7 @@ func _evo_button_in(parent: Container, text: String, tip: String) -> Button:
 	b.text = text
 	b.tooltip_text = tip
 	b.focus_mode = Control.FOCUS_NONE
-	b.add_theme_color_override(&"font_color", Color(1, 0.85, 0.35))
+	b.add_theme_color_override(&"font_color", FILTER_ON_COLOR)
 	parent.add_child(b)
 	return b
 

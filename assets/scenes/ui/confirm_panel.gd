@@ -6,7 +6,7 @@ extends OverlayPanel
 
 ## 이 글자의 확인 버튼은 빨간 글씨 (되돌릴 수 없는 삭제, v0.98)
 const DANGER_OK_TEXT := "삭제"
-const DANGER_COLOR := Color(1, 0.45, 0.4)
+const DANGER_COLOR := Color(0.85, 0.1, 0.1)   # 흰 버튼 위 빨간 글자
 
 var _message: Label
 ## 색이 든 문구(BBCode)용. 문구는 [center] 로 가운데 정렬 (v0.89)
