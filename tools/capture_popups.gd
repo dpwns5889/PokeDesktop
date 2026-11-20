@@ -13,6 +13,7 @@ extends Node
 ##   caughtbig  타입 2개·그림이 가장 큰 종·색이 다른·Lv100·가장 긴 특성 3개 (가장 넓은 경우)
 ##   icons    큰 아이콘: 도감(일반·색다름)·메인 엔트리 상자·파티 (v0.100)
 ##   items    32px 아이템 아이콘: 가방·상점(구매)·원정 보상 팝업·파티 빈 자리 (v0.101)
+##   panels   모든 패널을 차례로 + 보관함 필터(일부 켬) — UI 스킨 확인용 (panel_<id>.png)
 ## 결과: tools/previews/capture_<이름>.png (기준 해상도 그대로, 저작권 스프라이트가 들어 있어 git 제외)
 ## 세이브: 읽기만 하고 쓰기는 user://capture_saves 로 돌려서 실제 save.json 은 바뀌지 않는다.
 
@@ -50,6 +51,8 @@ func _ready() -> void:
 				await _capture_items()
 			"legend":
 				await _capture_legend()
+			"panels":
+				await _capture_panels()
 			"expedition":
 				await _capture_expedition(&"snow_climb", "expedition_snow")
 				await _capture_expedition(&"grassland_walk", "expedition_grass")
@@ -147,6 +150,7 @@ func _capture_stone() -> void:
 		PlayerState.add_item(id, 1)
 	_main._caught.close_panel()   # add_caught 가 띄운 포획 정보 창
 	await _frames(4)
+	_main._confirm.hide()   # 포획 정보 창이 닫히며 뜬 지역 해금 알림이 보관함을 가리지 않게
 	_main._toggle_panel(&"storage")
 	await _frames(6)
 	var panel = _main._panels[&"storage"]
@@ -180,6 +184,8 @@ func _capture_wipe() -> void:
 	var panel = _main._panels[&"settings"]
 	await _save("settings_top")   # 맨 위: 구역 들여쓰기 (v0.96)
 	panel.find_children("*", "ScrollContainer", true, false)[0].scroll_vertical = 9999
+	for s: HSlider in panel.find_children("*", "HSlider", true, false):
+		s.set_value_no_signal(60)   # 슬라이더 채움 모양 확인용 (신호 없이 → 설정 저장 안 됨)
 	await _frames(6)
 	await _save("wipe_settings")
 	for b: Button in panel.find_children("*", "Button", true, false):
@@ -246,6 +252,29 @@ func _capture_items() -> void:
 	_main._toggle_panel(&"expedition")
 	_main._toggle_panel(&"party")
 	await _save("items_party")
+
+
+## 모든 패널 + 보관함 필터 화면 (UI 스킨 확인)
+func _capture_panels() -> void:
+	PlayerState.level = maxi(PlayerState.level, 40)
+	await _frames(10)
+	_main._caught.hide()
+	_main._confirm.hide()
+	for id: StringName in _main._panels:
+		_main._toggle_panel(id)
+		await _frames(6)
+		_main._confirm.hide()
+		await _save("panel_" + String(id))
+		if id == &"storage":
+			var panel = _main._panels[id]
+			panel._filter_button.button_pressed = true
+			for i in [0, 3, 5]:   # 상태 하나·타입 둘을 켠 모습
+				if i < panel._filter_toggles.size():
+					panel._filter_toggles[i].button_pressed = true
+			await _save("panel_storage_filter")
+			panel._filter_button.button_pressed = false
+		_main._toggle_panel(id)
+		await _frames(4)
 
 
 ## 큰 아이콘 (v0.100): 151종 모두 포획 + 일부 색다름 → 도감(일반·색다름 전환)과 메인 엔트리 상자 캡처
