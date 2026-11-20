@@ -11,8 +11,10 @@ extends Node
 ##   legend   전설 울음소리 알림 팝업 (v0.97): 프리져 조건을 채운 상태 → 설산 / 뮤츠·뮤 → 유령탑
 ##   stone    보관함에서 이브이에게 진화의 돌 사용 (보관함 → 진화 창 → 진화 뒤)
 ##   caughtbig  타입 2개·그림이 가장 큰 종·색이 다른·Lv100·가장 긴 특성 3개 (가장 넓은 경우)
+##   icons    큰 아이콘: 도감(일반·색다름)·메인 엔트리 상자·파티 (v0.100)
+##   items    32px 아이템 아이콘: 가방·상점(구매)·원정 보상 팝업·파티 빈 자리 (v0.101)
 ## 결과: tools/previews/capture_<이름>.png (기준 해상도 그대로, 저작권 스프라이트가 들어 있어 git 제외)
-## 주의: 사용자 세이브를 읽고 자동 저장할 수 있으니, 실행 전후로 세이브를 백업·복원한다 (CLAUDE.md).
+## 세이브: 읽기만 하고 쓰기는 user://capture_saves 로 돌려서 실제 save.json 은 바뀌지 않는다.
 
 const OUT := "res://tools/previews/capture_%s.png"
 
@@ -20,6 +22,9 @@ var _main: Node
 
 
 func _ready() -> void:
+	# 세이브는 읽기만 하고 쓰기는 임시 폴더로 돌린다 → 실제 save.json 이 덮이지 않는다 (기획서 7.5)
+	SaveManager.save_dir = "user://capture_saves"
+	DirAccess.make_dir_recursive_absolute(SaveManager.save_dir)
 	EncounterManager.set_process(false)   # 실제 타이머가 끼어들지 않게
 	_main = (load("res://assets/scenes/main/companion.tscn") as PackedScene).instantiate()
 	get_tree().root.add_child.call_deferred(_main)
@@ -41,6 +46,8 @@ func _ready() -> void:
 				await _capture_wipe()
 			"icons":
 				await _capture_icons()
+			"items":
+				await _capture_items()
 			"legend":
 				await _capture_legend()
 			"expedition":
@@ -206,6 +213,39 @@ func _show_legend_notice(tag: String) -> void:
 	_main._show_unlock_notice()
 	await _frames(20)
 	await _save(tag)
+
+
+## 32px 아이템 아이콘 (v0.101): 가방·상점 목록(24px)과 설명 머리(32px), 원정 보상 칸, 파티 빈 자리
+func _capture_items() -> void:
+	PlayerState.reset()
+	PlayerState.level = 40
+	PlayerState.add_currency(50000)
+	for item in GameData.all_items():
+		PlayerState.add_item(item.id, 3)
+	await _frames(30)
+	_main._caught.hide()
+	_main._confirm.hide()
+	for id in [&"bag", &"shop"]:
+		_main._toggle_panel(id)
+		await _frames(6)
+		var panel = _main._panels[id]
+		var pick := maxi(0, panel._ids.find(&"forget_berry"))   # 깜빡열매(v0.102)가 목록에 있으면 그것을 고른다
+		panel._list.select(pick)
+		panel._list.ensure_current_is_visible()
+		panel._list.item_selected.emit(pick)
+		await _save("items_" + String(id))
+		_main._toggle_panel(id)
+		await _frames(4)
+	var r := {"expedition": &"grassland_walk", "success": true, "currency": 1200, "items": {&"great_ball": 2, &"fire_stone": 1, &"exp_candy_s": 3}, "pokemon_exp": {}, "levels": {}}
+	_main._toggle_panel(&"expedition")
+	await _frames(6)
+	_main._panels[&"expedition"]._reward.show_result(r)
+	await _frames(6)
+	await _save("items_reward")
+	_main._panels[&"expedition"]._reward.close_panel()
+	_main._toggle_panel(&"expedition")
+	_main._toggle_panel(&"party")
+	await _save("items_party")
 
 
 ## 큰 아이콘 (v0.100): 151종 모두 포획 + 일부 색다름 → 도감(일반·색다름 전환)과 메인 엔트리 상자 캡처
