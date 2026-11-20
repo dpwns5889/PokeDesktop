@@ -6,7 +6,7 @@
 script = ExtResource("1_jkfjq")
 id = &"pearl"
 name_ko = "진주"
-description = "아름다운 진주. 상점에 팔면 500원."
+description = "은은한 은빛 광택이 나는 작은 진주. 상점에서 비싸게 팔린다."
 category = &"valuable"
 order = 31
 sources = Array[StringName]([&"encounter"])

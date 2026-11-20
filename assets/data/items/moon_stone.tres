@@ -6,7 +6,7 @@
 script = ExtResource("1_sxgcj")
 id = &"moon_stone"
 name_ko = "달의돌"
-description = "특정 포켓몬을 진화시키는 돌. 원정에서 얻는다."
+description = "특정 포켓몬을 진화시키는 돌."
 category = &"evolution"
 order = 24
 sources = Array[StringName]([&"expedition"])

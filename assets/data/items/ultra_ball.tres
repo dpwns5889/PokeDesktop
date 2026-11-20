@@ -6,7 +6,7 @@
 script = ExtResource("1_lwb5v")
 id = &"ultra_ball"
 name_ko = "하이퍼볼"
-description = "몬스터볼보다 게이지가 2배 잘 찬다. 원정에서 얻거나, 하이퍼볼 취급 계약을 맺으면 상점에서 살 수 있다."
+description = "몬스터볼보다 게이지가 2배 잘 찬다."
 category = &"ball"
 order = 3
 params = {

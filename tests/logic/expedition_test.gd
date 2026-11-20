@@ -50,9 +50,9 @@ func test_expedition_data() -> void:
 
 func test_traits_data() -> void:
 	assert_object(GameData.get_trait(&"legend")).is_not_null()
-	# v0.28 개편: 49종(고정 2 포함), 모두 발동 위치가 원정 또는 전투, 옛 특성 없음
+	# v0.28 개편: 49종 → v0.103 52종(고정 2 포함), 모두 발동 위치가 원정 또는 전투, 옛 특성 없음
 	var all := GameData.all_traits()
-	assert_int(all.size()).is_equal(49)
+	assert_int(all.size()).is_equal(52)
 	for t in all:
 		assert_bool(t.trigger in [&"expedition", &"battle"]).override_failure_message(String(t.id)).is_true()
 		for e in t.effects:

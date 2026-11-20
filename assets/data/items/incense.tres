@@ -6,7 +6,7 @@
 script = ExtResource("1_mxw34")
 id = &"incense"
 name_ko = "향로"
-description = "쓸 때 고른 타입의 포켓몬이 30분 동안 2배 잘 나온다."
+description = "고른 타입의 포켓몬이 30분 동안 2배 잘 나온다."
 category = &"incense"
 order = 25
 params = {

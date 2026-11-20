@@ -65,11 +65,12 @@ static func condition_met(e: Dictionary, expedition: ExpeditionData, species: Po
 
 
 ## 포획 시 무작위 특성 (기획서 4.6). 고정 특성(전설 등)은 따로 붙인다.
-static func roll_traits(rng: RandomNumberGenerator, config: TraitRollConfig, pool: Array[TraitData]) -> Array[String]:
+## count_weights 를 주면 config 의 개수 가중치 대신 쓴다 (트레이스, v0.103).
+static func roll_traits(rng: RandomNumberGenerator, config: TraitRollConfig, pool: Array[TraitData], count_weights: Array = []) -> Array[String]:
 	var out: Array[String] = []
 	if config == null or pool.is_empty():
 		return out
-	var count := _weighted_index(config.count_weights, rng)
+	var count := _weighted_index(config.count_weights if count_weights.is_empty() else count_weights, rng)
 	for i in count:
 		var tiers: Array = config.tier_weights.keys()
 		var tw: Array[int] = []

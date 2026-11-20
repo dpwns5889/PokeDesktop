@@ -6,7 +6,7 @@
 script = ExtResource("1_xv57s")
 id = &"gold_cologne"
 name_ko = "골드코롱"
-description = "30분 동안 포켓몬이 2배 자주 나타난다."
+description = "포켓몬이 30분 동안 2배 자주 나타난다."
 category = &"boost"
 order = 27
 params = {

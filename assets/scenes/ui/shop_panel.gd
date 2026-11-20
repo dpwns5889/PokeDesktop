@@ -192,7 +192,7 @@ func _update_order() -> void:
 		_name.text = "보관함 확장"
 		_qty_row.visible = false   # 개수가 없어 합계도 없다 → 가격은 설명 끝에
 		if ShopManager.can_expand_storage():
-			_desc.text = "보관함이 %d칸 늘어난다.\n지금 %d칸 → %d칸\n가격 %s" % [ShopManager.STORAGE_EXPANSION_SLOTS,
+			_desc.text = "보관함이 %d칸 늘어난다.\n%d칸 → %d칸\n가격 %s" % [ShopManager.STORAGE_EXPANSION_SLOTS,
 				PlayerState.storage_capacity, PlayerState.storage_capacity + ShopManager.STORAGE_EXPANSION_SLOTS,
 				ShopManager.format_money(ShopManager.next_expansion_cost())]
 		else:
@@ -226,11 +226,11 @@ func _show_contract(cid: StringName) -> void:
 	match cid:
 		&"great_ball_discount":
 			var g := GameData.get_item(&"great_ball")
-			_desc.text = "한 번 맺으면 슈퍼볼이 %s에서 %s이 된다.\n가격 %s" % [ShopManager.format_money(g.buy_price),
+			_desc.text = "슈퍼볼이 %s에서 %s이 된다.\n가격 %s" % [ShopManager.format_money(g.buy_price),
 				ShopManager.format_money(int(g.params.contract_price)), cost]
 		&"ultra_ball_sale":
 			var u := GameData.get_item(&"ultra_ball")
-			_desc.text = "한 번 맺으면 하이퍼볼을 %s에 살 수 있다.\n가격 %s" % [ShopManager.format_money(u.buy_price), cost]
+			_desc.text = "하이퍼볼을 %s에 살 수 있다.\n가격 %s" % [ShopManager.format_money(u.buy_price), cost]
 	_button.text = "계약"
 	_button.disabled = false
 

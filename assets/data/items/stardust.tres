@@ -6,7 +6,7 @@
 script = ExtResource("1_p1ump")
 id = &"stardust"
 name_ko = "별의모래"
-description = "반짝이는 모래. 상점에 팔면 800원."
+description = "감촉이 부드럽고 색이 예쁜 모래. 상점에서 비싸게 팔린다."
 category = &"valuable"
 order = 32
 sources = Array[StringName]([&"encounter"])

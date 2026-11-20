@@ -6,7 +6,7 @@
 script = ExtResource("1_oo75b")
 id = &"lucky_egg"
 name_ko = "행복의 알"
-description = "15분 동안 플레이어가 얻는 경험치가 1.5배가 된다."
+description = "플레이어가 얻는 경험치가 15분 동안 1.5배 오른다."
 category = &"boost"
 order = 27
 params = {

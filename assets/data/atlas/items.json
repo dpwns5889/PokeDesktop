@@ -4,7 +4,6 @@
 	"icon_size": 24,
 	"_comment": "시트에서 자르는 아이콘만 남김(v0.101). 나머지 아이템은 tools/import_item_sprites.py 가 assets/sprites/items 에서 복사. region = [x, y, w, h]",
 	"icons": {
-		"coin": {"sheet": "res://assets/sprites/Coin.png", "region": [0, 0, 16, 16]},
-		"forget_berry": {"region": [120, 528, 22, 22], "_comment": "의문열매 = 열매 3번째 줄 6번째 (v0.79)"}
+		"coin": {"sheet": "res://assets/sprites/Coin.png", "region": [0, 0, 16, 16]}
 	}
 }

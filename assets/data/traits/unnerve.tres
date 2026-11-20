@@ -1,9 +1,9 @@
 [gd_resource type="Resource" script_class="TraitData" format=3]
 
-[ext_resource type="Script" path="res://assets/scripts/data/trait_data.gd" id="1_xe5rj"]
+[ext_resource type="Script" path="res://assets/scripts/data/trait_data.gd" id="1_4q4bj"]
 
 [resource]
-script = ExtResource("1_xe5rj")
+script = ExtResource("1_4q4bj")
 id = &"unnerve"
 name_ko = "긴장감"
 description = "[전투] 명중했을 때 게이지가 덜 찬다(×0.9)."
@@ -13,4 +13,4 @@ effects = Array[Dictionary]([{
 "kind": "battle_fill_mult",
 "value": 0.9
 }])
-exclusive_with = Array[StringName]([&"pickup", &"honey_gather"])
+exclusive_with = Array[StringName]([&"keen_eye"])

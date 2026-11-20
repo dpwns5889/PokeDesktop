@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="TraitData" format=3]
+
+[ext_resource type="Script" path="res://assets/scripts/data/trait_data.gd" id="1_pm1fy"]
+
+[resource]
+script = ExtResource("1_pm1fy")
+id = &"keen_eye"
+name_ko = "날카로운눈"
+description = "[전투] 명중했을 때 게이지가 더 찬다(×1.1)."
+trigger = &"battle"
+effects = Array[Dictionary]([{
+"kind": "battle_fill_mult",
+"value": 1.1
+}])
+exclusive_with = Array[StringName]([&"unnerve"])

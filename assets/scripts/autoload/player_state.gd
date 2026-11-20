@@ -690,7 +690,8 @@ func _roll_traits(dex_id: int, shiny: bool = false) -> Array:
 	var out: Array = [] if s == null else s.fixed_trait_ids.map(func(t: StringName) -> String: return String(t))
 	if shiny:
 		out.append("shiny")   # 색이 다른 개체의 고정 특성 (M11)
-	for t in ExpeditionLogic.roll_traits(rng, GameData.trait_roll_config(), GameData.random_trait_pool()):
+	var count_weights: Array = BattleTraits.collect(entry_pokemon()).trait_count_weights   # 트레이스 (v0.103)
+	for t in ExpeditionLogic.roll_traits(rng, GameData.trait_roll_config(), GameData.random_trait_pool(), count_weights):
 		if not out.has(t):
 			out.append(t)
 	return out

@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="TraitData" format=3]
+
+[ext_resource type="Script" path="res://assets/scripts/data/trait_data.gd" id="1_tpjgk"]
+
+[resource]
+script = ExtResource("1_tpjgk")
+id = &"trace"
+name_ko = "트레이스"
+description = "[전투] 포획한 포켓몬이 특성을 가질 확률이 오른다."
+tier = &"rare"
+trigger = &"battle"
+effects = Array[Dictionary]([{
+"kind": "trait_count_weights",
+"value": [50.0, 30.0, 16.0, 4.0]
+}])

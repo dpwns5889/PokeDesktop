@@ -6,7 +6,7 @@
 script = ExtResource("1_truul")
 id = &"exp_candy_m"
 name_ko = "경험사탕 M"
-description = "포켓몬의 경험치가 800 오른다. 원정이나 박사에게서 얻는다."
+description = "포켓몬의 경험치가 800 오른다."
 category = &"exp_candy"
 order = 11
 params = {

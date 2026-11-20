@@ -1,9 +1,9 @@
 [gd_resource type="Resource" script_class="TraitData" format=3]
 
-[ext_resource type="Script" path="res://assets/scripts/data/trait_data.gd" id="1_wry1a"]
+[ext_resource type="Script" path="res://assets/scripts/data/trait_data.gd" id="1_n8i73"]
 
 [resource]
-script = ExtResource("1_wry1a")
+script = ExtResource("1_n8i73")
 id = &"stench"
 name_ko = "악취"
 description = "[전투] 야생 포켓몬이 덜 나온다(인카운터 간격 ×1.15)."
@@ -13,4 +13,4 @@ effects = Array[Dictionary]([{
 "kind": "encounter_interval_mult",
 "value": 1.15
 }])
-exclusive_with = Array[StringName]([&"pickup", &"honey_gather"])
+exclusive_with = Array[StringName]([&"illuminate"])

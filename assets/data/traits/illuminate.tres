@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="TraitData" format=3]
+
+[ext_resource type="Script" path="res://assets/scripts/data/trait_data.gd" id="1_001al"]
+
+[resource]
+script = ExtResource("1_001al")
+id = &"illuminate"
+name_ko = "발광"
+description = "[전투] 야생 포켓몬이 더 자주 나타난다(인카운터 간격 ×0.9)."
+tier = &"rare"
+trigger = &"battle"
+effects = Array[Dictionary]([{
+"kind": "encounter_interval_mult",
+"value": 0.9
+}])
+exclusive_with = Array[StringName]([&"stench"])

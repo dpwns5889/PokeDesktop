@@ -6,7 +6,7 @@
 script = ExtResource("1_47d6j")
 id = &"shiny_incense"
 name_ko = "특이한 향로"
-description = "30분 동안 색이 다른 포켓몬이 4배 잘 나온다."
+description = "색이 다른 포켓몬이 30분 동안 4배 잘 나온다."
 category = &"incense"
 order = 26
 params = {

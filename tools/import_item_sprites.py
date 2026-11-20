@@ -2,7 +2,7 @@
 
 실행: python tools/import_item_sprites.py
 결과: assets/generated/icons/<아이템 id>.png (원본 크기 그대로)
-시트에서 자르는 coin·forget_berry 는 tools/import_icons.gd 가 만든다.
+시트에서 자르는 coin 은 tools/import_icons.gd 가 만든다.
 """
 import shutil
 from pathlib import Path
@@ -21,7 +21,7 @@ MAP = {
     "exp_candy_s": "exp-candy/xs", "exp_candy_m": "exp-candy/s",
     "trait_capsule": "medicine/ability-capsule", "expand_storage": "storage/pokemon-box",
     "incense": "incense/full", "shiny_incense": "incense/odd",
-    "gold_cologne": "other-item/max-lure",
+    "gold_cologne": "other-item/max-lure", "forget_berry": "berry/enigma",
 }
 
 if __name__ == "__main__":

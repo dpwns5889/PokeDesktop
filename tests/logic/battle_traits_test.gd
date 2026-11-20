@@ -164,3 +164,49 @@ func test_vital_spirit_raises_wild_level() -> void:
 	_to_battle(m2)
 	var cap := GameData.get_region(PlayerState.current_region).level_cap
 	assert_int(m2.current[&"level"]).is_equal(mini(base_level + 2, maxi(base_level, cap)))
+
+
+# ---------------------------------------------------------------- v0.103: 트레이스·발광·날카로운눈
+
+func test_illuminate_and_keen_eye_collect_and_buff_lines() -> void:
+	var fx := BattleTraits.collect([_add(16, 10, ["illuminate", "keen_eye"])])
+	assert_float(fx.interval_mult).is_equal_approx(0.9, 0.0001)
+	assert_float(fx.fill_mult).is_equal_approx(1.1, 0.0001)
+	var texts: Array = BattleTraits.buff_lines(fx).map(func(l: Dictionary) -> String: return l.text)
+	assert_array(texts).contains(["출현 +11%", "게이지 +10%"])
+	# 반대 특성이 다른 개체에 있으면 서로 곱해진다(발광 0.9 × 악취 1.15)
+	var mix := BattleTraits.collect([_add(16, 10, ["illuminate"]), _add(16, 10, ["stench", "unnerve"])])
+	assert_float(mix.interval_mult).is_equal_approx(1.035, 0.0001)
+	assert_float(mix.fill_mult).is_equal_approx(0.9, 0.0001)
+
+
+func test_trace_changes_trait_count_weights_only_when_in_entry() -> void:
+	assert_array(BattleTraits.collect([]).trait_count_weights).is_empty()
+	var fx := BattleTraits.collect([_add(16, 10, ["trace"])])
+	assert_array(fx.trait_count_weights).contains_exactly([50, 30, 16, 4])
+	# 가중치를 주면 개수 확률이 그걸 따른다
+	var rng := RandomNumberGenerator.new()
+	rng.seed = 11
+	for i in 50:
+		var ts := ExpeditionLogic.roll_traits(rng, GameData.trait_roll_config(), GameData.random_trait_pool(), [0, 0, 0, 1])
+		assert_int(ts.size()).is_equal(3)
+
+
+func test_caught_pokemon_get_more_traits_with_trace_in_entry() -> void:
+	var holder := _add(16, 10, ["trace"])
+	PlayerState.add_entry(String(holder.uid))
+	var with_traits := 0
+	for i in 600:
+		var inst := PlayerState.add_caught({&"dex_id": 16, &"level": 3, &"gender": &"male", &"region": &"grassland"})
+		if inst.traits.size() > 0:
+			with_traits += 1
+	assert_int(with_traits).is_between(255, 345)   # 약 50% (기본 40%)
+
+
+func test_new_exclusive_pairs_and_removed_pickup_rule() -> void:
+	assert_array(GameData.get_trait(&"pickup").exclusive_with).is_empty()      # v0.103: 삭제
+	assert_array(GameData.get_trait(&"honey_gather").exclusive_with).is_empty()
+	assert_array(GameData.get_trait(&"illuminate").exclusive_with).contains_exactly([&"stench"])
+	assert_array(GameData.get_trait(&"stench").exclusive_with).contains_exactly([&"illuminate"])
+	assert_array(GameData.get_trait(&"keen_eye").exclusive_with).contains_exactly([&"unnerve"])
+	assert_array(GameData.get_trait(&"unnerve").exclusive_with).contains_exactly([&"keen_eye"])

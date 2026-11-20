@@ -6,15 +6,18 @@ extends RefCounted
 ## 출현 배율이 이 값을 넘지 않게 (같은 타입에 서로 다른 특성 2개가 겹칠 때)
 const MAX_TYPE_WEIGHT := 2.25
 const MAX_INTERVAL_MULT := 1.5
+## 간격을 줄이는 특성(발광, v0.103)이 겹쳐도 이 값 밑으로는 내려가지 않는다
+const MIN_INTERVAL_MULT := 0.7
 
 
 ## 엔트리 개체들 → 합친 전투 효과
 ## {type_weights: {type: mult}, interval_mult, wild_level_add, fill_mult,
-##  item_encounter_mult (픽업, v0.84), per_level_currency, refund_ball, refund_chance, traits: [TraitData]}
+##  item_encounter_mult (픽업, v0.84), per_level_currency, refund_ball, refund_chance,
+##  trait_count_weights (트레이스, v0.103: 포획 시 특성 개수 가중치, 없으면 []), traits: [TraitData]}
 static func collect(entries: Array) -> Dictionary:
 	var out := {
 		"type_weights": {}, "interval_mult": 1.0, "wild_level_add": 0, "fill_mult": 1.0,
-		"item_encounter_mult": 1.0, "per_level_currency": 0, "refund_ball": false, "refund_chance": 0.0, "traits": [],
+		"item_encounter_mult": 1.0, "trait_count_weights": [], "per_level_currency": 0, "refund_ball": false, "refund_chance": 0.0, "traits": [],
 	}
 	var seen := {}
 	for inst in entries:
@@ -30,13 +33,15 @@ static func collect(entries: Array) -> Dictionary:
 							var k := StringName(ty)
 							out.type_weights[k] = minf(MAX_TYPE_WEIGHT, float(out.type_weights.get(k, 1.0)) * float(e.value))
 					"encounter_interval_mult":
-						out.interval_mult = minf(MAX_INTERVAL_MULT, out.interval_mult * float(e.value))
+						out.interval_mult = clampf(out.interval_mult * float(e.value), MIN_INTERVAL_MULT, MAX_INTERVAL_MULT)   # 악취 ×1.15 / 발광 ×0.9
 					"wild_level_add":
 						out.wild_level_add += int(e.value)
 					"battle_fill_mult":
 						out.fill_mult *= float(e.value)
 					"item_encounter_mult":   # 픽업 (v0.84: 전투 후 줍기 → 아이템 인카운터 확률)
 						out.item_encounter_mult *= float(e.value)
+					"trait_count_weights":   # 트레이스 (v0.103): 포획 순간 엔트리에 있으면 특성이 붙을 확률 ↑
+						out.trait_count_weights = Array(e.value).map(func(w: Variant) -> int: return int(w))
 					"after_battle_currency":
 						out.per_level_currency += int(e.per_level)
 					"refund_ball":   # 볼줍기 (v0.56: 성공·실패 상관없이 확률로, v0.81: 30% → 15%)
@@ -81,8 +86,14 @@ static func buff_lines(fx: Dictionary) -> Array[Dictionary]:
 		out.append({"text": "꿀모으기", "good": true})
 	if bool(fx.get("refund_ball", false)):
 		out.append({"text": "볼줍기", "good": true})
+	if not Array(fx.get("trait_count_weights", [])).is_empty():
+		out.append({"text": "특성 확률+", "good": true})
+	if float(fx.get("fill_mult", 1.0)) > 1.0:
+		out.append({"text": "게이지 +%d%%" % roundi((float(fx.fill_mult) - 1.0) * 100), "good": true})
 	if float(fx.get("fill_mult", 1.0)) < 1.0:
 		out.append({"text": "게이지 -%d%%" % roundi((1.0 - float(fx.fill_mult)) * 100), "good": false})
+	if float(fx.get("interval_mult", 1.0)) < 1.0:
+		out.append({"text": "출현 +%d%%" % roundi((1.0 / float(fx.interval_mult) - 1.0) * 100), "good": true})
 	if float(fx.get("interval_mult", 1.0)) > 1.0:
 		out.append({"text": "출현 -%d%%" % roundi((1.0 - 1.0 / float(fx.interval_mult)) * 100), "good": false})
 	return out

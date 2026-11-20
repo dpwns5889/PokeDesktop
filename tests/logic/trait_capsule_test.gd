@@ -59,24 +59,24 @@ func test_capsule_drops_only_on_single_transfer() -> void:
 
 
 func test_capsule_adds_replaces_exclusive_and_needs_choice_at_three() -> void:
-	var cap := GameData.capsule_id(&"pickup")
+	var cap := GameData.capsule_id(&"illuminate")
 	PlayerState.add_item(cap, 3)
 	var a := _add([])
 	assert_bool(ProfessorManager.use_capsule(a, cap).ok).is_true()
-	assert_array(PlayerState.find_pokemon(a).traits).contains_exactly(["pickup"])
+	assert_array(PlayerState.find_pokemon(a).traits).contains_exactly(["illuminate"])
 	assert_bool(ProfessorManager.use_capsule(a, cap).ok).is_false()   # 이미 있음
 	# 같이 안 붙는 특성(악취)은 그 자리에서 바뀐다
 	var b := _add(["ball_fetch", "stench"])
 	var r := ProfessorManager.use_capsule(b, cap)
 	assert_str(r.replaced).is_equal("stench")
-	assert_array(PlayerState.find_pokemon(b).traits).contains_exactly(["ball_fetch", "pickup"])
+	assert_array(PlayerState.find_pokemon(b).traits).contains_exactly(["ball_fetch", "illuminate"])
 	# 3개면 바꿀 특성을 골라야 한다 (고정 특성은 세지 않음)
 	var c := _add(["legend", "ball_fetch", "static", "harvest"])
-	assert_bool(ProfessorManager.capsule_plan(PlayerState.find_pokemon(c), &"pickup").choose).is_true()
+	assert_bool(ProfessorManager.capsule_plan(PlayerState.find_pokemon(c), &"illuminate").choose).is_true()
 	assert_bool(ProfessorManager.use_capsule(c, cap).ok).is_false()
 	assert_bool(ProfessorManager.use_capsule(c, cap, "legend").ok).is_false()
 	assert_bool(ProfessorManager.use_capsule(c, cap, "static").ok).is_true()
-	assert_array(PlayerState.find_pokemon(c).traits).contains_exactly(["legend", "ball_fetch", "pickup", "harvest"])
+	assert_array(PlayerState.find_pokemon(c).traits).contains_exactly(["legend", "ball_fetch", "illuminate", "harvest"])
 	assert_int(PlayerState.item_count(cap)).is_equal(0)
 
 
