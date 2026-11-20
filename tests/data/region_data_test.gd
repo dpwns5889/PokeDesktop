@@ -138,3 +138,22 @@ func test_starters_in_grassland_and_rare_hard_lapras_in_cave() -> void:
 	var base := Formulas.capture_difficulty(45, 22, false)
 	assert_float(Formulas.capture_difficulty(45, 22, false, 0.2)).is_equal_approx(base + 0.2, 0.0001)
 	assert_float(Formulas.capture_params(45, 22, false, 1.0, {}, 0.2)[&"difficulty"]).is_equal_approx(base + 0.2, 0.0001)
+
+
+## v0.97: 일반 전설 = 타입 + 도감 100, 뮤츠·뮤 = 타입 없이 뮤츠·뮤를 뺀 149종 (기획서 4.5)
+func test_legendary_dex_conditions_v097() -> void:
+	for r in GameData.legendary_rules():
+		var dex_c := {}
+		var has_type := false
+		for c in r.conditions:
+			if c.type == "dex_caught_count":
+				dex_c = c
+			if c.type == "type_caught_count":
+				has_type = true
+		if r.dex_id in [150, 151]:
+			assert_bool(has_type).is_false()
+			assert_int(int(dex_c.value)).is_equal(149)
+			assert_array(dex_c.exclude).contains_exactly_in_any_order([150, 151])
+		else:
+			assert_bool(has_type).is_true()
+			assert_int(int(dex_c.value)).is_equal(100)

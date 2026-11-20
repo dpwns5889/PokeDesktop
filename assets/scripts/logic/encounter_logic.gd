@@ -53,33 +53,35 @@ static func roll_gender(species: PokemonSpecies, rng: RandomNumberGenerator) -> 
 	return &"male" if rng.randf() < species.gender_ratio else &"female"
 
 
-## 전설 출현 판정 (기획서 4.5). 조건을 만족하고 지역이 맞는 규칙마다 확률을 굴린다(무작위 순서).
-## is_met: Callable(conditions: Array) -> bool
-static func roll_legendary(region: RegionData, rules: Array[LegendaryRule], is_met: Callable,
-		rng: RandomNumberGenerator) -> LegendaryRule:
+## 이 지역에서 조건을 만족해 후보가 되는 전설 규칙 (기획서 4.5)
+static func eligible_legendaries(region: RegionData, rules: Array[LegendaryRule], is_met: Callable) -> Array[LegendaryRule]:
 	var eligible: Array[LegendaryRule] = []
 	for r in rules:
 		if (r.region_ids.is_empty() or r.region_ids.has(region.id)) and is_met.call(r.conditions):
 			eligible.append(r)
-	# 같은 rng로 섞어 재현 가능하게
-	for i in range(eligible.size() - 1, 0, -1):
-		var j := rng.randi_range(0, i)
-		var tmp := eligible[i]
-		eligible[i] = eligible[j]
-		eligible[j] = tmp
-	for r in eligible:
-		if rng.randf() < r.chance:
-			return r
-	return null
+	return eligible
+
+
+## 전설 출현 판정 (기획서 4.5, v0.97). 후보가 있으면 확률을 **한 번만** 굴리고, 나오면 후보 중 하나를 고른다.
+## misses = 이 지역에서 전설을 못 만난 인카운터 수 → 확률 +1%p씩, 최대 20%
+static func roll_legendary(region: RegionData, rules: Array[LegendaryRule], is_met: Callable,
+		rng: RandomNumberGenerator, misses: int = 0) -> LegendaryRule:
+	var eligible := eligible_legendaries(region, rules, is_met)
+	if eligible.is_empty():
+		return null
+	var chance := minf(eligible[0].chance + misses * Formulas.LEGEND_PITY_STEP, Formulas.LEGEND_CHANCE_MAX)
+	if rng.randf() >= chance:
+		return null
+	return eligible[rng.randi_range(0, eligible.size() - 1)]
 
 
 ## 인카운터 1건. 지역에 출현 가능한 항목이 없으면 빈 Dictionary.
 ## rules/is_met 을 주면 전설 출현을 먼저 판정한다.
 static func roll_encounter(region: RegionData, player_level: int, rng: RandomNumberGenerator,
 		rules: Array[LegendaryRule] = [], is_met: Callable = Callable(), type_weights: Dictionary = {},
-		shiny_mult: float = 1.0) -> Dictionary:
+		shiny_mult: float = 1.0, legend_misses: int = 0) -> Dictionary:
 	if not rules.is_empty() and is_met.is_valid():
-		var rule := roll_legendary(region, rules, is_met, rng)
+		var rule := roll_legendary(region, rules, is_met, rng, legend_misses)
 		if rule != null:
 			var ls := GameData.get_species(rule.dex_id)
 			if ls != null:

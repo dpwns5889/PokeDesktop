@@ -31,6 +31,8 @@ var rng := RandomNumberGenerator.new()
 var fast_mode := false
 var force_shiny := false
 var force_item := false
+## 이 지역에서 조건을 만족한 전설을 못 만난 인카운터 수 (v0.97, 기획서 4.5). 지역을 옮기거나 전설이 나타나면 0. 저장 안 함
+var legend_misses := 0
 
 ## 이번 전투에 쓴 볼 (볼줍기 특성: 실패하면 돌려준다)
 var _battle_ball: StringName = &""
@@ -240,6 +242,7 @@ func _schedule_next(now: float) -> void:
 
 ## 지역을 바꿨을 때 남은 시간이 새 지역의 최대 간격보다 길면 새 지역 기준으로 다시 뽑는다.
 func _on_region_changed(_id: StringName) -> void:
+	legend_misses = 0   # v0.97
 	if not _started or fast_mode:
 		return
 	var now := _now()
@@ -271,7 +274,11 @@ func _begin_encounter(now: float) -> void:
 	for t in inc:
 		weights[t] = float(weights.get(t, 1.0)) * float(inc[t])
 	var enc := {} if region == null else EncounterLogic.roll_encounter(region, PlayerState.level, rng,
-		GameData.legendary_rules(), UnlockManager.evaluate, weights, PlayerState.shiny_multiplier(int(now)))
+		GameData.legendary_rules(), UnlockManager.evaluate, weights, PlayerState.shiny_multiplier(int(now)), legend_misses)
+	if enc.get(&"legendary", false):
+		legend_misses = 0
+	elif region != null and not EncounterLogic.eligible_legendaries(region, GameData.legendary_rules(), UnlockManager.evaluate).is_empty():
+		legend_misses += 1
 	if not enc.is_empty() and not enc.get(&"legendary", false):
 		enc[&"level"] = BattleTraits.boosted_level(enc[&"level"], fx.wild_level_add, region.level_cap)   # 의기양양
 	if enc.is_empty():

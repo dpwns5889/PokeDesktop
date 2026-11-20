@@ -136,6 +136,9 @@ const CAPTURE_BASE_FILL := 0.12
 const CAPTURE_INNER_RATIO := 0.45        # 과녁 반지름 대비 '중심' 영역
 const CAPTURE_INNER_BONUS := 1.5         # 중심 명중 시 게이지 배율
 const LEGENDARY_DIFFICULTY_BONUS := 0.15
+## 전설 출현 확률 증가 (v0.97, 기획서 4.5): 못 만난 인카운터마다 +1%p, 최대 20%
+const LEGEND_PITY_STEP := 0.01
+const LEGEND_CHANCE_MAX := 0.20
 
 
 ## bonus = 출현 표 한 줄의 추가 난이도 (EncounterEntry.difficulty_bonus, v0.76)

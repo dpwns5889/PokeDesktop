@@ -4,6 +4,7 @@ extends OverlayPanel
 ## 개발용 기능은 메인 창 우클릭 메뉴(디버그 빌드만)에 있다.
 
 const SCALES := ["자동", "1배", "2배", "3배", "4배"]
+const SECTION_INDENT := 10   ## 구역(창·소리·데이터) 아래 항목의 왼쪽 들여쓰기 px (기획서 6.3)
 
 var _on_top: CheckButton
 var _hide_fullscreen: CheckButton
@@ -31,14 +32,14 @@ func _build_content(box: VBoxContainer) -> void:
 	list.add_theme_constant_override(&"separation", 3)
 	scroll.add_child(list)
 
-	_section(list, "창")
+	var sec := _section(list, "창")
 	_on_top = CheckButton.new()
 	_on_top.text = "항상 위에 표시"
 	_on_top.focus_mode = Control.FOCUS_NONE
 	_on_top.toggled.connect(func(on: bool) -> void:
 		if not _loading:
 			WindowManager.set_always_on_top(on))
-	list.add_child(_on_top)
+	sec.add_child(_on_top)
 	_hide_fullscreen = CheckButton.new()
 	_hide_fullscreen.text = "전체화면 앱 실행 중 숨기기"
 	_hide_fullscreen.focus_mode = Control.FOCUS_NONE
@@ -46,9 +47,9 @@ func _build_content(box: VBoxContainer) -> void:
 	_hide_fullscreen.toggled.connect(func(on: bool) -> void:
 		if not _loading:
 			Settings.set_value(&"hide_on_fullscreen", on))
-	list.add_child(_hide_fullscreen)
+	sec.add_child(_hide_fullscreen)
 
-	var scale_row := _row(list, "창 크기")
+	var scale_row := _row(sec, "창 크기")
 	_scale = OptionButton.new()
 	_scale.focus_mode = Control.FOCUS_NONE
 	for s in SCALES:
@@ -65,16 +66,16 @@ func _build_content(box: VBoxContainer) -> void:
 	_move.toggled.connect(func(on: bool) -> void:
 		if not _loading:
 			WindowManager.move_mode = on)
-	list.add_child(_move)
+	sec.add_child(_move)
 
 	var reset := Button.new()
 	reset.text = "우하단으로 되돌리기"
 	reset.focus_mode = Control.FOCUS_NONE
 	reset.pressed.connect(WindowManager.reset_position)
-	list.add_child(reset)
+	sec.add_child(reset)
 
-	_section(list, "소리")
-	var vol_row := _row(list, "효과음 크기")
+	sec = _section(list, "소리")
+	var vol_row := _row(sec, "효과음 크기")
 	_volume = HSlider.new()
 	_volume.min_value = 0
 	_volume.max_value = 100
@@ -93,7 +94,7 @@ func _build_content(box: VBoxContainer) -> void:
 	_volume_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 	vol_row.add_child(_volume_label)
 
-	var bgm_row := _row(list, "배경음 크기")
+	var bgm_row := _row(sec, "배경음 크기")
 	_bgm_volume = HSlider.new()
 	_bgm_volume.min_value = 0
 	_bgm_volume.max_value = 100
@@ -119,8 +120,23 @@ func _build_content(box: VBoxContainer) -> void:
 	_encounter_sound.toggled.connect(func(on: bool) -> void:
 		if not _loading:
 			Settings.set_value(&"encounter_sound", on))
-	list.add_child(_encounter_sound)
+	sec.add_child(_encounter_sound)
 
+	# 저장된 데이터 삭제 (v0.96): 확인 창을 한 번 거친다 (기획서 6.3)
+	sec = _section(list, "데이터")
+	var wipe := Button.new()
+	wipe.text = "저장된 데이터 삭제"
+	wipe.focus_mode = Control.FOCUS_NONE
+	wipe.add_theme_color_override(&"font_color", Color(1, 0.45, 0.4))
+	wipe.pressed.connect(_on_wipe)
+	sec.add_child(wipe)
+
+
+
+func _on_wipe() -> void:
+	confirm_requested.emit("저장된 데이터 삭제",
+		"저장된 진행을 모두 지웁니다.\n(레벨, 도감, 보관함, 아이템, 재화)\n설정(창 크기·소리 등)은 유지됩니다.\n되돌릴 수 없습니다. 계속할까요?",
+		"삭제", SaveManager.reset_save)
 
 
 func refresh() -> void:
@@ -143,11 +159,19 @@ func _on_volume_changed(v: float) -> void:
 		Settings.set_value(&"sfx_volume", v / 100.0, false)   # 끌 때마다 파일에 쓰지 않음 (놓을 때 저장)
 
 
-func _section(parent: Control, text: String) -> void:
+## 노란 구역 제목을 붙이고, 그 아래 항목을 왼쪽으로 들여 넣을 상자를 돌려준다 (기획서 6.3, v0.96)
+func _section(parent: Control, text: String) -> VBoxContainer:
 	var l := Label.new()
 	l.text = text
 	l.add_theme_color_override(&"font_color", Color(1, 0.85, 0.35))
 	parent.add_child(l)
+	var indent := MarginContainer.new()
+	indent.add_theme_constant_override(&"margin_left", SECTION_INDENT)
+	parent.add_child(indent)
+	var items := VBoxContainer.new()
+	items.add_theme_constant_override(&"separation", 3)
+	indent.add_child(items)
+	return items
 
 
 func _row(parent: Control, label: String) -> HBoxContainer:

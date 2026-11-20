@@ -4,7 +4,7 @@ extends Node
 ##
 ## 조건 타입
 ##   {type: "player_level",      value: N}
-##   {type: "dex_caught_count",  value: N}                 도감에 포획으로 등록된 종 수
+##   {type: "dex_caught_count",  value: N}                 도감에 포획으로 등록된 종 수 (exclude: [도감 번호] 가 있으면 그 종은 빼고, v0.97)
 ##   {type: "species_caught",    value: dex_id}
 ##   {type: "type_caught_count", type_id: "water", value: N}   그 타입을 가진 포획 종 수
 ##   {type: "region_unlocked",   value: "forest"}
@@ -17,6 +17,7 @@ func _ready() -> void:
 	EventBus.game_reset.connect(check_regions)
 	# 세이브를 불러온 뒤(SaveManager가 먼저 준비됨) 한 번 확인. 조건이 바뀐 경우 대비.
 	check_regions.call_deferred()
+	_migrate_legend_notice.call_deferred()
 
 
 ## 모든 조건을 만족하는가
@@ -39,6 +40,9 @@ func progress(c: Dictionary) -> Dictionary:
 			label = "플레이어 Lv%d" % target
 		"dex_caught_count":
 			current = PlayerState.dex_caught_count()
+			for id in c.get("exclude", []):
+				if PlayerState.is_caught(int(id)):
+					current -= 1
 			label = "도감 %d종 포획" % target
 		"species_caught":
 			var s := GameData.get_species(int(c.value))
@@ -81,3 +85,22 @@ func check_regions() -> Array[StringName]:
 			newly.append(r.id)
 			EventBus.region_unlocked.emit(r.id)
 	return newly
+
+
+## 조건을 만족했지만 울음소리 알림을 아직 안 띄운 전설 규칙 (v0.97, 기획서 4.5)
+func legend_notice_due() -> Array[LegendaryRule]:
+	var due: Array[LegendaryRule] = []
+	for r in GameData.legendary_rules():
+		if not PlayerState.legend_noticed.has(r.dex_id) and evaluate(r.conditions):
+			due.append(r)
+	return due
+
+
+## 알림 기능 이전 세이브: 이미 만족한 전설은 알림 완료로 (팝업이 한꺼번에 뜨지 않게)
+func _migrate_legend_notice() -> void:
+	if not PlayerState.legend_noticed_missing:
+		return
+	var ids: Array[int] = []
+	for r in legend_notice_due():
+		ids.append(r.dex_id)
+	PlayerState.mark_legend_noticed(ids)

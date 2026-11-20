@@ -456,7 +456,8 @@ func _on_region_unlocked(id: StringName) -> void:
 ## 도감 완성 알림(v0.77)도 같은 조건으로, 지역 해금보다 먼저 띄운다 → 포획 정보 창을 확인한 뒤에 뜬다.
 func _show_unlock_notice() -> void:
 	var dex_due := PlayerState.is_dex_complete() and not PlayerState.dex_complete_noticed
-	if _unlock_names.is_empty() and not dex_due:
+	var legend_due := UnlockManager.legend_notice_due()   # 전설 울음소리 (v0.97, 기획서 4.5)
+	if _unlock_names.is_empty() and not dex_due and legend_due.is_empty():
 		return
 	if EncounterManager.state not in [EncounterManager.State.WAITING, EncounterManager.State.PAUSED]:
 		return
@@ -469,8 +470,31 @@ func _show_unlock_notice() -> void:
 			PlayerState.mark_dex_complete_noticed(), true)   # BBCode: "더 자주 나타난다"만 노란색 (v0.90)
 		AudioManager.play(&"region_unlocked")
 		return
+	if _unlock_names.is_empty():
+		_notify_legend(legend_due)
+		return
 	_confirm.notify("새 지역 해금", "새로운 지역이 해금되었다!\n%s\n\n지역 버튼에서 이동할 수 있다." % ", ".join(_unlock_names),
 		func() -> void: _unlock_names.clear(), true)
+
+
+## 전설 조건을 처음 채웠을 때 "~에서 울음소리가 들려온다." (v0.97). 같은 지역은 한 줄로, 확인하면 다시 안 뜬다
+func _notify_legend(due: Array[LegendaryRule]) -> void:
+	var ids: Array[int] = []
+	var names: Array[String] = []
+	for rule in due:
+		ids.append(rule.dex_id)
+		for rid in rule.region_ids:
+			var region := GameData.get_region(rid)
+			if region and not names.has(UiUtil.region_bbcode(region)):
+				names.append(UiUtil.region_bbcode(region))
+	if names.is_empty():
+		PlayerState.mark_legend_noticed(ids)   # 보여 줄 지역이 없으면 조용히 처리
+		return
+	var lines: Array[String] = []
+	for n in names:
+		lines.append("%s에서 울음소리가 들려온다." % n)
+	_confirm.notify("전설의 기척", "\n".join(lines), func() -> void: PlayerState.mark_legend_noticed(ids), true)
+	AudioManager.play(&"region_unlocked")
 
 
 ## 지역을 바꾸면 다음 인카운터부터 적용. 대기 중이면 화면도 바로 바꾼다.

@@ -11,11 +11,12 @@ config_version=5
 [application]
 
 config/name="PokeCompanion"
-config/version="0.95"
+config/version="0.97"
 run/main_scene="res://assets/scenes/main/companion.tscn"
 config/features=PackedStringArray("4.7", "GL Compatibility")
 run/max_fps=30
 run/low_processor_mode=true
+boot_splash/show_image=false
 config/icon="uid://c5iftjno2ymmt"
 
 [autoload]

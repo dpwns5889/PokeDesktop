@@ -7,8 +7,8 @@ extends SceneTree
 ##   대상      = is_legendary 또는 is_mythical 인 종 (도감 순)
 ##   주 타입    = 첫 번째 타입
 ##   플레이어 Lv = 25 + 3 × (대상 중 순번)
-##   타입 포획  = ceil(주 타입을 가진 비전설 종 수 × 0.6) 종
-##   도감 포획  = floor(비전설 종 수 × 비율). 비율: 일반 전설 0.7, 종족값 합 680 이상 0.9, 환상 0.95 (M10)
+##   일반 전설  = 타입 포획 ceil(주 타입을 가진 비전설 종 수 × 0.6)종 + 도감 포획 100종 (v0.97)
+##   강한 전설(종족값 합 680 이상)·환상 = 타입 조건 없음, 도감 포획 = 이런 전설을 뺀 전부(1세대 149종, exclude) (v0.97)
 ##   등장 지역  = 주 타입이 대표 타입인 지역 (없으면 모든 지역)
 ##   등장 레벨  = 일반 전설 50, 종족값 합 680 이상 70, 환상 30
 ##   확률      = 인카운터마다 3% (M10 밸런스)
@@ -42,6 +42,10 @@ func _run(max_gen: int) -> int:
 
 	var normal := species.filter(func(s): return not (s.is_legendary or s.is_mythical))
 	var legends := species.filter(func(s): return s.is_legendary or s.is_mythical)
+	var specials: Array = []   # 강한 전설·환상의 도감 번호 (도감 조건에서 뺀다)
+	for l in legends:
+		if l.base_stat_total() >= STRONG_BST or l.is_mythical:
+			specials.append(l.dex_id)
 	DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path(OUT_DIR))
 	for f in DirAccess.get_files_at(OUT_DIR):
 		if f.ends_with(".tres"):
@@ -52,17 +56,18 @@ func _run(max_gen: int) -> int:
 		var main_type: StringName = s.types[0]
 		var type_total := normal.filter(func(n): return n.types.has(main_type)).size()
 		var strong := s.base_stat_total() >= STRONG_BST
-		var ratio := 0.95 if s.is_mythical else (0.9 if strong else 0.7)
+		var special := strong or s.is_mythical
 
 		var rule := LegendaryRule.new()
 		rule.dex_id = s.dex_id
 		rule.chance = CHANCE
 		rule.level = 30 if s.is_mythical else (70 if strong else 50)
-		var conds: Array[Dictionary] = [
-			{"type": "player_level", "value": 25 + 3 * idx},
-			{"type": "type_caught_count", "type_id": String(main_type), "value": ceili(type_total * 0.6)},
-			{"type": "dex_caught_count", "value": floori(normal.size() * ratio)},
-		]
+		var conds: Array[Dictionary] = [{"type": "player_level", "value": 25 + 3 * idx}]
+		if special:
+			conds.append({"type": "dex_caught_count", "value": species.size() - specials.size(), "exclude": specials})
+		else:
+			conds.append({"type": "type_caught_count", "type_id": String(main_type), "value": ceili(type_total * 0.6)})
+			conds.append({"type": "dex_caught_count", "value": 100})
 		rule.conditions = conds
 		var region_ids: Array[StringName] = []
 		for r in regions:

@@ -42,6 +42,9 @@ var shop_unlocks: Array[String] = []
 ## 도감 완성(151종 포획) 시각 (v0.77). 0 = 아직. 완성 알림을 확인했으면 dex_complete_noticed (왕관 표시)
 var dex_completed_at: int = 0
 var dex_complete_noticed := false
+## 울음소리 알림(v0.97, 기획서 4.5)을 이미 띄운 전설의 도감 번호. 저장 키가 없던 세이브는 불러온 뒤 한 번 채운다
+var legend_noticed: Array[int] = []
+var legend_noticed_missing := false
 
 ## 특성 생성 등에 쓰는 난수 (테스트에서 seed 고정)
 var rng := RandomNumberGenerator.new()
@@ -68,6 +71,8 @@ func reset() -> void:
 	shop_unlocks = []
 	dex_completed_at = 0
 	dex_complete_noticed = false
+	legend_noticed = []
+	legend_noticed_missing = false
 
 
 # ---------------------------------------------------------------- 레벨 / 경험치
@@ -177,6 +182,15 @@ func is_dex_complete() -> bool:
 ## 도감 완성 알림을 확인했다 → 왕관이 보인다 (v0.77)
 func mark_dex_complete_noticed() -> void:
 	dex_complete_noticed = true
+	changed.emit()
+
+
+## 전설 울음소리 알림을 띄웠다 (v0.97, 기획서 4.5)
+func mark_legend_noticed(ids: Array) -> void:
+	for id in ids:
+		if not legend_noticed.has(int(id)):
+			legend_noticed.append(int(id))
+	legend_noticed_missing = false
 	changed.emit()
 
 
@@ -538,6 +552,7 @@ func to_save_dict() -> Dictionary:
 		"shop_unlocks": shop_unlocks.duplicate(),
 		"dex_completed_at": dex_completed_at,
 		"dex_complete_noticed": dex_complete_noticed,
+		"legend_noticed": legend_noticed.duplicate(),
 	}
 
 
@@ -632,6 +647,10 @@ func load_save_dict(d: Dictionary) -> void:
 	# 도감 완성 (v0.77): 이미 151종을 잡은 세이브는 불러올 때 완성으로 (알림은 아직 안 봄)
 	dex_completed_at = maxi(0, int(d.get("dex_completed_at", 0)))
 	dex_complete_noticed = bool(d.get("dex_complete_noticed", false))
+	legend_noticed = []
+	for id in d.get("legend_noticed", []):
+		legend_noticed.append(int(id))
+	legend_noticed_missing = not d.has("legend_noticed")   # 이 기능 이전 세이브 → UnlockManager가 한 번 채움
 	_check_dex_complete()
 
 	# 엔트리: 보관함에 있고 원정 중이 아닌 개체만, 중복 없이 최대 MAX_ENTRIES

@@ -1,9 +1,9 @@
 [gd_resource type="Resource" script_class="LegendaryRule" format=3]
 
-[ext_resource type="Script" path="res://assets/scripts/data/legendary_rule.gd" id="1_2ejt0"]
+[ext_resource type="Script" path="res://assets/scripts/data/legendary_rule.gd" id="1_xemgw"]
 
 [resource]
-script = ExtResource("1_2ejt0")
+script = ExtResource("1_xemgw")
 dex_id = 145
 chance = 0.03
 region_ids = Array[StringName]([&"power_plant"])
@@ -16,5 +16,5 @@ conditions = Array[Dictionary]([{
 "value": 5
 }, {
 "type": "dex_caught_count",
-"value": 102
+"value": 100
 }])

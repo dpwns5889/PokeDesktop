@@ -143,6 +143,71 @@ func test_no_legendary_in_other_region() -> void:
 	assert_bool(EncounterLogic.roll_encounter(region, 30, _rng(), rules, UnlockManager.evaluate)[&"legendary"]).is_false()
 
 
+func test_legendary_chance_rises_with_misses_and_caps() -> void:
+	PlayerState.level = 30
+	var region := GameData.get_region(&"snow_mountain")
+	var rules: Array[LegendaryRule] = [_rule(144, &"snow_mountain", 0.03)]
+	var rng := _rng()
+	var hits := 0
+	for i in 20000:
+		if EncounterLogic.roll_legendary(region, rules, UnlockManager.evaluate, rng, 10) != null:
+			hits += 1
+	assert_int(hits).is_between(2500, 3500)   # 3% + 10%p = 13% → 기대 2600
+	hits = 0
+	for i in 20000:
+		if EncounterLogic.roll_legendary(region, rules, UnlockManager.evaluate, rng, 500) != null:
+			hits += 1
+	assert_int(hits).is_between(3800, 4200)   # 상한 20% → 기대 4000
+
+
+func test_two_eligible_legendaries_share_one_roll() -> void:
+	PlayerState.level = 30
+	var region := GameData.get_region(&"snow_mountain")
+	var rules: Array[LegendaryRule] = [_rule(150, &"snow_mountain", 0.03), _rule(151, &"snow_mountain", 0.03)]
+	var rng := _rng()
+	var hits := 0
+	var mew := 0
+	for i in 20000:
+		var r := EncounterLogic.roll_legendary(region, rules, UnlockManager.evaluate, rng)
+		if r != null:
+			hits += 1
+			if r.dex_id == 151:
+				mew += 1
+	assert_int(hits).is_between(500, 700)   # 두 번 굴리면 6%, 한 번이면 3% → 기대 600
+	assert_int(mew).is_between(230, 370)    # 둘이 반반
+
+
+func test_dex_condition_exclude_skips_listed_species() -> void:
+	_catch(150)
+	_catch(1)
+	_catch(2)
+	var c := {"type": "dex_caught_count", "value": 2, "exclude": [150, 151]}
+	assert_int(UnlockManager.progress(c).current).is_equal(2)
+	assert_bool(UnlockManager.evaluate([c])).is_true()
+	c.value = 3
+	assert_bool(UnlockManager.evaluate([c])).is_false()
+
+
+func test_legend_notice_due_once_and_old_save_is_silent() -> void:
+	var due := UnlockManager.legend_notice_due()
+	assert_int(due.size()).is_equal(0)   # 새 게임은 조건 미충족
+	PlayerState.level = 40
+	for i in range(1, 151):
+		if i != 150 and i != 151:
+			_catch(i)
+	var ids := UnlockManager.legend_notice_due().map(func(r: LegendaryRule) -> int: return r.dex_id)
+	assert_array(ids).contains_exactly_in_any_order([144, 145, 146, 150, 151])
+	PlayerState.mark_legend_noticed([150, 151])
+	assert_int(UnlockManager.legend_notice_due().size()).is_equal(3)
+	var d := PlayerState.to_save_dict()
+	d.erase("legend_noticed")   # 이 기능 이전 세이브
+	PlayerState.load_save_dict(d)
+	assert_bool(PlayerState.legend_noticed_missing).is_true()
+	UnlockManager._migrate_legend_notice()
+	assert_int(UnlockManager.legend_notice_due().size()).is_equal(0)
+	assert_bool(PlayerState.legend_noticed_missing).is_false()
+
+
 func test_caught_legendary_gets_legend_trait_and_duplicates_allowed() -> void:
 	var a := PlayerState.add_caught({&"dex_id": 150, &"level": 70, &"gender": &"none", &"region": &"ghost_tower"})
 	var b := PlayerState.add_caught({&"dex_id": 150, &"level": 70, &"gender": &"none", &"region": &"ghost_tower"})

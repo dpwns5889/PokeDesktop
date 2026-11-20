@@ -7,6 +7,9 @@ extends Node
 ##   caught3  특성이 3개인 포켓몬의 포획 정보 창 (caught3_scrolled = 스크롤을 끝까지 내린 모습도 저장)
 ##   caught3long  이름이 가장 긴 특성 3개로 (상자 끝이 잘리는 모습)
 ##   expedition  원정 패널에서 설산 등반·초원 산책을 고른 모습 (원정지 이름 색)
+##   wipe     설정 맨 위(settings_top)와 맨 아래 "저장된 데이터 삭제" 버튼과 확인 창
+##   legend   전설 울음소리 알림 팝업 (v0.97): 프리져 조건을 채운 상태 → 설산 / 뮤츠·뮤 → 유령탑
+##   stone    보관함에서 이브이에게 진화의 돌 사용 (보관함 → 진화 창 → 진화 뒤)
 ##   caughtbig  타입 2개·그림이 가장 큰 종·색이 다른·Lv100·가장 긴 특성 3개 (가장 넓은 경우)
 ## 결과: tools/previews/capture_<이름>.png (기준 해상도 그대로, 저작권 스프라이트가 들어 있어 git 제외)
 ## 주의: 사용자 세이브를 읽고 자동 저장할 수 있으니, 실행 전후로 세이브를 백업·복원한다 (CLAUDE.md).
@@ -32,6 +35,12 @@ func _ready() -> void:
 				await _capture_caught3(true)
 			"caughtbig":
 				await _capture_caught3(true, _biggest_dual_type())
+			"stone":
+				await _capture_stone()
+			"wipe":
+				await _capture_wipe()
+			"legend":
+				await _capture_legend()
 			"expedition":
 				await _capture_expedition(&"snow_climb", "expedition_snow")
 				await _capture_expedition(&"grassland_walk", "expedition_grass")
@@ -120,3 +129,78 @@ func _capture_caught3(longest: bool, big_dex: int = 0) -> void:
 	await _frames(6)
 	await _save(tag + "_scrolled")
 	_main._caught.close_panel()
+
+
+## 보관함에서 이브이를 고르고 불의 돌로 진화시키는 과정
+func _capture_stone() -> void:
+	var p := PlayerState.add_caught({&"dex_id": 133, &"level": 20, &"gender": &"male", &"region": &"grassland"})
+	for id in [&"water_stone", &"fire_stone", &"thunder_stone"]:
+		PlayerState.add_item(id, 1)
+	_main._caught.close_panel()   # add_caught 가 띄운 포획 정보 창
+	await _frames(4)
+	_main._toggle_panel(&"storage")
+	await _frames(6)
+	var panel = _main._panels[&"storage"]
+	var idx: int = panel._uids.find(p.uid)
+	panel._list.select(idx)
+	panel._on_selected(idx)
+	await _save("stone_storage")
+	panel._info_scroll.scroll_vertical = 9999
+	await _frames(6)
+	await _save("stone_storage_scrolled")
+	panel._info_scroll.scroll_vertical = 0
+	for b: Button in panel._evo_box.get_children():
+		if b.text == GameData.get_item(&"fire_stone").name_ko:
+			b.pressed.emit()
+	await _frames(10)
+	await _save("stone_overlay")
+	var o: Node
+	for c in _main.get_children():
+		if c.get_script() and String(c.get_script().resource_path).ends_with("evolution_overlay.gd"):
+			o = c
+	if o:
+		o._on_skip()
+		await _frames(6)
+		await _save("stone_done")
+
+
+## 설정 맨 아래 삭제 버튼과 눌렀을 때 확인 창 (확인은 누르지 않는다)
+func _capture_wipe() -> void:
+	_main._toggle_panel(&"settings")
+	await _frames(6)
+	var panel = _main._panels[&"settings"]
+	await _save("settings_top")   # 맨 위: 구역 들여쓰기 (v0.96)
+	panel.find_children("*", "ScrollContainer", true, false)[0].scroll_vertical = 9999
+	await _frames(6)
+	await _save("wipe_settings")
+	for b: Button in panel.find_children("*", "Button", true, false):
+		if b.text == "저장된 데이터 삭제":
+			b.pressed.emit()
+	await _frames(8)
+	await _save("wipe_confirm")
+
+
+## 전설 울음소리 알림 (v0.97): 프리져 조건만 채운 상태(설산), 그다음 뮤츠·뮤 조건까지 채운 상태(유령탑)
+func _capture_legend() -> void:
+	PlayerState.reset()   # 사용자 세이브와 상관없이 같은 상태에서 시작
+	PlayerState.level = 40
+	for id in range(1, 101):
+		if not [144, 145, 146, 150, 151].has(id):
+			PlayerState.add_caught({&"dex_id": id, &"level": 5, &"gender": &"male", &"shiny": false, &"region": &"grassland"})
+	PlayerState.mark_legend_noticed([145, 146, 150, 151])   # 프리져만 알림 대기
+	await _show_legend_notice("legend_notice")
+	_main._confirm._confirm()
+	await _frames(10)
+	for id in range(101, 150):
+		PlayerState.add_caught({&"dex_id": id, &"level": 5, &"gender": &"male", &"shiny": false, &"region": &"grassland"})
+	PlayerState.legend_noticed = [144, 145, 146]
+	await _show_legend_notice("legend_notice_ghost")
+
+
+func _show_legend_notice(tag: String) -> void:
+	await _frames(30)   # 포획 정보 창이 늦게 뜨므로 기다렸다가 닫는다(떠 있으면 알림이 미뤄진다)
+	_main._caught.hide()
+	_main._unlock_names.clear()   # 지역 해금 알림이 먼저 뜨지 않게
+	_main._show_unlock_notice()
+	await _frames(20)
+	await _save(tag)

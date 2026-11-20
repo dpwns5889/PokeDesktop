@@ -1,9 +1,9 @@
 [gd_resource type="Resource" script_class="LegendaryRule" format=3]
 
-[ext_resource type="Script" path="res://assets/scripts/data/legendary_rule.gd" id="1_j83ym"]
+[ext_resource type="Script" path="res://assets/scripts/data/legendary_rule.gd" id="1_0tkij"]
 
 [resource]
-script = ExtResource("1_j83ym")
+script = ExtResource("1_0tkij")
 dex_id = 151
 level = 30
 chance = 0.03
@@ -12,10 +12,7 @@ conditions = Array[Dictionary]([{
 "type": "player_level",
 "value": 37
 }, {
-"type": "type_caught_count",
-"type_id": "psychic",
-"value": 8
-}, {
+"exclude": [150, 151],
 "type": "dex_caught_count",
-"value": 138
+"value": 149
 }])
