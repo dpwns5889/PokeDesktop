@@ -2,8 +2,8 @@ extends OverlayPanel
 ## 도감 패널. 151종 격자: 미발견 ?, 발견만 실루엣, 포획은 원래 모습. (기획서 4.7, 6.2)
 ## 도감을 완성하면(v0.77) 제목 줄에 "색이다른" 전환: 색이 다른 모습으로 잡은 종은 색이 다른 전투 모습, 못 잡은 종은 흐리게.
 
-const CELL := 34
-const ICON := 24   # v0.55: 오버월드 아이콘 1:1
+const CELL := 36
+const ICON := 32   # v0.100: 아틀라스 원본 크기 그대로(배율 1.0)
 const COLUMNS := 8
 
 var _header: Label
@@ -130,10 +130,10 @@ func _show_detail(s: PokemonSpecies) -> void:
 
 func _icon(s: PokemonSpecies) -> Texture2D:
 	if not _icon_cache.has(s.dex_id):
-		_icon_cache[s.dex_id] = UiUtil.pokemon_icon(s)
+		_icon_cache[s.dex_id] = UiUtil.pokemon_icon(s, false, false, true)
 	return _icon_cache[s.dex_id]
 
 
 ## 색이 다른 모습 아이콘 (v0.99: 도감 아틀라스의 색이 다른 그림, 없으면 일반 아이콘)
 func _shiny_icon(s: PokemonSpecies) -> Texture2D:
-	return UiUtil.pokemon_icon(s, false, true)
+	return UiUtil.pokemon_icon(s, false, true, true)

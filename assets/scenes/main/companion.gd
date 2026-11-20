@@ -1091,7 +1091,7 @@ func _refresh_entry_widgets() -> void:
 		icon.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 		icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 		var frames: Array[Texture2D] = []
-		var atlas := PokemonSprites.atlas_icon(s, String(p.get("gender", "")) == "female", bool(p.get("shiny", false)))
+		var atlas := PokemonSprites.atlas_icon(s, String(p.get("gender", "")) == "female", bool(p.get("shiny", false)), true)
 		if atlas:
 			frames.append(atlas)   # 도감 아틀라스 그림은 정지 1장 (v0.99)
 		else:

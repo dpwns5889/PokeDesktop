@@ -60,18 +60,20 @@ const FEMALE_ON_LIGHT := Color("d6337f")
 
 ## UI 아이콘 크기 (v0.55): 오버월드 앞모습(32×32 칸)에서 그림 부분을 24×24 로 잘라 1:1 로 보인다.
 const ICON_SIZE := 24
+## 큰 아이콘 (v0.100): 도감 격자·메인 엔트리 상자. 아틀라스 그림 원본 크기(배율 1.0)
+const ICON_BIG := 32
 static var _icon_cache := {}
 
 
 ## 포켓몬 아이콘 (목록·도감 등). v0.99: 도감 아틀라스 그림(색이 다른·암컷 포함). 아틀라스에 없는 종은
 ## v0.55 방식 — 오버월드 앞모습 첫 프레임을 그림 아래 가운데 기준 24×24 로 자른 것. 그것도 없으면 전투 스프라이트 첫 프레임.
-static func pokemon_icon(s: PokemonSpecies, female: bool = false, shiny: bool = false) -> Texture2D:
+static func pokemon_icon(s: PokemonSpecies, female: bool = false, shiny: bool = false, big: bool = false) -> Texture2D:
 	if s == null:
 		return null
-	var key := "%d:%s:%s" % [s.dex_id, female, shiny]
+	var key := "%d:%s:%s:%s" % [s.dex_id, female, shiny, big]
 	if _icon_cache.has(key):
 		return _icon_cache[key]
-	var atlas := PokemonSprites.atlas_icon(s, female, shiny)   # v0.99: 도감 아틀라스 그림 우선
+	var atlas := PokemonSprites.atlas_icon(s, female, shiny, big)   # v0.99: 도감 아틀라스 그림 우선
 	if atlas:
 		_icon_cache[key] = atlas
 		return atlas

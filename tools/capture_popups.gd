@@ -39,6 +39,8 @@ func _ready() -> void:
 				await _capture_stone()
 			"wipe":
 				await _capture_wipe()
+			"icons":
+				await _capture_icons()
 			"legend":
 				await _capture_legend()
 			"expedition":
@@ -204,3 +206,26 @@ func _show_legend_notice(tag: String) -> void:
 	_main._show_unlock_notice()
 	await _frames(20)
 	await _save(tag)
+
+
+## 큰 아이콘 (v0.100): 151종 모두 포획 + 일부 색다름 → 도감(일반·색다름 전환)과 메인 엔트리 상자 캡처
+func _capture_icons() -> void:
+	PlayerState.reset()
+	for id in range(1, 152):
+		var inst := PlayerState.add_caught({&"dex_id": id, &"level": 5, &"gender": &"male", &"shiny": id % 3 == 0, &"region": &"grassland"})
+		if id in [25, 94, 145]:
+			PlayerState.add_entry(String(inst.uid))
+	await _frames(30)
+	_main._caught.hide()
+	PlayerState.mark_dex_complete_noticed()
+	_main._confirm.hide()
+	await _frames(10)
+	_main._toggle_panel(&"dex")
+	await _save("icons_dex")
+	_main._panels[&"dex"]._shiny_view = true
+	_main._panels[&"dex"].refresh()
+	await _save("icons_dex_shiny")
+	_main._close_panels()
+	await _save("icons_main")
+	_main._toggle_panel(&"party")
+	await _save("icons_party")
