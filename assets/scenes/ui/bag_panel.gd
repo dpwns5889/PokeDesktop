@@ -6,7 +6,7 @@ extends OverlayPanel
 
 const CATEGORY_NAMES := {&"ball": "볼", &"exp_candy": "경험사탕", &"evolution": "진화 도구", &"valuable": "귀중품", &"incense": "향로", &"boost": "도구",
 	&"trait_tool": "특성 도구", &"trait_capsule": "특성 캡슐"}
-const LIST_WIDTH := 120   # 가장 긴 일반 아이템(골드코롱 x99 등)이 아이콘까지 약 113px (v0.91)
+const LIST_WIDTH := 122   # 가장 긴 일반 아이템(골드코롱 x99 등)이 아이콘까지 약 113px (v0.91), 스크롤바 8px 로 +2 (v0.105)
 
 var _money: Label
 var _list: ItemList

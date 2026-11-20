@@ -1,4 +1,4 @@
-[gd_resource type="Theme" load_steps=21 format=3]
+[gd_resource type="Theme" load_steps=34 format=3]
 
 [ext_resource type="FontFile" path="res://assets/fonts/pokemon-dppt.ttf" id="1_font"]
 [ext_resource type="Texture2D" path="res://assets/ui/skin/button_normal.png" id="2_bn"]
@@ -7,6 +7,14 @@
 [ext_resource type="Texture2D" path="res://assets/ui/skin/button_disabled.png" id="5_bd"]
 [ext_resource type="Texture2D" path="res://assets/ui/skin/grabber.png" id="6_gr"]
 [ext_resource type="Texture2D" path="res://assets/ui/skin/grabber_hover.png" id="7_gh"]
+[ext_resource type="Texture2D" path="res://assets/ui/skin/slider_track.png" id="8_st"]
+[ext_resource type="Texture2D" path="res://assets/ui/skin/slider_fill.png" id="9_sf"]
+[ext_resource type="Texture2D" path="res://assets/ui/skin/slider_fill_hover.png" id="10_sh"]
+[ext_resource type="Texture2D" path="res://assets/ui/skin/radio_on.png" id="11_ron"]
+[ext_resource type="Texture2D" path="res://assets/ui/skin/radio_off.png" id="12_roff"]
+[ext_resource type="Texture2D" path="res://assets/ui/skin/scroll_grabber.png" id="13_sg"]
+[ext_resource type="Texture2D" path="res://assets/ui/skin/scroll_grabber_hover.png" id="14_sgh"]
+[ext_resource type="Texture2D" path="res://assets/ui/skin/scroll_grabber_pressed.png" id="15_sgp"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_tooltip"]
 content_margin_left = 4.0
@@ -70,9 +78,118 @@ texture_margin_bottom = 10.0
 
 [sub_resource type="StyleBoxEmpty" id="Empty"]
 
-[sub_resource type="StyleBoxFlat" id="Slider_track"]
+[sub_resource type="StyleBoxTexture" id="Slider_track"]
+content_margin_top = 4.0
+content_margin_bottom = 4.0
+texture = ExtResource("8_st")
+texture_margin_left = 3.0
+texture_margin_right = 3.0
+texture_margin_top = 3.0
+texture_margin_bottom = 3.0
+
+[sub_resource type="StyleBoxTexture" id="Slider_fill"]
+content_margin_top = 4.0
+content_margin_bottom = 4.0
+texture = ExtResource("9_sf")
+texture_margin_left = 3.0
+texture_margin_right = 3.0
+texture_margin_top = 3.0
+texture_margin_bottom = 3.0
+
+[sub_resource type="StyleBoxTexture" id="Slider_fill_hover"]
+content_margin_top = 4.0
+content_margin_bottom = 4.0
+texture = ExtResource("10_sh")
+texture_margin_left = 3.0
+texture_margin_right = 3.0
+texture_margin_top = 3.0
+texture_margin_bottom = 3.0
+
+[sub_resource type="StyleBoxFlat" id="Menu_panel"]
+content_margin_left = 3.0
 content_margin_top = 3.0
+content_margin_right = 3.0
 content_margin_bottom = 3.0
+bg_color = Color(0.973, 0.973, 0.973, 1)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.29, 0.29, 0.29, 1)
+corner_radius_top_left = 2
+corner_radius_top_right = 2
+corner_radius_bottom_right = 2
+corner_radius_bottom_left = 2
+
+[sub_resource type="StyleBoxFlat" id="Menu_hover"]
+bg_color = Color(1, 0.92, 0.92, 1)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.906, 0, 0, 1)
+corner_radius_top_left = 2
+corner_radius_top_right = 2
+corner_radius_bottom_right = 2
+corner_radius_bottom_left = 2
+
+[sub_resource type="StyleBoxFlat" id="Edit_normal"]
+content_margin_left = 4.0
+content_margin_top = 1.0
+content_margin_right = 4.0
+content_margin_bottom = 1.0
+bg_color = Color(0.973, 0.973, 0.973, 1)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.29, 0.29, 0.29, 1)
+corner_radius_top_left = 2
+corner_radius_top_right = 2
+corner_radius_bottom_right = 2
+corner_radius_bottom_left = 2
+
+[sub_resource type="StyleBoxFlat" id="Edit_focus"]
+content_margin_left = 4.0
+content_margin_top = 1.0
+content_margin_right = 4.0
+content_margin_bottom = 1.0
+bg_color = Color(0.973, 0.973, 0.973, 1)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.906, 0, 0, 1)
+corner_radius_top_left = 2
+corner_radius_top_right = 2
+corner_radius_bottom_right = 2
+corner_radius_bottom_left = 2
+
+[sub_resource type="StyleBoxFlat" id="Spin_btn"]
+bg_color = Color(0.973, 0.973, 0.973, 1)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.29, 0.29, 0.29, 1)
+corner_radius_top_left = 2
+corner_radius_top_right = 2
+corner_radius_bottom_right = 2
+corner_radius_bottom_left = 2
+
+[sub_resource type="StyleBoxFlat" id="Spin_btn_hover"]
+bg_color = Color(0.973, 0.973, 0.973, 1)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.906, 0, 0, 1)
+corner_radius_top_left = 2
+corner_radius_top_right = 2
+corner_radius_bottom_right = 2
+corner_radius_bottom_left = 2
+
+[sub_resource type="StyleBoxFlat" id="Spin_btn_pressed"]
 bg_color = Color(0.741, 0.741, 0.741, 1)
 border_width_left = 1
 border_width_top = 1
@@ -84,33 +201,61 @@ corner_radius_top_right = 2
 corner_radius_bottom_right = 2
 corner_radius_bottom_left = 2
 
-[sub_resource type="StyleBoxFlat" id="Slider_fill"]
-content_margin_top = 3.0
-content_margin_bottom = 3.0
-bg_color = Color(0.29, 0.45, 0.906, 1)
+[sub_resource type="StyleBoxFlat" id="Spin_btn_disabled"]
+bg_color = Color(0.871, 0.871, 0.871, 1)
 border_width_left = 1
 border_width_top = 1
 border_width_right = 1
 border_width_bottom = 1
-border_color = Color(0.29, 0.29, 0.29, 1)
+border_color = Color(0.549, 0.549, 0.549, 1)
 corner_radius_top_left = 2
 corner_radius_top_right = 2
 corner_radius_bottom_right = 2
 corner_radius_bottom_left = 2
 
-[sub_resource type="StyleBoxFlat" id="Slider_fill_hover"]
+[sub_resource type="StyleBoxTexture" id="Scroll_track"]
+content_margin_left = 4.0
 content_margin_top = 3.0
+content_margin_right = 4.0
 content_margin_bottom = 3.0
-bg_color = Color(0.388, 0.549, 1, 1)
-border_width_left = 1
-border_width_top = 1
-border_width_right = 1
-border_width_bottom = 1
-border_color = Color(0.29, 0.29, 0.29, 1)
-corner_radius_top_left = 2
-corner_radius_top_right = 2
-corner_radius_bottom_right = 2
-corner_radius_bottom_left = 2
+texture = ExtResource("8_st")
+texture_margin_left = 3.0
+texture_margin_top = 3.0
+texture_margin_right = 3.0
+texture_margin_bottom = 3.0
+
+[sub_resource type="StyleBoxTexture" id="Scroll_grab"]
+content_margin_left = 4.0
+content_margin_top = 3.0
+content_margin_right = 4.0
+content_margin_bottom = 3.0
+texture = ExtResource("13_sg")
+texture_margin_left = 2.0
+texture_margin_top = 2.0
+texture_margin_right = 2.0
+texture_margin_bottom = 2.0
+
+[sub_resource type="StyleBoxTexture" id="Scroll_grab_hover"]
+content_margin_left = 4.0
+content_margin_top = 3.0
+content_margin_right = 4.0
+content_margin_bottom = 3.0
+texture = ExtResource("14_sgh")
+texture_margin_left = 2.0
+texture_margin_top = 2.0
+texture_margin_right = 2.0
+texture_margin_bottom = 2.0
+
+[sub_resource type="StyleBoxTexture" id="Scroll_grab_pressed"]
+content_margin_left = 4.0
+content_margin_top = 3.0
+content_margin_right = 4.0
+content_margin_bottom = 3.0
+texture = ExtResource("15_sgp")
+texture_margin_left = 2.0
+texture_margin_top = 2.0
+texture_margin_right = 2.0
+texture_margin_bottom = 2.0
 
 [resource]
 default_font = ExtResource("1_font")
@@ -145,4 +290,46 @@ HSlider/styles/grabber_area = SubResource("Slider_fill")
 HSlider/styles/grabber_area_highlight = SubResource("Slider_fill_hover")
 HSlider/styles/slider = SubResource("Slider_track")
 OptionButton/constants/modulate_arrow = 1
+LineEdit/colors/caret_color = Color(0.22, 0.22, 0.22, 1)
+LineEdit/colors/font_color = Color(0.22, 0.22, 0.22, 1)
+LineEdit/colors/font_selected_color = Color(0.22, 0.22, 0.22, 1)
+LineEdit/colors/font_uneditable_color = Color(0.5, 0.5, 0.5, 1)
+LineEdit/colors/selection_color = Color(1, 0.58, 0.58, 0.6)
+LineEdit/styles/focus = SubResource("Edit_focus")
+LineEdit/styles/normal = SubResource("Edit_normal")
+LineEdit/styles/read_only = SubResource("Edit_normal")
+PopupMenu/colors/font_color = Color(0.22, 0.22, 0.22, 1)
+PopupMenu/colors/font_disabled_color = Color(0.5, 0.5, 0.5, 1)
+PopupMenu/colors/font_hover_color = Color(0.22, 0.22, 0.22, 1)
+PopupMenu/icons/radio_checked = ExtResource("11_ron")
+PopupMenu/icons/radio_unchecked = ExtResource("12_roff")
+PopupMenu/styles/hover = SubResource("Menu_hover")
+PopupMenu/styles/panel = SubResource("Menu_panel")
+SpinBox/colors/down_disabled_icon_modulate = Color(0.5, 0.5, 0.5, 1)
+SpinBox/colors/down_hover_icon_modulate = Color(0.22, 0.22, 0.22, 1)
+SpinBox/colors/down_icon_modulate = Color(0.22, 0.22, 0.22, 1)
+SpinBox/colors/down_pressed_icon_modulate = Color(0.22, 0.22, 0.22, 1)
+SpinBox/colors/up_disabled_icon_modulate = Color(0.5, 0.5, 0.5, 1)
+SpinBox/colors/up_hover_icon_modulate = Color(0.22, 0.22, 0.22, 1)
+SpinBox/colors/up_icon_modulate = Color(0.22, 0.22, 0.22, 1)
+SpinBox/colors/up_pressed_icon_modulate = Color(0.22, 0.22, 0.22, 1)
+SpinBox/constants/field_and_buttons_separation = 2
+SpinBox/styles/down_background = SubResource("Spin_btn")
+SpinBox/styles/down_background_disabled = SubResource("Spin_btn_disabled")
+SpinBox/styles/down_background_hovered = SubResource("Spin_btn_hover")
+SpinBox/styles/down_background_pressed = SubResource("Spin_btn_pressed")
+SpinBox/styles/up_background = SubResource("Spin_btn")
+SpinBox/styles/up_background_disabled = SubResource("Spin_btn_disabled")
+SpinBox/styles/up_background_hovered = SubResource("Spin_btn_hover")
+SpinBox/styles/up_background_pressed = SubResource("Spin_btn_pressed")
+HScrollBar/styles/grabber = SubResource("Scroll_grab")
+HScrollBar/styles/grabber_highlight = SubResource("Scroll_grab_hover")
+HScrollBar/styles/grabber_pressed = SubResource("Scroll_grab_pressed")
+HScrollBar/styles/scroll = SubResource("Scroll_track")
+HScrollBar/styles/scroll_focus = SubResource("Scroll_track")
+VScrollBar/styles/grabber = SubResource("Scroll_grab")
+VScrollBar/styles/grabber_highlight = SubResource("Scroll_grab_hover")
+VScrollBar/styles/grabber_pressed = SubResource("Scroll_grab_pressed")
+VScrollBar/styles/scroll = SubResource("Scroll_track")
+VScrollBar/styles/scroll_focus = SubResource("Scroll_track")
 TooltipPanel/styles/panel = SubResource("StyleBoxFlat_tooltip")
