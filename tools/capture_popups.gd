@@ -14,6 +14,8 @@ extends Node
 ##   icons    큰 아이콘: 도감(일반·색다름)·메인 엔트리 상자·파티 (v0.100)
 ##   items    32px 아이템 아이콘: 가방·상점(구매)·원정 보상 팝업·파티 빈 자리 (v0.101)
 ##   panels   모든 패널을 차례로 + 보관함 필터(일부 켬) — UI 스킨 확인용 (panel_<id>.png)
+##   popups   스크롤이 생기는 원정 편성(자동 선택)·원정 보상(칸 많이) — 포획 정보는 caughtbig 로
+##   shopui   상점 모드 드롭다운을 연 모습(라디오·목록 바탕)과 수량 칸 + 설정 슬라이더 (UI 스킨)
 ## 결과: tools/previews/capture_<이름>.png (기준 해상도 그대로, 저작권 스프라이트가 들어 있어 git 제외)
 ## 세이브: 읽기만 하고 쓰기는 user://capture_saves 로 돌려서 실제 save.json 은 바뀌지 않는다.
 
@@ -53,6 +55,10 @@ func _ready() -> void:
 				await _capture_legend()
 			"panels":
 				await _capture_panels()
+			"shopui":
+				await _capture_shop_ui()
+			"popups":
+				await _capture_scroll_popups()
 			"expedition":
 				await _capture_expedition(&"snow_climb", "expedition_snow")
 				await _capture_expedition(&"grassland_walk", "expedition_grass")
@@ -275,6 +281,68 @@ func _capture_panels() -> void:
 			panel._filter_button.button_pressed = false
 		_main._toggle_panel(id)
 		await _frames(4)
+
+
+## 스크롤이 생기는 원정 편성·원정 보상 (UI 스킨 스크롤바)
+func _capture_scroll_popups() -> void:
+	for i in 10:
+		PlayerState.add_caught({&"dex_id": 16 + i, &"level": 10 + i, &"gender": &"male", &"region": &"grassland"})
+	await _frames(4)
+	_main._caught.close_panel()
+	await _frames(4)
+	_main._confirm.hide()
+	_main._toggle_panel(&"expedition")
+	await _frames(6)
+	var panel = _main._panels[&"expedition"]
+	for i in panel._rows.size():
+		if panel._rows[i].get("id", &"") == &"grassland_walk":
+			panel._list.select(i)
+	panel._on_action()   # 파티 편성 화면으로
+	await _frames(6)
+	panel._on_auto()
+	await _save("popup_formation")
+	panel._view = 0
+	panel.refresh()
+	var items := {}
+	for id in [&"great_ball", &"ultra_ball", &"fire_stone", &"water_stone", &"thunder_stone", &"leaf_stone",
+			&"exp_candy_s", &"exp_candy_m", &"rare_candy", &"nugget", &"pearl", &"big_pearl"]:
+		if GameData.get_item(id):
+			items[id] = 2
+	var r := {"expedition": &"grassland_walk", "success": true, "currency": 1200, "items": items,
+		"pokemon_exp": {}, "levels": {}}
+	panel._reward.show_result(r)
+	await _frames(6)
+	await _save("popup_reward")
+	var sc: Array = panel._reward.find_children("*", "ScrollContainer", true, false)
+	if sc:
+		sc[0].scroll_vertical = 9999
+		await _save("popup_reward_scrolled")
+	panel._reward.close_panel()
+	_main._toggle_panel(&"expedition")
+
+
+## 상점 드롭다운 목록·수량 칸, 설정 슬라이더 (UI 스킨)
+func _capture_shop_ui() -> void:
+	await _frames(10)
+	_main._caught.hide()
+	_main._confirm.hide()
+	_main._toggle_panel(&"shop")
+	await _frames(6)
+	var shop = _main._panels[&"shop"]
+	shop._qty.set_value_no_signal(3)
+	shop._mode.show_popup()
+	var pm: PopupMenu = shop._mode.get_popup()
+	pm.set_focused_item(1)   # 둘째 줄에 마우스를 올린 모습
+	await _save("shopui_dropdown")
+	pm.hide()
+	_main._toggle_panel(&"shop")
+	_main._toggle_panel(&"settings")
+	await _frames(6)
+	var panel = _main._panels[&"settings"]
+	panel.find_children("*", "ScrollContainer", true, false)[0].scroll_vertical = 9999
+	for s: HSlider in panel.find_children("*", "HSlider", true, false):
+		s.set_value_no_signal(60)   # 신호 없이 → 설정 저장 안 됨
+	await _save("shopui_slider")
 
 
 ## 큰 아이콘 (v0.100): 151종 모두 포획 + 일부 색다름 → 도감(일반·색다름 전환)과 메인 엔트리 상자 캡처
