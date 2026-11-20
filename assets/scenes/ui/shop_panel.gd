@@ -7,7 +7,7 @@ const STORAGE_ROW := &"__storage__"
 const CONTRACT_PREFIX := "__contract__"
 ## 보관함 확장 그림 (v0.66, tools/import_icons.gd 가 assets/sprites/ExpandBag.png 를 24px 로 줄여 만든다)
 const STORAGE_ICON := "res://assets/generated/icons/expand_storage.png"
-const LIST_WIDTH := 120   # 가장 긴 일반 아이템(향긋한 허브 x99 등)이 아이콘까지 약 113px (v0.91)
+const LIST_WIDTH := 120   # 가장 긴 일반 아이템(골드코롱 x99 등)이 아이콘까지 약 113px (v0.91)
 
 var _money: Label
 ## 모드 드롭다운 (구매/판매/업그레이드, v0.93). v0.93: 왼쪽 열 맨 위 (소지금은 제목 줄)
@@ -69,7 +69,7 @@ func _build_content(box: VBoxContainer) -> void:
 	left.add_child(_mode)
 	_list = ItemList.new()
 	_list.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	_list.fixed_icon_size = Vector2i(20, 20)
+	_list.fixed_icon_size = Vector2i(24, 24)
 	_list.item_selected.connect(func(_i: int) -> void:
 		_message.text = ""
 		_update_order())
@@ -81,7 +81,7 @@ func _build_content(box: VBoxContainer) -> void:
 	var head := HBoxContainer.new()
 	right.add_child(head)
 	_icon = TextureRect.new()
-	_icon.custom_minimum_size = Vector2(24, 24)
+	_icon.custom_minimum_size = Vector2(32, 32)
 	_icon.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	_icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 	head.add_child(_icon)

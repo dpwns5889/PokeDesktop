@@ -4,8 +4,8 @@
 
 [resource]
 script = ExtResource("1_xv57s")
-id = &"sweet_honey"
-name_ko = "향긋한 허브"
+id = &"gold_cologne"
+name_ko = "골드코롱"
 description = "30분 동안 포켓몬이 2배 자주 나타난다."
 category = &"boost"
 order = 27

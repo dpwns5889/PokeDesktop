@@ -6,7 +6,7 @@ extends OverlayPanel
 
 const CATEGORY_NAMES := {&"ball": "볼", &"exp_candy": "경험사탕", &"evolution": "진화 도구", &"valuable": "귀중품", &"incense": "향로", &"boost": "도구",
 	&"trait_tool": "특성 도구", &"trait_capsule": "특성 캡슐"}
-const LIST_WIDTH := 120   # 가장 긴 일반 아이템(향긋한 허브 x99 등)이 아이콘까지 약 113px (v0.91)
+const LIST_WIDTH := 120   # 가장 긴 일반 아이템(골드코롱 x99 등)이 아이콘까지 약 113px (v0.91)
 
 var _money: Label
 var _list: ItemList
@@ -43,7 +43,7 @@ func _build_content(box: VBoxContainer) -> void:
 	left.add_child(_money)
 	_list = ItemList.new()
 	_list.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	_list.fixed_icon_size = Vector2i(20, 20)
+	_list.fixed_icon_size = Vector2i(24, 24)
 	_list.item_selected.connect(func(_i: int) -> void: _show_detail())
 	left.add_child(_list)
 
@@ -53,7 +53,7 @@ func _build_content(box: VBoxContainer) -> void:
 	var head := HBoxContainer.new()
 	right.add_child(head)
 	_icon = TextureRect.new()
-	_icon.custom_minimum_size = Vector2(24, 24)
+	_icon.custom_minimum_size = Vector2(32, 32)
 	_icon.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	_icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 	head.add_child(_icon)
@@ -202,7 +202,7 @@ func _on_action() -> void:
 		return
 	if item and item.category == &"boost":
 		var now := Time.get_unix_time_from_system()
-		var reason := EncounterManager.use_sweet_honey(now) if item.id == &"sweet_honey" else PlayerState.use_lucky_egg(int(now))
+		var reason := EncounterManager.use_gold_cologne(now) if item.id == &"gold_cologne" else PlayerState.use_lucky_egg(int(now))
 		refresh()
 		if reason != "":
 			_desc.text = reason

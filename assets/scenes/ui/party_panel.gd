@@ -94,7 +94,7 @@ func refresh() -> void:
 		_add_row(_entry_list, p)
 		_entry_uids.append(p.uid)
 	for i in range(PlayerState.entries.size(), PlayerState.MAX_ENTRIES):
-		var idx := _entry_list.add_item("(빈 자리)")
+		var idx := _entry_list.add_item("(빈 자리)", _blank_icon())   # 투명 아이콘으로 찬 줄과 높이를 맞춘다
 		_entry_list.set_item_disabled(idx, true)
 		_entry_list.set_item_selectable(idx, false)
 		_entry_list.set_item_custom_fg_color(idx, Color(1, 1, 1, 0.35))
@@ -121,6 +121,11 @@ func refresh() -> void:
 
 	_bonus.text = _bonus_text()
 	_update_buttons()
+
+
+## 아이콘 칸과 같은 크기의 투명 그림
+func _blank_icon() -> Texture2D:
+	return ImageTexture.create_from_image(Image.create_empty(UiUtil.ICON_SIZE, UiUtil.ICON_SIZE, false, Image.FORMAT_RGBA8))
 
 
 func _add_row(list: ItemList, p: Dictionary) -> void:

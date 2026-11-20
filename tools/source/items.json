@@ -40,7 +40,7 @@
 		{"id": "lucky_egg", "name_ko": "행복의 알", "category": "boost", "order": 27, "unlock_level": 18,
 		 "params": {"duration_min": 15, "player_exp_mult": 1.5}, "sources": ["shop"], "buy_price": 5000, "sell_price": 1500,
 		 "description": "15분 동안 플레이어가 얻는 경험치가 1.5배가 된다."},
-		{"id": "sweet_honey", "name_ko": "향긋한 허브", "category": "boost", "order": 27, "unlock_level": 10,
+		{"id": "gold_cologne", "name_ko": "골드코롱", "category": "boost", "order": 27, "unlock_level": 10,
 		 "params": {"duration_min": 30, "interval_mult": 0.5}, "sources": ["shop"], "buy_price": 2000, "sell_price": 600,
 		 "description": "30분 동안 포켓몬이 2배 자주 나타난다."},
 		{"id": "forget_berry", "name_ko": "깜빡열매", "category": "trait_tool", "order": 28, "unlock_level": 12,

@@ -21,7 +21,7 @@ extends Node
 ## - 진화: 레벨 진화는 모두 수락, 진화의 돌은 새 종이 나오면 사용(v0.42: 돌은 원정에서만 얻는다).
 ## - 상점: 슈퍼볼이 10개 미만이면 산다(소지금 3,000원은 남김). 보관함이 90% 차면 (돈이 되는 만큼) 확장.
 ## - 아이템 인카운터(v0.84): 인카운터가 아이템이면 얻고 끝. 하루 끝에 귀중품을 모두 판다(--verbose 에 "아이템 N개 M원").
-## - 향긋한 허브(v0.87): 플레이어 Lv10부터 하루 시작에 돈이 있으면 --honey 개(기본 2개 = 1시간, 인카운터 간격 ×0.5)를 사서 쓴다. 0이면 안 쓴다.
+## - 골드코롱(v0.87): 플레이어 Lv10부터 하루 시작에 돈이 있으면 --honey 개(기본 2개 = 1시간, 인카운터 간격 ×0.5)를 사서 쓴다. 0이면 안 쓴다.
 
 const DEFAULT_SEEDS := 5
 ## 기획서 9.3 일차별 목표 [일차, 플레이어 Lv, 포획 종 수]
@@ -32,7 +32,7 @@ const TOLERANCE := 0.15
 ## 원정에 진화 후보를 몇 마리 더 데려가는지 / 남은 사탕을 나눠 줄 주력 수
 const EXTRA_EVOLUTION_MEMBERS := 3
 const MAIN_TEAM := 10
-## 하루에 쓰는 향긋한 허브 개수 (--honey 로 바꿈)
+## 하루에 쓰는 골드코롱 개수 (--honey 로 바꿈)
 const DEFAULT_HONEY_PER_DAY := 2
 ## 가상 플레이어가 상위 볼을 쓰는 난이도 기준 배율 (v0.92): 기준 = 0.5 × 지역 몬스터볼 추가 배율 × 이 값. 1.0 이면 후반에 막혀 진행이 크게 느려지고(9.3.2), 0.65 부터 목표를 통과한다
 const DEFAULT_BALL_SCALE := 0.65
@@ -113,7 +113,7 @@ func _run(seed: int) -> Array:
 		_use_honey()
 		while true:
 			now += Formulas.roll_encounter_interval(rng, GameData.get_region(PlayerState.current_region)) \
-				* PlayerState.interval_multiplier(int(now))   # 향긋한 허브 (v0.87)
+				* PlayerState.interval_multiplier(int(now))   # 골드코롱 (v0.87)
 			if now >= day_end:
 				break
 			_encounter()
@@ -164,14 +164,14 @@ func _buy_contracts() -> void:
 			stats["c_%s_day" % cid] = _cur_day
 
 
-## 하루 시작에 향긋한 허브를 사서 쓴다 (v0.87): 실제 상점 규칙(Lv10, 2,000원)을 따른다. 돈이 모자라면 못 산다
+## 하루 시작에 골드코롱를 사서 쓴다 (v0.87): 실제 상점 규칙(Lv10, 2,000원)을 따른다. 돈이 모자라면 못 산다
 func _use_honey() -> void:
 	if no_spend:
 		return
 	for i in honey_per_day:
-		if not ShopManager.buy(&"sweet_honey").ok:
+		if not ShopManager.buy(&"gold_cologne").ok:
 			return
-		PlayerState.use_sweet_honey(int(now))
+		PlayerState.use_gold_cologne(int(now))
 		stats.honey += 1
 
 

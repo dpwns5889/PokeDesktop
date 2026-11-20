@@ -3,7 +3,7 @@ extends GdUnitTestSuite
 ## 실패하면 tools/import_battle_sprites.gd, tools/import_icons.gd 를 실행한 뒤 --import 하세요.
 
 const CELL := PokemonSprites.CELL
-const ICONS := [&"poke_ball", &"great_ball", &"ultra_ball", &"exp_candy_s", &"exp_candy_m",
+const ICONS := [&"poke_ball", &"great_ball", &"ultra_ball", &"exp_candy_s", &"exp_candy_m","exp_candy_s", &"exp_candy_m",
 	&"fire_stone", &"water_stone", &"thunder_stone", &"leaf_stone", &"moon_stone"]
 
 

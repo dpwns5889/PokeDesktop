@@ -177,9 +177,9 @@ func active_buffs() -> Array[Dictionary]:
 	var el := PlayerState.item_seconds_left("lucky_egg", now)   # 행복의 알 (v0.61)
 	if el > 0:
 		out.append({"text": "행복의 알 %d분" % ceili(el / 60.0), "good": true})
-	var hl := PlayerState.item_seconds_left("sweet_honey", now)   # 향긋한 허브 (v0.87)
+	var hl := PlayerState.item_seconds_left("gold_cologne", now)   # 골드코롱 (v0.87)
 	if hl > 0:
-		out.append({"text": "향긋한 허브 %d분" % ceili(hl / 60.0), "good": true})
+		out.append({"text": "골드코롱 %d분" % ceili(hl / 60.0), "good": true})
 	return out
 
 
@@ -190,11 +190,11 @@ func finish_battle(success: bool) -> void:
 	_finish(_now(), success)
 
 
-## 향긋한 허브 사용 (기획서 4.11, v0.87): 가방이 부른다. 처음 켤 때만 남은 대기 시간을 ×0.5 (연장일 때는 다시 줄이지 않는다).
+## 골드코롱 사용 (기획서 4.11, v0.87): 가방이 부른다. 처음 켤 때만 남은 대기 시간을 ×0.5 (연장일 때는 다시 줄이지 않는다).
 ## 반환: "" = 성공, 아니면 이유
-func use_sweet_honey(now: float) -> String:
-	var was_active := PlayerState.item_seconds_left("sweet_honey", int(now)) > 0
-	var reason := PlayerState.use_sweet_honey(int(now))
+func use_gold_cologne(now: float) -> String:
+	var was_active := PlayerState.item_seconds_left("gold_cologne", int(now)) > 0
+	var reason := PlayerState.use_gold_cologne(int(now))
 	if reason != "" or was_active:
 		return reason
 	var mult := PlayerState.interval_multiplier(int(now))
@@ -237,7 +237,7 @@ func _now() -> float:
 func _schedule_next(now: float) -> void:
 	var interval := Formulas.roll_encounter_interval(rng, GameData.get_region(PlayerState.current_region))
 	interval *= float(entry_traits().interval_mult)   # 악취 (4.6)
-	interval *= PlayerState.interval_multiplier(int(now))   # 향긋한 허브 (4.11, v0.87)
+	interval *= PlayerState.interval_multiplier(int(now))   # 골드코롱 (4.11, v0.87)
 	if fast_mode:
 		interval = FAST_INTERVAL_SEC + rng.randf_range(-FAST_JITTER_SEC, FAST_JITTER_SEC)
 	_deadline = now + interval
@@ -251,7 +251,7 @@ func _on_region_changed(_id: StringName) -> void:
 		return
 	var now := _now()
 	var limit := Formulas.encounter_interval_range(GameData.get_region(PlayerState.current_region)).y \
-		* PlayerState.interval_multiplier(int(now))   # 향긋한 허브 (v0.87)
+		* PlayerState.interval_multiplier(int(now))   # 골드코롱 (v0.87)
 	match state:
 		State.WAITING:
 			if _deadline - now > limit:

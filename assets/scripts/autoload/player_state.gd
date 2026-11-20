@@ -376,17 +376,17 @@ func player_exp_multiplier(now: int) -> float:
 	return _timed_item_mult(&"lucky_egg", "player_exp_mult", 1.5, now)
 
 
-# ---------------------------------------------------------------- 향긋한 허브 (기획서 4.11, v0.87)
+# ---------------------------------------------------------------- 골드코롱 (기획서 4.11, v0.87)
 
-## 향긋한 허브 사용: 30분 동안 인카운터 간격 ×0.5. 쓰고 있는 중이면 30분 연장.
-## 남은 대기 시간 줄이기는 EncounterManager.use_sweet_honey 가 한다. 반환: "" = 성공, 아니면 이유
-func use_sweet_honey(now: int) -> String:
-	return _use_timed_item(&"sweet_honey", 30, "향긋한 허브가 없습니다.", now)
+## 골드코롱 사용: 30분 동안 인카운터 간격 ×0.5. 쓰고 있는 중이면 30분 연장.
+## 남은 대기 시간 줄이기는 EncounterManager.use_gold_cologne 가 한다. 반환: "" = 성공, 아니면 이유
+func use_gold_cologne(now: int) -> String:
+	return _use_timed_item(&"gold_cologne", 30, "골드코롱가 없습니다.", now)
 
 
-## 인카운터 간격 배율 (향긋한 허브 켜져 있으면 0.5, 아니면 1.0)
+## 인카운터 간격 배율 (골드코롱 켜져 있으면 0.5, 아니면 1.0)
 func interval_multiplier(now: int) -> float:
-	return _timed_item_mult(&"sweet_honey", "interval_mult", 0.5, now)
+	return _timed_item_mult(&"gold_cologne", "interval_mult", 0.5, now)
 
 
 # ---------------------------------------------------------------- 엔트리 (기획서 4.13)
@@ -639,7 +639,7 @@ func load_save_dict(d: Dictionary) -> void:
 	# 향로·행복의 알: 형식이 맞는 것만 (끝난 것은 그대로 두어도 효과가 없다)
 	var raw_active: Variant = d.get("active_items", {})
 	if raw_active is Dictionary:
-		for k in ["incense", "shiny_incense", "lucky_egg", "sweet_honey"]:
+		for k in ["incense", "shiny_incense", "lucky_egg", "gold_cologne"]:
 			var v: Variant = raw_active.get(k)
 			if v is Dictionary and v.has("end_at"):
 				active_items[k] = {"end_at": int(v.end_at), "type": String(v.get("type", ""))}

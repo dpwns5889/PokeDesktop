@@ -84,7 +84,7 @@ const TITLE_RIGHT := 312.0
 const DEX_COMPLETE_TEXT := "관동 지방의 포켓몬 151종을 모두 잡았다!\n\n이제 색이 다른 포켓몬이 [color=#ffd959]더 자주 나타난다[/color].\n도감에서 색이 다른 포켓몬 기록을 볼 수 있다."
 const CROWN_COLOR := Color(1.0, 0.82, 0.25)
 ## 아이템 인카운터 아이콘 크기 (24px 아이콘 2배, v0.84)
-const FOUND_ICON_PX := 24.0   # 아이템 아이콘 기본 크기 (v0.91, 이전 2배 48)
+const FOUND_ICON_PX := 32.0   # 아이템 아이콘 기본 크기 = 원본 32px (v0.101, v0.91은 24px, 이전 2배 48)
 enum DevMenu { ENCOUNTER, MONEY, LEVEL_UP, RESET_SAVE }
 
 var _dev_menu: PopupMenu        # 개발용 우클릭 메뉴 (디버그 빌드만)

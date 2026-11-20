@@ -20,7 +20,7 @@ func test_v01_items_and_prices() -> void:
 	var ids := GameData.all_items().filter(func(i: ItemData) -> bool: return i.category != GameData.CAPSULE_TEMPLATE) \
 		.map(func(i: ItemData) -> String: return String(i.id))   # 특성 캡슐(특성마다 하나, v0.79)은 trait_capsule_test
 	assert_array(ids).contains_exactly(["poke_ball", "great_ball", "ultra_ball", "exp_candy_s", "exp_candy_m",
-		"fire_stone", "water_stone", "thunder_stone", "leaf_stone", "moon_stone", "incense", "shiny_incense", "lucky_egg", "sweet_honey",
+		"fire_stone", "water_stone", "thunder_stone", "leaf_stone", "moon_stone", "incense", "shiny_incense", "gold_cologne", "lucky_egg",
 		"forget_berry", "pretty_feather", "pearl", "stardust", "nugget", "star_piece", "big_nugget"])
 	# 금구슬: 판매 전용 (픽업 특성, v0.28)
 	var nugget := GameData.get_item(&"nugget")
