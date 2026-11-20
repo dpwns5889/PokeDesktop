@@ -190,7 +190,9 @@ func _ready() -> void:
 
 	EventBus.encounter_started.connect(_on_encounter_started)
 	EventBus.encounter_appeared.connect(_on_encounter_appeared)
+	EventBus.item_appeared.connect(_on_item_appeared)
 	EventBus.item_found.connect(_on_item_found)
+	EventBus.item_lost.connect(_on_item_lost)
 	EventBus.battle_started.connect(func(_e: Dictionary, b: StringName) -> void:
 		_battle_ball = b
 		_close_panels()
@@ -538,18 +540,45 @@ func _build_ground_plate() -> void:
 	move_child(_found_icon, _pokemon.get_index() + 1)
 
 
-## 아이템 인카운터 (v0.84): 발판 위에 아이템을 보여 주고 알린다. 얻는 것은 EncounterManager 가 했다
-func _on_item_found(id: StringName, count: int) -> void:
+## 아이템 이름 (여러 개면 "슈퍼볼 ×2", v0.88)
+func _item_label(id: StringName, count: int) -> String:
 	var item := GameData.get_item(id)
 	var item_name := item.name_ko if item else String(id)
-	if count > 1:
-		item_name += " ×%d" % count   # v0.88: 슈퍼볼 ×2
+	return item_name + (" ×%d" % count if count > 1 else "")
+
+
+## 아이템 인카운터 (v0.84, v0.98): 발판 위에 아이템이 나타난다. 클릭해야 얻는다
+func _on_item_appeared(id: StringName, count: int) -> void:
+	var item := GameData.get_item(id)
 	_ground_plate.shaking = false
 	_emote.hide_bubble()
 	_found_icon.texture = item.load_icon() if item else null
+	_found_icon.modulate = Color.WHITE
 	_found_icon.show()
-	_title.text = "%s을(를) 발견했다!" % item_name
-	_push_notice("발견: %s" % item_name)
+	var hit := Rect2(_found_icon.position, _found_icon.size).grow(4)   # 아이콘을 클릭 영역으로
+	_hitbox.position = hit.position
+	_hitbox.size = hit.size
+	_hitbox.show()
+	_title.text = "%s을(를) 발견했다!" % _item_label(id, count)
+	_update_hud()
+	if _autoplay:
+		get_tree().create_timer(1.0).timeout.connect(_start_battle)
+
+
+## 아이템을 클릭해 얻었다: 알림만 (얻는 것과 소리는 EncounterManager 가 했다)
+func _on_item_found(id: StringName, count: int) -> void:
+	var label := _item_label(id, count)
+	_hitbox.hide()
+	_title.text = "%s을(를) 얻었다!" % label
+	_push_notice("발견: %s" % label)
+	_update_hud()
+
+
+## 클릭하지 않아 아이템이 사라졌다
+func _on_item_lost(id: StringName, count: int) -> void:
+	_found_icon.modulate = Color(1, 1, 1, 0.35)
+	_hitbox.hide()
+	_title.text = "%s은(는) 사라졌다..." % _item_label(id, count)
 	_update_hud()
 
 
@@ -707,6 +736,8 @@ func _on_encounter_appeared(enc: Dictionary) -> void:
 
 func _start_battle() -> void:
 	if _battle != null:
+		return
+	if EncounterManager.collect_item():   # 아이템 인카운터: 클릭하면 줍는다 (v0.98)
 		return
 	var params := EncounterManager.begin_battle()
 	if params.is_empty():
@@ -1059,7 +1090,12 @@ func _refresh_entry_widgets() -> void:
 		icon.custom_minimum_size = Vector2(ENTRY_ICON, ENTRY_ICON)
 		icon.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 		icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
-		var frames := PokemonSprites.overworld_frames(s, String(p.get("gender", "")) == "female")
+		var frames: Array[Texture2D] = []
+		var atlas := PokemonSprites.atlas_icon(s, String(p.get("gender", "")) == "female", bool(p.get("shiny", false)))
+		if atlas:
+			frames.append(atlas)   # 도감 아틀라스 그림은 정지 1장 (v0.99)
+		else:
+			frames = PokemonSprites.overworld_frames(s, String(p.get("gender", "")) == "female")
 		if frames.is_empty() and s:
 			frames.append(UiUtil.pokemon_icon(s))
 		icon.set_meta(&"frames", frames)
@@ -1219,7 +1255,7 @@ func _update_hud() -> void:
 		EncounterManager.State.PREVIEW:
 			status = "무언가 나타났다!"
 		EncounterManager.State.APPEARED:
-			status = "클릭해서 잡기 (%d초)" % ceili(EncounterManager.seconds_until_flee())
+			status = "클릭해서 %s (%d초)" % ["줍기" if EncounterManager.current.has(&"item") else "잡기", ceili(EncounterManager.seconds_until_flee())]
 		EncounterManager.State.BATTLE:
 			status = "과녁을 클릭!"
 		EncounterManager.State.RESULT:

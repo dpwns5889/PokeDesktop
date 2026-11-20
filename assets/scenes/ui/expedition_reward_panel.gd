@@ -136,7 +136,7 @@ static func pokemon_tiles(r: Dictionary) -> Array[Dictionary]:
 		var s := GameData.get_species(p.dex_id)
 		var to: int = p.level
 		var gained := int(levels[uid])
-		out.append({"icon": UiUtil.pokemon_icon(s, String(p.get("gender", "")) == "female") if s else null,
+		out.append({"icon": UiUtil.individual_icon(p) if s else null,
 			"amount": "+%d" % gained, "color": LEVEL_COLOR,
 			"tip": "%s  Lv%d → Lv%d" % [s.name_ko if s else "?", to - gained, to]})
 	return out

@@ -17,7 +17,6 @@ var _add: Button
 var _message: Label
 var _entry_uids: Array[String] = []
 var _pick_uids: Array[String] = []
-var _icon_cache: Dictionary = {}
 
 
 func _panel_title() -> String:
@@ -132,9 +131,7 @@ func _add_row(list: ItemList, p: Dictionary) -> void:
 	if not battle.is_empty():
 		list.set_item_tooltip(idx, "전투 특성: " + ", ".join(battle.map(func(t: TraitData) -> String: return t.name_ko)))
 	if s:
-		if not _icon_cache.has(s.dex_id):
-			_icon_cache[s.dex_id] = UiUtil.pokemon_icon(s)
-		list.set_item_icon(idx, _icon_cache[s.dex_id])
+		list.set_item_icon(idx, UiUtil.individual_icon(p))
 
 
 ## 현재 지역의 평균적인 야생 포켓몬을 상대로 한 전투 보너스

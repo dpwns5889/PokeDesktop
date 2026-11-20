@@ -10,7 +10,6 @@ var _header: Label
 var _grid: GridContainer
 var _detail: RichTextLabel
 var _icon_cache: Dictionary = {}   # dex_id -> AtlasTexture
-var _shiny_icon_cache: Dictionary = {}   # dex_id -> AtlasTexture (전투 시트의 색이 다른 첫 프레임)
 ## 색이 다른 도감 보기 (v0.77, 도감 완성 후)
 var _shiny_view := false
 var _shiny_toggle: Button
@@ -135,25 +134,6 @@ func _icon(s: PokemonSpecies) -> Texture2D:
 	return _icon_cache[s.dex_id]
 
 
-## 오버월드 그림에는 색이 다른 모습이 없어 전투 시트의 색이 다른 첫 프레임을 그림 부분만 잘라 쓴다 (칸에 맞춰 줄어듦)
+## 색이 다른 모습 아이콘 (v0.99: 도감 아틀라스의 색이 다른 그림, 없으면 일반 아이콘)
 func _shiny_icon(s: PokemonSpecies) -> Texture2D:
-	if not _shiny_icon_cache.has(s.dex_id):
-		var tex := PokemonSprites.make_frames(s, false, true).get_frame_texture(&"idle", 0)
-		var at := tex as AtlasTexture
-		if at:
-			var img := at.atlas.get_image()
-			if img:
-				if img.is_compressed():
-					img.decompress()
-				var r := img.get_region(Rect2i(at.region)).get_used_rect()
-				if r.size != Vector2i.ZERO:
-					var side := maxi(r.size.x, r.size.y)   # 정사각형으로 (가운데 기준)
-					var cell := at.region.size   # 옆 칸이 보이지 않게 칸 안으로
-					var x := clampf(roundf(r.get_center().x - side / 2.0), 0.0, cell.x - side)
-					var y := clampf(roundf(r.get_center().y - side / 2.0), 0.0, cell.y - side)
-					var crop := AtlasTexture.new()
-					crop.atlas = at.atlas
-					crop.region = Rect2(at.region.position + Vector2(x, y), Vector2(side, side))
-					tex = crop
-		_shiny_icon_cache[s.dex_id] = tex
-	return _shiny_icon_cache[s.dex_id]
+	return UiUtil.pokemon_icon(s, false, true)

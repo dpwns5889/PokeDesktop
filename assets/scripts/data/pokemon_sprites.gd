@@ -93,6 +93,28 @@ static func overworld_walk_sheet(species: PokemonSpecies, female: bool = false) 
 	return null
 
 
+## UI 아이콘 (v0.99): 도감 아틀라스에서 잘라 만든 24×24 (tools/import_atlas_icons.py).
+## 암컷·색이 다른 그림이 없으면 일반 그림으로, 종 자체가 아틀라스에 없으면 null (호출하는 쪽이 오버월드 아이콘으로 대신).
+const ICON_DIR := "res://assets/generated/icons/pokemon/"
+
+
+static func atlas_icon(species: PokemonSpecies, female: bool = false, shiny: bool = false) -> Texture2D:
+	if species == null:
+		return null
+	var names: Array[String] = [species.name_en]
+	if female:
+		names.push_front(species.name_en + "-female")
+	var suffixes: Array[String] = [""]
+	if shiny:
+		suffixes.push_front("_shiny")
+	for suffix in suffixes:
+		for n in names:
+			var path: String = ICON_DIR + n + suffix + ".png"
+			if ResourceLoader.exists(path):
+				return load(path)
+	return null
+
+
 static func _get_placeholder() -> Texture2D:
 	if _placeholder == null:
 		var img := Image.create(CELL, CELL, false, Image.FORMAT_RGBA8)

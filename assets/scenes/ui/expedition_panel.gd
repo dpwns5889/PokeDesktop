@@ -304,7 +304,7 @@ func _refresh_party() -> void:
 		var s := GameData.get_species(p.dex_id)
 		var trait_mark := "*" if p.get("traits", []).size() > 0 else ""
 		var idx := _party_list.add_item("%s%s Lv%d  %d%s" % ["★" if p.get("favorite", false) else "", s.name_ko if s else "?", p.level, roundi(powers[p.uid]), trait_mark],
-			UiUtil.pokemon_icon(s) if s else null)
+			UiUtil.individual_icon(p) if s else null)
 		_party_uids.append(p.uid)
 		if keep.has(p.uid):
 			_party_list.select(idx, false)

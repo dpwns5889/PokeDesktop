@@ -5,8 +5,8 @@ extends Node
 ##   WAITING ─타이머 만료→ PREVIEW(풀숲 흔들림, 소리) → APPEARED(90초) ─클릭→ BATTLE → RESULT → WAITING
 ##                                                      └─90초 초과→ RESULT(도망)
 ##   WAITING ⇄ PAUSED : 선택한 볼(몬스터볼 제외) 보유량이 0이면 정지, 생기면 남은 시간부터 재개
-##   아이템 인카운터 (v0.84): WAITING → PREVIEW(흔들림) → RESULT(아이템을 얻고 ITEM_SHOW_SEC 동안 보여 줌) → WAITING
-##     current = {item: id}. 클릭하지 않아도 얻는다.
+##   아이템 인카운터 (v0.84, v0.98 클릭): WAITING → PREVIEW(흔들림) → APPEARED(90초) ─collect_item()→ RESULT(ITEM_SHOW_SEC 동안 보여 줌) → WAITING
+##     current = {item: id, count: n}. 클릭해야 얻고 소리가 난다. 90초 안에 안 누르면 사라진다(RESULT, last_result = item_lost).
 ##
 ## 시간은 프레임 누적이 아니라 시스템 시각(초)으로 비교한다. 테스트에서는 tick(now)를 직접 호출한다.
 ## 개발용: 실행 인자 `-- --fast-encounter` 를 주면 간격이 약 12초가 된다. `-- --shiny` 는 모든 야생이 색이 다른 포켓몬(디버그 빌드만, M11).
@@ -22,7 +22,7 @@ const ITEM_SHOW_SEC := 2.0
 var state: State = State.WAITING
 ## 현재 인카운터 {dex_id, level, gender, shiny, region}. 없으면 빈 Dictionary.
 var current: Dictionary = {}
-## 마지막 결과: &"caught" / &"fled" / &"item" / &""
+## 마지막 결과: &"caught" / &"fled" / &"item" / &"item_lost" / &""
 var last_result: StringName = &""
 ## begin_battle()이 거절된 이유: &"storage_full" / &"no_ball" / &""
 var block_reason: StringName = &""
@@ -78,16 +78,20 @@ func tick(now: float) -> void:
 				state = State.WAITING
 				EventBus.ball_shortage_changed.emit(false)
 		State.PREVIEW:
-			if now >= _deadline and current.has(&"item"):
-				_found_item(now)
-			elif now >= _deadline:
+			if now >= _deadline:
 				state = State.APPEARED
 				_deadline = now + Formulas.ENCOUNTER_APPEAR_SEC
-				PlayerState.mark_seen(current[&"dex_id"])
-				EventBus.encounter_appeared.emit(current)
+				if current.has(&"item"):
+					EventBus.item_appeared.emit(current[&"item"], int(current.get(&"count", 1)))
+				else:
+					PlayerState.mark_seen(current[&"dex_id"])
+					EventBus.encounter_appeared.emit(current)
 		State.APPEARED:
 			if now >= _deadline:
-				_finish(now, false)
+				if current.has(&"item"):
+					_lost_item(now)
+				else:
+					_finish(now, false)
 		State.RESULT:
 			if now >= _deadline:
 				current = {}
@@ -113,7 +117,7 @@ func seconds_until_flee() -> float:
 ## 포켓몬을 클릭했을 때. 볼을 1개 소모하고 전투 파라미터를 돌려준다. 시작할 수 없으면 빈 Dictionary.
 func begin_battle() -> Dictionary:
 	block_reason = &""
-	if state != State.APPEARED:
+	if state != State.APPEARED or current.has(&"item"):
 		return {}
 	# 보관함이 가득 차면 인카운터는 일어나지만 전투는 시작하지 않는다 (기획서 4.7.2)
 	if PlayerState.is_storage_full():
@@ -308,6 +312,22 @@ func _finish(now: float, success: bool) -> void:
 		EventBus.encounter_fled.emit(current)
 	if was_battle:
 		_apply_after_battle(success)
+
+
+## 아이템을 클릭했을 때 (v0.98). 아이템이 나와 있으면 얻고 true
+func collect_item() -> bool:
+	if state != State.APPEARED or not current.has(&"item"):
+		return false
+	_found_item(_now())
+	return true
+
+
+## 클릭하지 않아 아이템이 사라짐 (v0.98): 얻지 못하고 소리도 없다
+func _lost_item(now: float) -> void:
+	state = State.RESULT
+	last_result = &"item_lost"
+	_deadline = now + Formulas.ENCOUNTER_RESULT_SEC
+	EventBus.item_lost.emit(current[&"item"], int(current.get(&"count", 1)))
 
 
 ## 아이템 인카운터: 아이템을 얻고 잠깐 보여 준 뒤 끝 (v0.84)

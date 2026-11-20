@@ -7,11 +7,15 @@ extends Node
 signal encounter_started(encounter: Dictionary)
 ## 예고가 끝나고 포켓몬이 모습을 드러냄 (클릭하면 전투)
 signal encounter_appeared(encounter: Dictionary)
-## 아이템 인카운터에서 아이템을 얻었다 (v0.84)
+## 아이템 인카운터에서 아이템이 발판 위에 나타났다 (클릭하면 얻음, v0.98)
+signal item_appeared(item_id: StringName, count: int)
+## 아이템 인카운터에서 아이템을 클릭해 얻었다 (v0.84, v0.98부터 클릭 시)
 signal item_found(item_id: StringName, count: int)
 ## 전투 시작. ball = 사용한 볼 ID
 signal battle_started(encounter: Dictionary, ball: StringName)
 signal battle_finished(success: bool)
+## 아이템을 클릭하지 않아 사라졌다 (v0.98)
+signal item_lost(item_id: StringName, count: int)
 ## 반응이 없거나 전투에 실패해 도망
 signal encounter_fled(encounter: Dictionary)
 ## 결과 표시가 끝나고 대기 상태로 돌아감

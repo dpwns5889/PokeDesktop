@@ -63,14 +63,18 @@ const ICON_SIZE := 24
 static var _icon_cache := {}
 
 
-## 포켓몬 아이콘 (목록·도감 등). v0.55: 오버월드 앞모습 첫 프레임을 그림 아래 가운데 기준 24×24 로 자른 것.
-## 오버월드 그림이 없으면 전투 스프라이트 첫 프레임.
-static func pokemon_icon(s: PokemonSpecies, female: bool = false) -> Texture2D:
+## 포켓몬 아이콘 (목록·도감 등). v0.99: 도감 아틀라스 그림(색이 다른·암컷 포함). 아틀라스에 없는 종은
+## v0.55 방식 — 오버월드 앞모습 첫 프레임을 그림 아래 가운데 기준 24×24 로 자른 것. 그것도 없으면 전투 스프라이트 첫 프레임.
+static func pokemon_icon(s: PokemonSpecies, female: bool = false, shiny: bool = false) -> Texture2D:
 	if s == null:
 		return null
-	var key := "%d:%s" % [s.dex_id, female]
+	var key := "%d:%s:%s" % [s.dex_id, female, shiny]
 	if _icon_cache.has(key):
 		return _icon_cache[key]
+	var atlas := PokemonSprites.atlas_icon(s, female, shiny)   # v0.99: 도감 아틀라스 그림 우선
+	if atlas:
+		_icon_cache[key] = atlas
+		return atlas
 	var frames := PokemonSprites.overworld_frames(s, female)
 	var at := AtlasTexture.new()
 	if frames.is_empty():
@@ -82,6 +86,11 @@ static func pokemon_icon(s: PokemonSpecies, female: bool = false) -> Texture2D:
 		at.region = icon_region(f)
 	_icon_cache[key] = at
 	return at
+
+
+## 개체(포켓몬 딕셔너리)의 성별·색이 다름에 맞는 아이콘 (v0.99)
+static func individual_icon(p: Dictionary) -> Texture2D:
+	return pokemon_icon(GameData.get_species(p.dex_id), String(p.get("gender", "")) == "female", bool(p.get("shiny", false)))
 
 
 ## 오버월드 칸(32×32) 안에서 그림 아래 가운데를 기준으로 24×24 영역

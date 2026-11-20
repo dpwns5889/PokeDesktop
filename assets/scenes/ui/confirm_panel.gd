@@ -4,6 +4,10 @@ extends OverlayPanel
 ## notify(제목, 문구, 확인 시 호출할 Callable) — 알림: "확인" 버튼 하나뿐 (예: 새 지역 해금, v0.24)
 ## v0.80: 팝업 규칙(기획서 6.1) — 확인 창·알림 모두 문구와 버튼을 창 가운데에 모은다.
 
+## 이 글자의 확인 버튼은 빨간 글씨 (되돌릴 수 없는 삭제, v0.98)
+const DANGER_OK_TEXT := "삭제"
+const DANGER_COLOR := Color(1, 0.45, 0.4)
+
 var _message: Label
 ## 색이 든 문구(BBCode)용. 문구는 [center] 로 가운데 정렬 (v0.89)
 var _rich: RichTextLabel
@@ -65,6 +69,11 @@ func ask(title_text: String, message: String, ok_text: String, on_ok: Callable, 
 	_message.text = "" if bbcode else message
 	_rich.text = "[center]%s[/center]" % message if bbcode else ""
 	_ok.text = ok_text
+	for c in [&"font_color", &"font_hover_color", &"font_pressed_color"]:   # 삭제 버튼은 빨간 글씨 (v0.98)
+		if ok_text == DANGER_OK_TEXT:
+			_ok.add_theme_color_override(c, DANGER_COLOR)
+		else:
+			_ok.remove_theme_color_override(c)
 	_on_ok = on_ok
 	open_panel()
 

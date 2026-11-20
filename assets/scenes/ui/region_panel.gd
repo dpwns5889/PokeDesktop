@@ -1,6 +1,9 @@
 extends OverlayPanel
 ## 지역 패널: 해금된 지역으로 이동, 잠긴 지역은 해금 조건과 진행도. (기획서 4.4, 6.2)
 
+## 달성한 해금 조건 글자색 (기획서 6.2, v0.98)
+const DONE_COLOR := Color(0.6, 0.95, 0.55)
+
 var _list: ItemList
 var _detail: RichTextLabel
 var _move: Button
@@ -32,6 +35,7 @@ func _build_content(box: VBoxContainer) -> void:
 	row.add_child(right)
 	_detail = UiUtil.rich_label(false)
 	_detail.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	_detail.add_theme_constant_override(&"line_separation", 1)   # 행간 (기획서 6.2, v0.98)
 	right.add_child(_detail)
 	_move = Button.new()
 	_move.focus_mode = Control.FOCUS_NONE
@@ -72,13 +76,21 @@ func _show_detail(index: int) -> void:
 	for e in r.encounters:
 		lv_min = mini(lv_min, e.min_level)
 		lv_max = maxi(lv_max, e.max_level)
-	var lines: Array[String] = ["주요 타입: %s" % types, "레벨: %d~%d" % [lv_min, lv_max]]
+	var species := {}
+	var caught := 0
+	for e in r.encounters:
+		if not species.has(e.dex_id):
+			species[e.dex_id] = true
+			caught += 1 if PlayerState.is_caught(e.dex_id) else 0
+	var lines: Array[String] = ["주요 타입: %s" % types, "레벨: %d~%d" % [lv_min, lv_max],
+			"잡은 포켓몬: %d / %d" % [caught, species.size()]]
 	var unlocked := PlayerState.unlocked_regions.has(r.id)
 	if not unlocked:
 		lines.append("해금 조건")
 		for c in r.unlock_conditions:
 			var p := UnlockManager.progress(c)
-			lines.append("%s %s (%d/%d)" % ["O" if p.current >= p.target else "-", p.label, p.current, p.target])
+			var line := "- %s (%d/%d)" % [p.label, p.current, p.target]
+			lines.append("[color=#%s]%s[/color]" % [DONE_COLOR.to_html(false), line] if p.current >= p.target else line)
 	_detail.text = "\n".join(lines)
 	_move.disabled = not unlocked or r.id == PlayerState.current_region
 	_move.text = "현재 지역" if r.id == PlayerState.current_region else ("이 지역으로 이동" if unlocked else "잠김")

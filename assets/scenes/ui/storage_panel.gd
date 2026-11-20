@@ -29,7 +29,6 @@ var _count: Label
 var _sort: OptionButton
 var _list: ItemList
 var _uids: Array[String] = []
-var _icon_cache: Dictionary = {}
 var _selected_uid := ""
 ## 켜진 필터 (v0.77)
 var _filter_status: Array[String] = []
@@ -277,9 +276,7 @@ func refresh() -> void:
 		var fav: bool = p.get("favorite", false)
 		var idx := _list.add_item("%s%s Lv%d" % ["★" if fav else "", label, p.level])
 		if s:
-			if not _icon_cache.has(s.dex_id):
-				_icon_cache[s.dex_id] = UiUtil.pokemon_icon(s)
-			_list.set_item_icon(idx, _icon_cache[s.dex_id])
+			_list.set_item_icon(idx, UiUtil.individual_icon(p))
 		if PlayerState.is_busy(p.uid):
 			_list.set_item_custom_fg_color(idx, Color(0.6, 0.85, 1))
 		elif PlayerState.is_entry(p.uid):

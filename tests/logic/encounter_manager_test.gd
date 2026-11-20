@@ -149,8 +149,8 @@ func test_region_intervals() -> void:
 	assert_that(Formulas.encounter_interval_range(null)).is_equal(Formulas.DEFAULT_ENCOUNTER_INTERVAL)
 
 
-## 아이템 인카운터 (v0.84): 흔들림 → 클릭 없이 아이템을 얻고 ITEM_SHOW_SEC 뒤 대기로
-func test_item_encounter_gives_item_without_click() -> void:
+## 아이템 인카운터 (v0.84, v0.98): 흔들림 → 클릭해서 얻고 ITEM_SHOW_SEC 뒤 대기로
+func test_item_encounter_gives_item_on_click() -> void:
 	PlayerState.inventory = {}
 	var got := []
 	var cb := func(id: StringName, _count: int) -> void: got.append(id)
@@ -168,12 +168,39 @@ func test_item_encounter_gives_item_without_click() -> void:
 	assert_int(_m.state).is_equal(Manager.State.PREVIEW)
 	var id: StringName = _m.current[&"item"]
 	_m.tick(t + Formulas.ENCOUNTER_PREVIEW_SEC)
+	# v0.98: 흔들림이 끝나도 아직 못 얻는다 — 클릭(collect_item)해야 얻는다
+	assert_int(_m.state).is_equal(Manager.State.APPEARED)
+	assert_int(PlayerState.item_count(id)).is_equal(0)
+	assert_array(got).is_empty()
+	assert_dict(_m.begin_battle()).is_empty()   # 아이템은 전투가 아니다
+	assert_bool(_m.collect_item()).is_true()
 	assert_int(_m.state).is_equal(Manager.State.RESULT)
 	assert_int(PlayerState.item_count(id)).is_equal(int(_m.current[&"count"]))
 	assert_array(got).contains_exactly([id])
-	_m.tick(t + Formulas.ENCOUNTER_PREVIEW_SEC + Manager.ITEM_SHOW_SEC)
+	assert_bool(_m.collect_item()).is_false()   # 두 번은 못 얻는다
+	_m.tick(_m._deadline)
 	assert_int(_m.state).is_equal(Manager.State.WAITING)
 	EventBus.item_found.disconnect(cb)
+
+
+## 클릭하지 않으면 90초 뒤 아이템이 사라진다 (얻지 못함, v0.98)
+func test_item_encounter_lost_when_not_clicked() -> void:
+	PlayerState.inventory = {}
+	var lost := []
+	var cb := func(id: StringName, _count: int) -> void: lost.append(id)
+	EventBus.item_lost.connect(cb)
+	var t := T0 + Formulas.MAX_ENCOUNTER_INTERVAL_SEC + 1.0
+	_m.current = {&"item": &"pearl", &"count": 1}
+	_m.state = Manager.State.PREVIEW
+	_m._deadline = t
+	_m.tick(t)
+	assert_int(_m.state).is_equal(Manager.State.APPEARED)
+	_m.tick(t + Formulas.ENCOUNTER_APPEAR_SEC)
+	assert_int(_m.state).is_equal(Manager.State.RESULT)
+	assert_array(lost).contains_exactly([&"pearl"])
+	assert_int(PlayerState.item_count(&"pearl")).is_equal(0)
+	assert_bool(_m.collect_item()).is_false()
+	EventBus.item_lost.disconnect(cb)
 
 
 func test_item_encounter_rate_and_pickup_doubles_it() -> void:
