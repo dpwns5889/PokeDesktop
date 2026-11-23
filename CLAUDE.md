@@ -26,7 +26,7 @@ Godot 4.7.2(GDScript) 데스크탑 컴패니언. 기준 문서는 `docs/GAME_DES
   - 파일 또는 기능: 무엇을 왜 바꿨는지
   ```
   게임 내용이 바뀌지 않은 커밋은 `(기획서 v…)` 표기를 빼고 요약만 쓴다.
-- 지인에게 배포할 exe를 내보낼 때만 그 커밋에 `v0.xx` 태그를 단다. exe는 GitHub Release에 올리지 않는다. 저작권 스프라이트가 exe 안에 들어가기 때문이다.
+- 배포할 exe를 내보낼 때만 그 커밋에 `v0.xx` 태그를 달고, exe를 그 태그의 GitHub Release에 올린다(2026-11-22 사용자 결정). exe 안에 저작권 스프라이트·사운드가 들어 있으니 README 라이선스 항목을 유지한다.
 
 ## 폴더 규칙 (기획서 8.2)
 - 게임 실행에 쓰이는 것은 `assets/` 아래에 둔다(scenes, scripts, data, audio, fonts, ui, sprites, generated).
