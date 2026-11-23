@@ -47,6 +47,7 @@ func _build_content(box: VBoxContainer) -> void:
 	_hide_fullscreen.toggled.connect(func(on: bool) -> void:
 		if not _loading:
 			Settings.set_value(&"hide_on_fullscreen", on))
+	_hide_fullscreen.visible = OS.get_name() == "Windows"   ## PowerShell 감시라 Windows 전용 (기획서 3.1, v0.106)
 	sec.add_child(_hide_fullscreen)
 
 	var scale_row := _row(sec, "창 크기")

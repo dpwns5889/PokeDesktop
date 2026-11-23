@@ -4,7 +4,7 @@
 일정 시간마다 야생 포켓몬이 나타나면 **과녁을 클릭하는 짧은 전투**로 잡고, 잡은 포켓몬을 **원정**에 보내 아이템과 돈을 벌어 옵니다.
 앱을 꺼 둔 동안에도 원정은 흘러가고, 평소에는 작고 조용하게 작업을 방해하지 않는 것이 목표입니다.
 
-- 엔진: **Godot 4.7.2 (GDScript)** · 대상: Windows 10/11
+- 엔진: **Godot 4.7.2 (GDScript)** · 대상: Windows 10/11 (macOS 빌드도 제공, Mac에서 직접 확인하지는 못함)
 - 규모: 게임 코드 약 1만 줄 · 테스트 약 4,300줄(**323개**) · 도구 약 3,100줄
 - 비상업 개인 프로젝트 (포트폴리오·지인 공개)
 
@@ -34,7 +34,7 @@
 
 ### 1. 기획서가 먼저, 코드는 그다음
 - [`docs/GAME_DESIGN.md`](docs/GAME_DESIGN.md)가 **기준 문서**입니다. 결정이 바뀌면 코드보다 문서를 먼저 고칩니다.
-- 기획서 버전(현재 **v0.105**)과 게임 안 버전 표시·exe 버전 정보가 항상 같습니다. 변경 이력 표에 버전마다 무엇을 왜 바꿨는지 남깁니다.
+- 기획서 버전(현재 **v0.106**)과 게임 안 버전 표시·exe 버전 정보가 항상 같습니다. 변경 이력 표에 버전마다 무엇을 왜 바꿨는지 남깁니다.
 - 마일스톤 M0~M13(세팅 → 창 → 데이터 → 전투 → 저장 → … → 도감 완성)으로 진행했고, 단계마다 완료 기준이 있습니다.
 - 미결정 사항은 13장 표로 관리하고, 정해지면 해당 장을 고친 뒤 표에서 지웁니다.
 
@@ -119,6 +119,9 @@ godot --headless --path . res://tools/balance_sim.tscn -- --seeds 5 --days 14
 
 # Windows exe 내보내기 (내보내기 템플릿 4.7.2 필요)
 godot --headless --path . --export-release "Windows Desktop" build/PokeCompanion.exe
+
+# macOS 앱 내보내기 (zip 안에 .app, 공증 없음 → 처음엔 우클릭 → 열기)
+godot --headless --path . --export-release "macOS" build/PokeCompanion_mac.zip
 ```
 
 개발용 실행 인자(디버그 빌드만): `-- --fast-encounter`(약 12초 간격) · `--autoplay`(자동 전투) · `--shiny` · `--item-encounter` · `--open=storage` 등.
